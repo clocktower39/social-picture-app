@@ -10,12 +10,14 @@ export let reducer = (state = { user, authenticated }, action) => {
                     ...action.user,
                     username: action.user.username
                 },
+                authenticated: true,
             }
         case LOGOUT_USER:
             return { 
                 ...state,
                 user: {
                 },
+                authenticated: false,
             }
         default:
             return {...state};
