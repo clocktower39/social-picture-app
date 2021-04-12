@@ -13,9 +13,14 @@ import './App.css';
 const useStyles = makeStyles({
   App: {
     height: '100%',
+    display: 'flex',
+    flexDirection:' column',
+    alignItems: 'center',
   },
   navbar: {
-  }
+  },
+  main: {
+  },
 });
 
 function App() {
@@ -25,7 +30,6 @@ function App() {
     <div className={classes.App}>
       <Router>
         <Switch>
-
           <Route exact path='/login' children={<Login/>} />
           
           <Route exact path='/signup' children={<Signup/>} />
