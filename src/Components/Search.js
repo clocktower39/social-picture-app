@@ -1,10 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { TextField } from '@material-ui/core';
 
 export const Search = (props) => {
     return (
         <div>
-            Search
+            <TextField label='Search' />
         </div>
     )
 }
