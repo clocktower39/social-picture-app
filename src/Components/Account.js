@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect }  from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { Button, Grid, GridList, GridListTile, Typography, makeStyles } from '@material-ui/core';
 import { logoutUser } from '../Redux/actions';
@@ -12,13 +12,18 @@ const useStyles = makeStyles({
     },
     profilePic:{
         borderRadius: '50%',
-        scale: 0.5,
     },
 });
 
 export const Account = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
+    const [opacity, setOpacity] = useState(0);
+
+    useEffect(()=>{
+        setOpacity(opacity+0.01)
+        // eslint-disable-next-line
+    },[opacity]);
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -27,7 +32,7 @@ export const Account = (props) => {
     }
 
     return (
-        <div className={classes.root} >
+        <div className={classes.root} style={{opacity}}>
             <Grid container justify="center">
                 <Grid item xs={12}>
                     <Typography variant='h4' >{props.user.username}</Typography>
