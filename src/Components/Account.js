@@ -1,6 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Grid, GridList, GridListTile, Typography, makeStyles } from '@material-ui/core';
+import { connect, useDispatch } from 'react-redux';
+import { Button, Grid, GridList, GridListTile, Typography, makeStyles } from '@material-ui/core';
+import { logoutUser } from '../Redux/actions';
 
 const useStyles = makeStyles({
     root: {
@@ -17,6 +18,14 @@ const useStyles = makeStyles({
 
 export const Account = (props) => {
     const classes = useStyles();
+    const dispatch = useDispatch();
+
+    const handleLogout = () => {
+        dispatch(logoutUser());
+        localStorage.removeItem('username');
+        localStorage.setItem('authenticated', false);
+    }
+
     return (
         <div className={classes.root} >
             <Grid container justify="center">
@@ -41,6 +50,11 @@ export const Account = (props) => {
                 </Grid>
                 <Grid item  xs={12}>
                     <Typography variant='body2'>{props.user.description}</Typography>
+                </Grid>
+                <Grid item  xs={12}>
+                    <Button 
+                        onClick={()=>handleLogout()}
+                    >LOGOUT</Button>
                 </Grid>
 
             </Grid>
