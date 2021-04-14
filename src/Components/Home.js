@@ -40,7 +40,7 @@ export const Home = (props) => {
     },[opacity]);
     return (
       <div className={classes.root} style={{opacity}}>
-        <Typography variant={"h3"}>Social Photo App</Typography>
+        <Typography variant={"h4"}>Social Photo App</Typography>
         <GridList cols={1} cellHeight="auto" className={classes.postList}>
           {posts.map((post, index) => {
             return (
@@ -54,12 +54,16 @@ export const Home = (props) => {
                   classes={{
                     root: classes.titleBar,
                     title: classes.title,
+                    subtitle: classes.title,
                   }}
                   title={
-                    <>
-                    <img style={{borderRadius: '50%', height: '40px'}} src={post.user.profilePicSrc} alt="profile pic"/>
-                    <Typography variant="caption">{post.user.username}</Typography>
-                    </>
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <img style={{borderRadius: '50%', height: '50px', padding: '5px 5px 5px 0',}} src={post.user.profilePicSrc} alt="profile pic"/>
+                        <div>
+                            <Typography variant="h6">{post.user.username}</Typography>
+                            <Typography variant="caption">{post.location}</Typography>
+                        </div>
+                    </div>
                     }
                   titlePosition="top"
                 />
