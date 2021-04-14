@@ -1,94 +1,128 @@
 import React, { useState, useEffect }  from 'react';
 import { connect } from 'react-redux';
-import { GridList, GridListTile, GridListTileBar, Typography, makeStyles } from '@material-ui/core';
-import { posts } from '../Redux/states';
-import { FavoriteBorder, ModeComment, Send } from '@material-ui/icons';
+import {
+  Avatar,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CardMedia,
+  Collapse,
+  Container,
+  Grid,
+  IconButton,
+  Typography,
+  makeStyles,
+} from "@material-ui/core";
+import { Favorite, Share, ExpandMore, MoreVert } from '@material-ui/icons';
+import { red } from '@material-ui/core/colors';
+import clsx from 'clsx';
 
-const useStyles = makeStyles({
-    root: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
+const useStyles = makeStyles((theme) => ({
+    root:{
+        paddingBottom: '75px',
     },
-    postList: {
-        paddingBottom: '65px',
+    cardRoot: {
     },
-    postListImgContainer: {
-        display: 'flex',
-        justifyContent: 'center',
+    media: {
+      height: 0,
+      paddingTop: '100%', // 16:9
     },
-    postImg: {
-        width:'414px',
-        height: '518px',
-        padding: '48px 0px 44px 0px',
+    expand: {
+      transform: 'rotate(0deg)',
+      marginLeft: 'auto',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+      }),
     },
-    titleBar: {
-        backgroundColor: 'white',
+    expandOpen: {
+      transform: 'rotate(180deg)',
     },
-    title:{
-        color: 'black',
+    avatar: {
+      backgroundColor: red[500],
     },
-})
+  }));
+  
+
 export const Home = (props) => {
     const classes = useStyles();
+    const [expanded, setExpanded] = React.useState(false);
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.01)
+        setOpacity(opacity+0.05)
         // eslint-disable-next-line
     },[opacity]);
+
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
     return (
-      <div className={classes.root} style={{opacity}}>
-        <Typography variant={"h4"}>Social Photo App</Typography>
-        <GridList cols={1} cellHeight="auto" className={classes.postList}>
-          {posts.map((post, index) => {
-            return (
-              <GridListTile className={classes.postListImgContainer}>
-                <img
-                  className={classes.postImg}
-                  src={post.imgSrc}
-                  alt={index}
-                />
-                <GridListTileBar
-                  classes={{
-                    root: classes.titleBar,
-                    title: classes.title,
-                    subtitle: classes.title,
-                  }}
-                  title={
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <img style={{borderRadius: '50%', height: '50px', padding: '5px 5px 5px 0',}} src={post.user.profilePicSrc} alt="profile pic"/>
-                        <div>
-                            <Typography variant="h6">{post.user.username}</Typography>
-                            <Typography variant="caption">{post.location}</Typography>
-                        </div>
-                    </div>
-                    }
-                  titlePosition="top"
-                />
-                <GridListTileBar
-                  classes={{
-                    root: classes.titleBar,
-                    title: classes.title,
-                  }}
-                  title={
-                    <>
-                      <FavoriteBorder /> <ModeComment /> <Send />
-                    </>
-                  }
-                  titlePosition="bottom"
-                />
-              </GridListTile>
-            );
-          })}
-        </GridList>
-      </div>
-    );
+        <Container maxWidth='md' className={classes.root} disableGutters style={{opacity}}>
+            <Grid justify="center" container spacing={3}>
+                <Grid item xs={12}>
+                    <Typography variant="h5" >Social Photo App</Typography>
+                </Grid>
+                
+                {props.posts.map((post, index) => {
+                    return(
+                        <Grid item xs={12}>
+                            <Card className={classes.cardRoot}>
+                                <CardHeader
+                                    avatar={
+                                    <Avatar aria-label="recipe" className={classes.avatar} alt='Profile Pic' src={post.user.profilePicSrc} />
+                                    }
+                                    action={
+                                    <IconButton aria-label="settings">
+                                        <MoreVert />
+                                    </IconButton>
+                                    }
+                                    title={post.user.username}
+                                    subheader={post.location}
+                                />
+                                <CardMedia
+                                    className={classes.media}
+                                    image={post.imgSrc}
+                                />
+                                <CardContent>
+                                    <Typography variant="body2" color="textSecondary" component="p">
+                                    {post.description}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions disableSpacing>
+                                    <IconButton aria-label="add to favorites">
+                                    <Favorite />
+                                    </IconButton>
+                                    <IconButton aria-label="share">
+                                    <Share />
+                                    </IconButton>
+                                    <IconButton
+                                    className={clsx(classes.expand, {
+                                        [classes.expandOpen]: expanded,
+                                    })}
+                                    onClick={handleExpandClick}
+                                    aria-expanded={expanded}
+                                    aria-label="show more"
+                                    >
+                                    <ExpandMore />
+                                    </IconButton>
+                                </CardActions>
+                                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                                    <CardContent>
+                                    <Typography paragraph>Comments:</Typography>
+                                    </CardContent>
+                                </Collapse>
+                            </Card>
+                        </Grid>
+                    )
+                })}
+            </Grid>
+        </Container>
+    )
 }
 
 const mapStateToProps = (state) => ({
-    posts: state.posts,
+    posts: state.posts,    
 })
 
 const mapDispatchToProps = {

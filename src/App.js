@@ -17,10 +17,6 @@ const useStyles = makeStyles({
     flexDirection:' column',
     alignItems: 'center',
   },
-  navbar: {
-  },
-  main: {
-  },
 });
 
 function App() {
@@ -44,7 +40,7 @@ function App() {
             
 
         </Switch>
-        <Navbar className={classes.navbar}/>
+        <Navbar />
       </Router>
     </div>
   );
