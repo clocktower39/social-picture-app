@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { Button, Grid, GridList, GridListTile, Typography, makeStyles } from '@material-ui/core';
+import { Button, Container, Grid, GridList, GridListTile, CardMedia, Typography, makeStyles } from '@material-ui/core';
 import { logoutUser } from '../Redux/actions';
 
 const useStyles = makeStyles({
@@ -13,6 +13,10 @@ const useStyles = makeStyles({
     profilePic:{
         borderRadius: '50%',
     },
+    media: {
+      height: 0,
+      paddingTop: '100%', // 16:9
+    },
 });
 
 export const Account = (props) => {
@@ -21,7 +25,7 @@ export const Account = (props) => {
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.01)
+        setOpacity(opacity+0.05)
         // eslint-disable-next-line
     },[opacity]);
 
@@ -32,8 +36,8 @@ export const Account = (props) => {
     }
 
     return (
-        <div className={classes.root} style={{opacity}}>
-            <Grid container justify="center">
+        <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
+            <Grid container justify="center" spacing={1} >
                 <Grid item xs={12}>
                     <Typography variant='h4' >{props.user.username}</Typography>
                     <br />
@@ -57,16 +61,23 @@ export const Account = (props) => {
                     <Typography variant='body2'>{props.user.description}</Typography>
                 </Grid>
                 <Grid item  xs={12}>
-                    <Button 
+                    <Button
+                        variant="contained"
+                        color="primary"
                         onClick={()=>handleLogout()}
                     >LOGOUT</Button>
                 </Grid>
-
+                <Grid container item xs={12}>
+                    {props.user.posts.map((post, item) => {
+                        return(
+                            <Grid item xs={4}>
+                                <CardMedia className={classes.media} image={post}/>
+                            </Grid>
+                        );
+                    })}
+                </Grid>
             </Grid>
-            <GridList cols={3} className={classes.imgList}>
-                {props.user.posts.map((post, index) => <GridListTile cols={1} key={index}><img src={post} alt={Math.random(1)}/></GridListTile> )}
-            </GridList>
-        </div>
+        </Container>
     )
 }
 

@@ -22,6 +22,9 @@ const useStyles = makeStyles((theme) => ({
     root:{
         paddingBottom: '75px',
     },
+    gridContainer: {
+      scrollBehavior:'smooth',
+    },
     cardRoot: {
     },
     media: {
@@ -58,8 +61,8 @@ export const Home = (props) => {
         setExpanded(!expanded);
     };
     return (
-        <Container maxWidth='md' className={classes.root} disableGutters style={{opacity}}>
-            <Grid justify="center" container spacing={3}>
+        <Container maxWidth='sm' className={classes.root} disableGutters style={{opacity}}>
+            <Grid justify="center" container spacing={3} className={classes.gridContainer}>
                 <Grid item xs={12}>
                     <Typography variant="h5" >Social Photo App</Typography>
                 </Grid>
