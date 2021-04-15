@@ -89,7 +89,7 @@ export const Home = (props) => {
                                 />
                                 <CardContent>
                                     <Typography variant="body2" color="textSecondary" component="p">
-                                    {post.description}
+                                    <strong>{post.user.username}:  </strong>{post.description}
                                     </Typography>
                                 </CardContent>
                                 <CardActions disableSpacing>

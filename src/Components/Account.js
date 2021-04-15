@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { Button, Container, Grid, GridList, GridListTile, CardMedia, Typography, makeStyles } from '@material-ui/core';
+import { Button, Container, Grid, CardMedia, Typography, makeStyles } from '@material-ui/core';
 import { logoutUser } from '../Redux/actions';
 
 const useStyles = makeStyles({

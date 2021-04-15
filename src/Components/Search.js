@@ -1,12 +1,29 @@
-import React from 'react'
+import React, { useState, useEffect }  from 'react';
 import { connect } from 'react-redux'
-import { TextField } from '@material-ui/core';
+import { Container, Grid, TextField, Typography, makeStyles } from '@material-ui/core';
+
+const useStyles = makeStyles({
+    root: {
+    },
+});
 
 export const Search = (props) => {
+    const classes = useStyles();
+    const [opacity, setOpacity] = useState(0);
+
+    useEffect(()=>{
+        setOpacity(opacity+0.05)
+        // eslint-disable-next-line
+    },[opacity]);
+    
     return (
-        <div>
-            <TextField label='Search' />
-        </div>
+        <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
+            <Grid container>
+                <Grid item xs={12}>
+                    <TextField fullWidth label='Search' />
+                </Grid>
+            </Grid>
+        </Container>
     )
 }
 
