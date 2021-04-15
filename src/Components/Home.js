@@ -67,7 +67,7 @@ export const Home = (props) => {
                     <Typography variant="h5" >Social Photo App</Typography>
                 </Grid>
                 
-                {props.posts.map((post, index) => {
+                {props.posts.map((post) => {
                     return(
                         <Grid item xs={12}>
                             <Card className={classes.cardRoot}>

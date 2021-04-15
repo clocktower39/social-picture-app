@@ -34,7 +34,6 @@ function App() {
           
           <AuthRoute exact path='/account' component={Account} />
             
-
         </Switch>
         <Navbar />
       </Router>

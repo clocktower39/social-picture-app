@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import { connect } from 'react-redux'
-import { Container, Grid, TextField, Typography, makeStyles } from '@material-ui/core';
+import { Container, Grid, TextField, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
     root: {
