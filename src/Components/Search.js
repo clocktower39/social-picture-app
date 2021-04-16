@@ -22,6 +22,7 @@ export const Search = (props) => {
                 <Grid item xs={12}>
                     <TextField fullWidth label='Search' />
                 </Grid>
+                    {/* pull X random users then a random post from them */}
             </Grid>
         </Container>
     )

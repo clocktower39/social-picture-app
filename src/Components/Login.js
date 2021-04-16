@@ -32,6 +32,7 @@ export const Login = (props) => {
         }
     }
     const handleLoginAttempt = (e) => {
+        //change into post request to login, if successful then dispatch login with returned data
         if(username){
             dispatch(loginUser({username: username}));
             localStorage.setItem('username', username);
