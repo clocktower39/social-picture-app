@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import { connect } from 'react-redux'
-import { Container, Grid, TextField, makeStyles } from '@material-ui/core';
+import { CardMedia, Container, Grid, TextField, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
     root: {
@@ -22,7 +22,10 @@ export const Search = (props) => {
                 <Grid item xs={12}>
                     <TextField fullWidth label='Search' />
                 </Grid>
-                    {/* pull X random users then a random post from them */}
+                {/* pull X random users then a random post from them */}
+                        <Grid item xs={4}>
+                            <CardMedia className={classes.media} image={''}/>
+                        </Grid>
             </Grid>
         </Container>
     )
