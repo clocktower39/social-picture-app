@@ -15,7 +15,7 @@ const useStyles = makeStyles({
     },
     media: {
       height: 0,
-      paddingTop: '100%', // 16:9
+      paddingTop: '100%',
     },
 });
 
@@ -67,6 +67,8 @@ export const Account = (props) => {
                         onClick={()=>handleLogout()}
                     >LOGOUT</Button>
                 </Grid>
+                
+                {/* list all posts from account */}
                 <Grid container item xs={12}>
                     {props.user.posts.map((post, item) => {
                         return(
