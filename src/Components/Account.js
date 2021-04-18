@@ -60,8 +60,17 @@ export const Account = (props) => {
                 <Grid item  xs={12}>
                     <Typography variant='body2'>{props.user.description}</Typography>
                 </Grid>
-                <Grid item  xs={12}>
+                <Grid item  xs={6}>
                     <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={()=> null}
+                    >EDIT</Button>
+                </Grid>
+                <Grid item  xs={6}>
+                    <Button
+                        fullWidth
                         variant="contained"
                         color="primary"
                         onClick={()=>handleLogout()}

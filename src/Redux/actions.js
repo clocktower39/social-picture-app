@@ -2,6 +2,7 @@ export const LOGIN_USER = 'LOGIN_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
 export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
+export const UPDATE_USER = 'UPDATE_USER';
 
 
 export function loginUser(user){
@@ -29,3 +30,8 @@ export function deletePost(){
     }
 }
 
+export function updateUser(){
+    return {
+        type: UPDATE_USER,
+    }
+}
