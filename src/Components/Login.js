@@ -33,13 +33,29 @@ export const Login = (props) => {
     }
     const handleLoginAttempt = (e) => {
         //change into post request to login, if successful then dispatch login with returned data
-        if(username){
-            dispatch(loginUser({username: username}));
-            localStorage.setItem('username', username);
-            setAuthenticated(true);
-            localStorage.setItem('authenticated', true);
-            setRedirect(true);
-        }
+        let loginAttempt = JSON.stringify({username:username, password:password});
+        fetch('http://mattkearns.ddns.net:3000/login', {
+            method: 'post',
+            dataType: 'json',
+            body: loginAttempt,
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+              console.log(data);
+              if(!data.authenticated){
+
+              }
+              else {
+                    dispatch(loginUser({username: username}));
+                    localStorage.setItem('username', username);
+                    setAuthenticated(true);
+                    localStorage.setItem('authenticated', true);
+                    setRedirect(true);
+              }
+          });
     }
 
     useEffect(()=>{
