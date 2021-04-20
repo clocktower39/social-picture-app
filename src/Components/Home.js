@@ -53,7 +53,9 @@ export const Home = (props) => {
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.05)
+        if(opacity<1){
+            setOpacity(opacity+0.05);
+        }
         // eslint-disable-next-line
     },[opacity]);
 
@@ -67,9 +69,9 @@ export const Home = (props) => {
                     <Typography variant="h5" >Social Photo App</Typography>
                 </Grid>
                 
-                {props.posts.map((post) => {
+                {props.posts.map((post, index) => {
                     return(
-                        <Grid item xs={12}>
+                        <Grid item xs={12} key={index}>
                             <Card className={classes.cardRoot}>
                                 <CardHeader
                                     avatar={

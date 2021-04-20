@@ -12,7 +12,9 @@ export const Post = (props) => {
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.05)
+        if(opacity<1){
+            setOpacity(opacity+0.05);
+        }
         // eslint-disable-next-line
     },[opacity]);
 

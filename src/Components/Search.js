@@ -12,7 +12,9 @@ export const Search = (props) => {
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.05)
+        if(opacity<1){
+            setOpacity(opacity+0.05);
+        }
         // eslint-disable-next-line
     },[opacity]);
     
@@ -24,7 +26,7 @@ export const Search = (props) => {
                 </Grid>
                 {/* pull X random users then a random post from them */}
                         <Grid item xs={4}>
-                            <CardMedia className={classes.media} image={''}/>
+                            <CardMedia className={classes.media} image={'#'}/>
                         </Grid>
             </Grid>
         </Container>

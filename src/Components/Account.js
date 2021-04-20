@@ -25,7 +25,9 @@ export const Account = (props) => {
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
-        setOpacity(opacity+0.05)
+        if(opacity<1){
+            setOpacity(opacity+0.05);
+        }
         // eslint-disable-next-line
     },[opacity]);
 
@@ -79,9 +81,9 @@ export const Account = (props) => {
                 
                 {/* list all posts from account */}
                 <Grid container item xs={12}>
-                    {props.user.posts.map((post, item) => {
+                    {props.user.posts.map((post, index) => {
                         return(
-                            <Grid item xs={4}>
+                            <Grid item xs={4} key={index}>
                                 <CardMedia className={classes.media} image={post}/>
                             </Grid>
                         );
