@@ -33,7 +33,7 @@ export const Login = (props) => {
     }
     const handleLoginAttempt = (e) => {
         //change into post request to login, if successful then dispatch login with returned data
-        let loginAttempt = JSON.stringify({username:username, password:password});
+        let loginAttempt = JSON.stringify({username:username, password:password, authenticated: authenticated });
         fetch('http://mattkearns.ddns.net:3000/login', {
             method: 'post',
             dataType: 'json',
@@ -49,10 +49,10 @@ export const Login = (props) => {
 
               }
               else {
-                    dispatch(loginUser({username: username}));
-                    localStorage.setItem('username', username);
-                    setAuthenticated(true);
-                    localStorage.setItem('authenticated', true);
+                    dispatch(loginUser(data.user));
+                    localStorage.setItem('username', data.user.username);
+                    setAuthenticated(data.authenticated);
+                    localStorage.setItem('authenticated', data.authenticated);
                     setRedirect(true);
               }
           });
