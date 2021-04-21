@@ -1,10 +1,23 @@
 import React, { useState, useEffect }  from 'react';
 import { connect } from 'react-redux'
-import { Button, Typography, Container, Grid, TextField, makeStyles } from '@material-ui/core';
+import {
+    Button,
+    CardMedia,
+    Container,
+    Grid,
+    TextField,
+    Typography,
+    makeStyles
+} from '@material-ui/core';
 
 const useStyles = makeStyles({
     root: {
     },
+    profilePic: {
+        height: 0,
+        paddingTop: '100%',
+        borderRadius: '50%',
+      },
 });
 
 export const Search = (props) => {
@@ -42,8 +55,8 @@ export const Search = (props) => {
     }
     
     return (
-        <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
-            <Grid container>
+        <Container maxWidth='sm' className={classes.root} style={{opacity}}>
+            <Grid container spacing='3' alignItems='center'>
                 <Grid item xs={10}>
                     <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} />
                 </Grid>
@@ -53,8 +66,15 @@ export const Search = (props) => {
                 {/* pull X random users then a random post from them */}
                 {users.map((user, index) => {
                     return(
-                    <Grid item xs={12}>
-                        <Typography>{user.username}</Typography>
+                    <Grid container item xs={12} alignItems='center' spacing='3' >
+                        <Grid item xs={2}><CardMedia className={classes.profilePic} image={user.profilePic} /></Grid>
+                        <Grid item xs={7}>
+                            <Typography variant='body1' >{user.username}</Typography>
+                            <Typography variant='body2' >{user.firstName} {user.lastName}</Typography>
+                        </Grid>
+                        <Grid  item xs={3}>
+                            <Button variant='outlined'>Follow</Button>
+                        </Grid>
                     </Grid>
                     )
                 })}
