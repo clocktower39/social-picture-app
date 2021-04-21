@@ -58,7 +58,7 @@ export const Search = (props) => {
         <Container maxWidth='sm' className={classes.root} style={{opacity}}>
             <Grid container spacing='3' alignItems='center'>
                 <Grid item xs={10}>
-                    <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} />
+                    <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} variant='filled' />
                 </Grid>
                 <Grid item xs={2}>
                     <Button variant='contained' color='primary' fullWidth onClick={fetchSearch} >Search</Button>
@@ -73,7 +73,7 @@ export const Search = (props) => {
                             <Typography variant='body2' >{user.firstName} {user.lastName}</Typography>
                         </Grid>
                         <Grid  item xs={3}>
-                            <Button variant='outlined'>Follow</Button>
+                            {(props.user.username === user.username)?null:<Button variant='outlined'>{(props.user.following.includes(user.username))?'Unfollow':'Follow'}</Button>}
                         </Grid>
                     </Grid>
                     )
@@ -84,7 +84,7 @@ export const Search = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-    
+    user: state.user,
 })
 
 const mapDispatchToProps = {
