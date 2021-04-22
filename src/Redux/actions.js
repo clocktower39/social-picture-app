@@ -3,6 +3,7 @@ export const LOGOUT_USER = 'LOGOUT_USER';
 export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
 export const UPDATE_USER = 'UPDATE_USER';
+export const UPDATE_FOLLOWING = 'UPDATE_FOLLOWING';
 
 
 export function loginUser(user){
@@ -15,6 +16,13 @@ export function loginUser(user){
 export function logoutUser(){
     return {
         type: LOGOUT_USER
+    }
+}
+
+export function updateFollowing(following){
+    return {
+        type: UPDATE_FOLLOWING,
+        following: following,
     }
 }
 

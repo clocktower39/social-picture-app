@@ -84,7 +84,7 @@ export const Account = (props) => {
                     {props.user.posts.map((post, index) => {
                         return(
                             <Grid item xs={4} key={index}>
-                                <CardMedia className={classes.media} image={post}/>
+                                <CardMedia className={classes.media} image={post.src}/>
                             </Grid>
                         );
                     })}

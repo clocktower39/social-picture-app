@@ -1,5 +1,5 @@
 import React, { useState, useEffect }  from 'react';
-import { connect } from 'react-redux'
+import { useDispatch, connect } from 'react-redux'
 import {
     Button,
     CardMedia,
@@ -9,6 +9,7 @@ import {
     Typography,
     makeStyles
 } from '@material-ui/core';
+import { updateFollowing } from '../Redux/actions';
 
 const useStyles = makeStyles({
     root: {
@@ -21,6 +22,7 @@ const useStyles = makeStyles({
 });
 
 export const Search = (props) => {
+    const dispatch = useDispatch();
     const classes = useStyles();
     const [opacity, setOpacity] = useState(0);
     const [searchInput, setSearchInput] = useState('');
@@ -53,6 +55,25 @@ export const Search = (props) => {
     const handleInput = (e) => {
         setSearchInput(e.target.value);
     }
+
+    const handleFollowUpdate = (e, username) => {
+        console.log('running')
+        let newFollowList;
+        switch(e){
+            case 'Unfollow':
+                newFollowList = props.user.following.filter(user => user !== username);
+                console.log(newFollowList)
+                dispatch(updateFollowing(newFollowList));
+                break;
+            case 'Follow':
+                newFollowList = props.user.following.slice()
+                newFollowList.push(username);
+                dispatch(updateFollowing(newFollowList));
+                break;
+            default:
+                break;
+        }
+    }
     
     return (
         <Container maxWidth='sm' className={classes.root} style={{opacity}}>
@@ -73,7 +94,18 @@ export const Search = (props) => {
                             <Typography variant='body2' >{user.firstName} {user.lastName}</Typography>
                         </Grid>
                         <Grid  item xs={3}>
-                            {(props.user.username === user.username)?null:<Button variant='outlined'>{(props.user.following.includes(user.username))?'Unfollow':'Follow'}</Button>}
+                            {
+                            (props.user.username === user.username)
+                            ?null
+                            :
+                            <>
+                                {
+                                (props.user.following.includes(user.username))
+                                ?<Button onClick={()=>handleFollowUpdate('Unfollow', user.username)} variant='contained' color='primary' fullWidth>Unfollow</Button>
+                                :<Button onClick={()=>handleFollowUpdate('Follow', user.username)} variant='outlined' color='primary' fullWidth>Follow</Button>
+                                }
+                            </>
+                            }
                         </Grid>
                     </Grid>
                     )
