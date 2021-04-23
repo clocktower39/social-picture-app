@@ -1,5 +1,5 @@
 import React, { useState, useEffect }  from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 export const Login = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
-    const [redirect, setRedirect] = useState(false);
+    const redirect = useSelector(state => state.authenticated)
     const [error, setError] = useState(false);
     const [authenticated, setAuthenticated] = useState(localStorage.getItem('authenticated'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
@@ -34,27 +34,8 @@ export const Login = (props) => {
     const handleLoginAttempt = (e) => {
         //change into post request to login, if successful then dispatch login with returned data
         let loginAttempt = JSON.stringify({username:username, password:password, authenticated: authenticated });
-        fetch('http://mattkearns.ddns.net:3000/login', {
-            method: 'post',
-            dataType: 'json',
-            body: loginAttempt,
-            headers: {
-              "Content-type": "application/json; charset=UTF-8"
-            }
-          })
-          .then(res => res.json())
-          .then(data => {
-              if(!data.authenticated){
 
-              }
-              else {
-                    dispatch(loginUser(data.user));
-                    localStorage.setItem('username', data.user.username);
-                    setAuthenticated(data.authenticated);
-                    localStorage.setItem('authenticated', data.authenticated);
-                    setRedirect(true);
-              }
-          });
+        dispatch(loginUser(loginAttempt));
     }
 
     useEffect(()=>{

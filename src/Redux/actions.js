@@ -5,11 +5,30 @@ export const DELETE_POST = 'DELETE_POST';
 export const UPDATE_USER = 'UPDATE_USER';
 export const UPDATE_FOLLOWING = 'UPDATE_FOLLOWING';
 
+//not finished
+export function loginUser(loginCredentials){
+    return async (dispatch, getState) => {
+        const response = await fetch('http://mattkearns.ddns.net:3000/login', {
+            method: 'post',
+            dataType: 'json',
+            body: loginCredentials,
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          })
+        const data = await response.json();
 
-export function loginUser(user){
-    return {
-        type: LOGIN_USER,
-        user: user
+        if(!data.authenticated){
+
+        }
+        else {
+            localStorage.setItem('username', data.user.username);
+            localStorage.setItem('authenticated', data.authenticated);
+        }
+        return dispatch({
+            type: LOGIN_USER,
+            user: data.user
+        });
     }
 }
 
