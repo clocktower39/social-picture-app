@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
 
@@ -10,31 +10,25 @@ export const AuthRoute = (props) => {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const Component = props.component;
-    const isAuthenticated = props.authenticated;
+    const isAuthenticated = useSelector(state => state.authenticated);
 
-    const handleLoginAttempt = (e) => {
+    const handleLoginAttempt = async(e) => {
         //change into post request to login, if successful then dispatch login with returned data
         let loginAttempt = JSON.stringify({username:localStorage.getItem('username'), password:'', authenticated: localStorage.getItem('authenticated') });
 
         dispatch(loginUser(loginAttempt));
     }
 
+    // need to make this async somehow... I need to focus on something else for now, good luck future me
     useEffect(()=>{
         if(localStorage.getItem('username') && localStorage.getItem('authenticated')){
             handleLoginAttempt();
+            setTimeout(()=>{setLoading(false)},1000)
         }
         // eslint-disable-next-line
     },[])
 
-    return (isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
+    return loading?<>LOADING</>:(isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
 }
 
-const mapStateToProps = (state) => ({
-    authenticated: state.authenticated
-})
-
-const mapDispatchToProps = {
-    
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(AuthRoute)
+export default AuthRoute
