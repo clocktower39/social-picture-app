@@ -28,13 +28,7 @@ export const Search = (props) => {
     const [searchInput, setSearchInput] = useState('');
     const [users, setUsers] = useState([]);
 
-    useEffect(()=>{
-        if(opacity<1){
-            setOpacity(opacity+0.05);
-        }
-        // eslint-disable-next-line
-    },[opacity]);
-
+    
     const fetchSearch = () => {
         let payload = JSON.stringify({ username: searchInput});
 
@@ -52,17 +46,17 @@ export const Search = (props) => {
           });
     }
 
+
+
     const handleInput = (e) => {
         setSearchInput(e.target.value);
     }
 
     const handleFollowUpdate = (e, username) => {
-        console.log('running')
         let newFollowList;
         switch(e){
             case 'Unfollow':
                 newFollowList = props.user.following.filter(user => user !== username);
-                console.log(newFollowList)
                 dispatch(updateFollowing(newFollowList));
                 break;
             case 'Follow':
@@ -74,10 +68,22 @@ export const Search = (props) => {
                 break;
         }
     }
-    
+
+    useEffect(()=>{
+        if(opacity<1){
+            setOpacity(opacity+0.05);
+        }
+        // eslint-disable-next-line
+    },[opacity]);
+
+    useEffect(() => {
+        fetchSearch();
+    // eslint-disable-next-line
+    }, [searchInput]);
+
     return (
         <Container maxWidth='sm' className={classes.root} style={{opacity}}>
-            <Grid container spacing='3' alignItems='center'>
+            <Grid container spacing={3} alignItems='center'>
                 <Grid item xs={10}>
                     <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} variant='filled' />
                 </Grid>
@@ -87,7 +93,7 @@ export const Search = (props) => {
                 {/* pull X random users then a random post from them */}
                 {users.map((user, index) => {
                     return(
-                    <Grid container item xs={12} alignItems='center' spacing='3' >
+                    <Grid container item xs={12} alignItems='center' spacing={3} >
                         <Grid item xs={2}><CardMedia className={classes.profilePic} image={user.profilePic} /></Grid>
                         <Grid item xs={7}>
                             <Typography variant='body1' >{user.username}</Typography>

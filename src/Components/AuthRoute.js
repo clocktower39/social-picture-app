@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 
@@ -8,6 +8,10 @@ import { Redirect } from 'react-router-dom';
 export const AuthRoute = (props) => {
     const Component = props.component;
     const isAuthenticated = props.authenticated;
+
+    useEffect(() => {
+        
+    }, [])
 
     return (isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
 }
