@@ -1,5 +1,5 @@
 import React, { useState }  from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
@@ -17,12 +17,12 @@ const useStyles = makeStyles({
 
   });
 
-export const Login = (props) => {
+export const Login = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const redirect = useSelector(state => state.authenticated)
     const [error, setError] = useState(false);
-    const [authenticated, setAuthenticated] = useState(localStorage.getItem('authenticated'));
+    const [authenticated] = useState(localStorage.getItem('authenticated'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
     const [password, setPassword] = useState('');
 
@@ -87,12 +87,4 @@ export const Login = (props) => {
     )
 }
 
-const mapStateToProps = (state) => ({
-    
-})
-
-const mapDispatchToProps = {
-    
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login)
+export default Login

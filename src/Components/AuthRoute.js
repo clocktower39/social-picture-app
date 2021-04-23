@@ -8,7 +8,7 @@ import { loginUser } from '../Redux/actions';
 
 export const AuthRoute = (props) => {
     const dispatch = useDispatch();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(localStorage.getItem('authenticated'));
     const Component = props.component;
     const isAuthenticated = useSelector(state => state.authenticated);
 
@@ -16,14 +16,13 @@ export const AuthRoute = (props) => {
         //change into post request to login, if successful then dispatch login with returned data
         let loginAttempt = JSON.stringify({username:localStorage.getItem('username'), password:'', authenticated: localStorage.getItem('authenticated') });
 
-        dispatch(loginUser(loginAttempt));
+        dispatch(loginUser(loginAttempt)).then(()=>setLoading(false));
     }
 
     // need to make this async somehow... I need to focus on something else for now, good luck future me
     useEffect(()=>{
         if(localStorage.getItem('username') && localStorage.getItem('authenticated')){
             handleLoginAttempt();
-            setTimeout(()=>{setLoading(false)},1000)
         }
         // eslint-disable-next-line
     },[])
