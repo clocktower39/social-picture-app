@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useState }  from 'react';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
@@ -37,13 +37,6 @@ export const Login = (props) => {
 
         dispatch(loginUser(loginAttempt));
     }
-
-    useEffect(()=>{
-        if(username && authenticated){
-            handleLoginAttempt();
-        }
-        // eslint-disable-next-line
-    },[])
 
     if(redirect){
         return <Redirect to={'/'} />

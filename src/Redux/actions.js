@@ -19,7 +19,7 @@ export function loginUser(loginCredentials){
         const data = await response.json();
 
         if(!data.authenticated){
-
+            localStorage.setItem('authenticated', data.authenticated);
         }
         else {
             localStorage.setItem('username', data.user.username);
