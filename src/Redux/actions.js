@@ -20,6 +20,10 @@ export function loginUser(loginCredentials){
 
         if(!data.authenticated){
             localStorage.setItem('authenticated', data.authenticated);
+            return dispatch({
+                type: LOGOUT_USER,
+                user: {}
+            });
         }
         else {
             localStorage.setItem('username', data.user.username);

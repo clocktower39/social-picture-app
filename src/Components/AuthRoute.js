@@ -19,7 +19,6 @@ export const AuthRoute = (props) => {
         dispatch(loginUser(loginAttempt)).then(()=>setLoading(false));
     }
 
-    // need to make this async somehow... I need to focus on something else for now, good luck future me
     useEffect(()=>{
         if(localStorage.getItem('username') && localStorage.getItem('authenticated')){
             handleLoginAttempt();
