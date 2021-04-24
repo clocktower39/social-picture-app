@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { Button, Container, Grid, CardMedia, Typography, makeStyles } from '@material-ui/core';
+import { Button, Container, Grid, CardMedia, TextField, Typography, makeStyles } from '@material-ui/core';
 import { logoutUser } from '../Redux/actions';
 
 const useStyles = makeStyles({
@@ -23,6 +23,11 @@ export const Account = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const [opacity, setOpacity] = useState(0);
+    const [editMode, setEditMode] = useState(false);
+    const [username,setUsername] = useState(props.user.username);
+    const [firstName,setFirstName] = useState(props.user.firstName);
+    const [lastName,setLastName] = useState(props.user.lastName);
+    const [description,setDescription] = useState(props.user.description);
 
     useEffect(()=>{
         if(opacity<1){
@@ -37,11 +42,22 @@ export const Account = (props) => {
         localStorage.setItem('authenticated', false);
     }
 
+    const handleEdit = () => {
+        setEditMode(!editMode);
+    }
+
+    const handleChange = (e, setter) => {
+        setter(e.target.value)
+    }
+
     return (
         <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
             <Grid container justify="center" spacing={1} >
                 <Grid item xs={12}>
-                    <Typography variant='h4' >{props.user.username}</Typography>
+                    {editMode
+                    ?<TextField label='Username' value={username} onChange={(e)=>{handleChange(e,setUsername)}} />
+                    :<Typography variant='h4' >{props.user.username}</Typography>
+                    }
                     <br />
                 </Grid>
                 <Grid item xs={4}>
@@ -57,18 +73,26 @@ export const Account = (props) => {
                     <Typography variant='body2' align='center'>{props.user.following.length}<br/>Following</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant='body1'>{props.user.firstName} {props.user.lastName}</Typography>
+                    {editMode
+                    ?<><TextField label='First Name' value={firstName} onChange={(e)=>{handleChange(e,setFirstName)}} /><TextField  label='Last Name' value={lastName} onChange={(e)=>{handleChange(e,setLastName)}} /></>
+                    :<Typography variant='body1'>{props.user.firstName} {props.user.lastName}</Typography>
+                    }
                 </Grid>
                 <Grid item  xs={12}>
-                    <Typography variant='body2'>{props.user.description}</Typography>
+                    {editMode
+                    ?<TextField label='Description' fullWidth value={description} onChange={(e)=>{handleChange(e,setDescription)}} />
+                    :<Typography variant='body2'>{props.user.description}</Typography>
+                    }
                 </Grid>
                 <Grid item  xs={6}>
                     <Button
                         fullWidth
                         variant="contained"
                         color="primary"
-                        onClick={()=> null}
-                    >EDIT</Button>
+                        onClick={()=> handleEdit()}
+                    >
+                        {editMode?'Save':'Edit'}
+                    </Button>
                 </Grid>
                 <Grid item  xs={6}>
                     <Button
@@ -76,7 +100,9 @@ export const Account = (props) => {
                         variant="contained"
                         color="primary"
                         onClick={()=>handleLogout()}
-                    >LOGOUT</Button>
+                    >
+                        LOGOUT
+                    </Button>
                 </Grid>
                 
                 {/* list all posts from account */}
