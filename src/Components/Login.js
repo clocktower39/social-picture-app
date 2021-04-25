@@ -1,7 +1,7 @@
 import React, { useState }  from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
 
 const useStyles = makeStyles({
@@ -82,6 +82,11 @@ export const Login = () => {
                 >
                 Login
                 </Button>
+            </Grid>
+            <Grid item xs={12}>
+                <Link to='./signup'>
+                    Need an Account?
+                </Link>
             </Grid>
         </Grid>
     )

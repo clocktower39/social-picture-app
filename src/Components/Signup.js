@@ -1,5 +1,6 @@
 import React, { useState }  from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
@@ -109,6 +110,11 @@ export const Signup = (props) => {
                 >
                 Sign up
                 </Button>
+            </Grid>
+            <Grid item xs={12}>
+                <Link to='./login'>
+                    Already have an Account?
+                </Link>
             </Grid>
         </Grid>
     )
