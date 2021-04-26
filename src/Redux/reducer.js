@@ -1,7 +1,7 @@
 import { LOGIN_USER, LOGOUT_USER, UPDATE_FOLLOWING, SIGNUP_USER } from './actions';
-import { user, authenticated, posts } from './states'
+import { user, authenticated, posts, error } from './states'
 
-export let reducer = (state = { user, authenticated, posts }, action) => {
+export let reducer = (state = { user, authenticated, posts, error }, action) => {
     switch(action.type){
         case LOGIN_USER:
             return { 
@@ -30,6 +30,11 @@ export let reducer = (state = { user, authenticated, posts }, action) => {
         case SIGNUP_USER:
             return {
                 ...state
+            }
+        case 'ERROR':
+            return {
+                ...state,
+                error: {...action.error}
             }
         default:
             return {...state};

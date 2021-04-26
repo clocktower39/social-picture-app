@@ -1,5 +1,5 @@
 import React, { useState }  from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link, Redirect} from 'react-router-dom';
 import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
 import { signupUser } from '../Redux/actions';
@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 export const Signup = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
-    const [error] = useState(false);
+
     const [redirect, setRedirect] = useState(false);
     const [ username, setUsername ] = useState('');
     const [ firstName, setFirstName ] = useState('');
@@ -29,12 +29,28 @@ export const Signup = (props) => {
     const [ password, setPassword ] = useState('');
     const [ confirmPassword, setConfirmPassword ] = useState('');
 
+    const [ usernameError, setUsernameError ] = useState('');
+    const [ firstNameError, setFirstNameError ] = useState('');
+    const [ lastNameError, setLastNameError ] = useState('');
+    const [ emailError, setEmailError ] = useState('');
+    const [ passwordError, setPasswordError ] = useState('');
+    const [ confirmPasswordError, setConfirmPasswordError ] = useState('');
+
     const handleSignupAttempt = (e) => {
         let signupAttempt = JSON.stringify({username, firstName, lastName, email, password });
 
         dispatch(signupUser(signupAttempt)).then((e)=>{
-            console.log(e)
-            setRedirect(false)
+            if(e.type ===  "ERROR"){
+                setUsernameError(e.error.username);
+                setFirstNameError(e.error.firstName);
+                setLastNameError(e.error.lastName);
+                setEmailError(e.error.email);
+                setPasswordError(e.error.password);
+                setConfirmPasswordError(e.error.password);
+            }
+            else {
+                setRedirect(true);
+            }
         });
     }
     const handleChange = (e, setter) => {
@@ -48,8 +64,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={error === true ? "Please enter your username" : false}
+                error={usernameError}
+                helperText={usernameError}
                 className={classes.textField}
                 label="Username"
                 value={username}
@@ -60,8 +76,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={error === true ? "Please enter your first name" : false}
+                error={firstNameError}
+                helperText={firstNameError}
                 className={classes.textField}
                 label="First Name"
                 value={firstName}
@@ -72,8 +88,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={error === true ? "Please enter your last name" : false}
+                error={lastNameError}
+                helperText={lastNameError}
                 className={classes.textField}
                 label="Last Name"
                 value={lastName}
@@ -84,8 +100,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={error === true ? "Please enter your email" : false}
+                error={emailError}
+                helperText={emailError}
                 className={classes.textField}
                 label="Email"
                 type="email"
@@ -97,8 +113,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={(error === true)?"Please enter your password":false}
+                error={passwordError}
+                helperText={passwordError}
                 className={classes.textField}
                 label="Password"
                 value={password}
@@ -110,8 +126,8 @@ export const Signup = (props) => {
             <Grid item xs={12}>
                 <Paper>
                 <TextField
-                error={error === true ? true : false}
-                helperText={(error === true)?"Please confirm your password":false}
+                error={confirmPasswordError}
+                helperText={confirmPasswordError}
                 className={classes.textField}
                 label="Confirm Password"
                 value={confirmPassword}
@@ -139,12 +155,5 @@ export const Signup = (props) => {
     )
 }
 
-const mapStateToProps = (state) => ({
-    
-})
 
-const mapDispatchToProps = {
-    
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Signup)
+export default Signup
