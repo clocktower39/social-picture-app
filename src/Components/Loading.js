@@ -21,7 +21,7 @@ export default function CircularIndeterminate() {
   return (
     <div className={classes.root}>
         <Typography variant='h4'>Loading</Typography>
-      <CircularProgress />
+        <CircularProgress />
     </div>
   );
 }

@@ -27,7 +27,7 @@ export const AuthRoute = (props) => {
         // eslint-disable-next-line
     },[])
 
-    return loading?<Loading />:(isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
+    return loading==='true'?<Loading />:(isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
 }
 
 export default AuthRoute

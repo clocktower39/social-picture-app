@@ -5,6 +5,7 @@ export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
 export const UPDATE_USER = 'UPDATE_USER';
 export const UPDATE_FOLLOWING = 'UPDATE_FOLLOWING';
+export const ERROR = 'ERROR';
 
 export function signupUser(newUser){
     return async (dispatch, getState) => {
@@ -25,7 +26,7 @@ export function signupUser(newUser){
             if(data.error.password){data.error.password='Please enter a password'}
             
             return dispatch({
-                type: 'ERROR',
+                type: ERROR,
                 error: data.error
             });
           }
@@ -48,13 +49,26 @@ export function loginUser(loginCredentials){
         if(!data.authenticated){
             localStorage.setItem('authenticated', data.authenticated);
             return dispatch({
-                type: 'ERROR',
+                type: ERROR,
                 error: data.error
             });
         }
         else {
             localStorage.setItem('username', data.user.username);
             localStorage.setItem('authenticated', data.authenticated);
+            
+            let targetUser = JSON.stringify({username: data.user.username});
+
+            const requestFollowers = await fetch('http://mattkearns.ddns.net:3000/followers', {
+                method: 'post',
+                dataType: 'json',
+                body: targetUser,
+                headers: {
+                "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            const followers = await requestFollowers.json();
+            data.user.followers = followers.followers;
         }
         return dispatch({
             type: LOGIN_USER,
