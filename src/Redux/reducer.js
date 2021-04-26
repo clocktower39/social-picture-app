@@ -23,6 +23,7 @@ export let reducer = (state = { user, authenticated, posts, error }, action) => 
                 ...state,
                 user: {
                     ...state.user,
+                    following: [...action.following],
                 }
             }
         case SIGNUP_USER:

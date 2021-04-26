@@ -83,10 +83,23 @@ export function logoutUser(){
     }
 }
 
-export function updateFollowing(following){
-    return {
-        type: UPDATE_FOLLOWING,
-        following: following,
+export function updateFollowing(username, following){
+    return async (dispatch, getState) => {
+        let request = JSON.stringify({username, following});
+        const response = await fetch('http://mattkearns.ddns.net:3000/followUser', {
+            method: 'post',
+            dataType: 'json',
+            body: request,
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          })
+          const data = await response.json();
+          console.log(data);
+        return dispatch({
+            type: UPDATE_FOLLOWING,
+            following,
+        })
     }
 }
 

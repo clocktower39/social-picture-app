@@ -57,16 +57,15 @@ export const Search = (props) => {
         switch(e){
             case 'Unfollow':
                 newFollowList = props.user.following.filter(user => user !== username);
-                dispatch(updateFollowing(newFollowList));
                 break;
             case 'Follow':
                 newFollowList = props.user.following.slice()
                 newFollowList.push(username);
-                dispatch(updateFollowing(newFollowList));
                 break;
             default:
                 break;
         }
+        dispatch(updateFollowing(props.user.username, newFollowList));
     }
 
     useEffect(()=>{
@@ -93,13 +92,13 @@ export const Search = (props) => {
                 {/* pull X random users then a random post from them */}
                 {users.map((user, index) => {
                     return(
-                    <Grid container item xs={12} alignItems='center' spacing={3} >
+                    <Grid key={index} container item xs={12} alignItems='center' spacing={3} >
                         <Grid item xs={2}><CardMedia className={classes.profilePic} image={user.profilePic} /></Grid>
-                        <Grid item xs={7}>
+                        <Grid item xs={6}>
                             <Typography variant='body1' >{user.username}</Typography>
                             <Typography variant='body2' >{user.firstName} {user.lastName}</Typography>
                         </Grid>
-                        <Grid  item xs={3}>
+                        <Grid  item xs={4}>
                             {
                             (props.user.username === user.username)
                             ?null
