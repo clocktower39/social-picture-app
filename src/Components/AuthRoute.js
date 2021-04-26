@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
+import Loading from './Loading';
 
 // hook state to redirect to history of last requested component
 // add initial fetch request for user info if already authenticated so login page doesnt even load if already authenticated from previous login
@@ -26,7 +27,7 @@ export const AuthRoute = (props) => {
         // eslint-disable-next-line
     },[])
 
-    return loading?<>LOADING</>:(isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
+    return loading?<Loading />:(isAuthenticated === true)?<Component />:<Redirect to={{ pathname: '/login'}} />;
 }
 
 export default AuthRoute
