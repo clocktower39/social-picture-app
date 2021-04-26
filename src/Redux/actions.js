@@ -18,9 +18,6 @@ export function signupUser(newUser){
           })
           const data = await response.json();
           if(data.error){
-            console.log('here');
-            console.log(data.error);
-            console.log('here');
             if(data.error.username){data.error.username='Please enter a username'}
             if(data.error.firstName){data.error.firstName='Please enter your first name'}
             if(data.error.lastName){data.error.lastName='Please enter your last name'}
@@ -51,8 +48,8 @@ export function loginUser(loginCredentials){
         if(!data.authenticated){
             localStorage.setItem('authenticated', data.authenticated);
             return dispatch({
-                type: LOGOUT_USER,
-                user: {}
+                type: 'ERROR',
+                error: data.error
             });
         }
         else {
