@@ -1,5 +1,6 @@
 import React, { useState, useEffect }  from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import { getPosts } from '../Redux/actions';
 import {
   Avatar,
   Card,
@@ -48,16 +49,22 @@ const useStyles = makeStyles((theme) => ({
   
 
 export const Home = (props) => {
+    const dispatch = useDispatch();
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
     const [opacity, setOpacity] = useState(0);
 
     useEffect(()=>{
+        dispatch(getPosts([...props.user.following, props.user.username]))
+        // eslint-disable-next-line
+    },[])
+    
+    useEffect(()=>{
         if(opacity<1){
             setOpacity(opacity+0.05);
         }
-        // eslint-disable-next-line
     },[opacity]);
+
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -75,7 +82,7 @@ export const Home = (props) => {
                             <Card className={classes.cardRoot}>
                                 <CardHeader
                                     avatar={
-                                    <Avatar aria-label="recipe" className={classes.avatar} alt='Profile Pic' src={post.user.profilePicSrc} />
+                                    <Avatar aria-label="recipe" className={classes.avatar} alt='Profile Pic' src={post.user.profilePic} />
                                     }
                                     action={
                                     <IconButton aria-label="settings">
@@ -87,7 +94,7 @@ export const Home = (props) => {
                                 />
                                 <CardMedia
                                     className={classes.media}
-                                    image={post.imgSrc}
+                                    image={post.src}
                                 />
                                 <CardContent>
                                     <Typography variant="body2" color="textSecondary" component="p">
@@ -127,6 +134,7 @@ export const Home = (props) => {
 }
 
 const mapStateToProps = (state) => ({
+    user: state.user,
     posts: state.posts,    
 })
 

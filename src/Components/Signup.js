@@ -40,7 +40,7 @@ export const Signup = (props) => {
         let signupAttempt = JSON.stringify({username, firstName, lastName, email, password });
 
         dispatch(signupUser(signupAttempt)).then((e)=>{
-            if(e.type ===  "ERROR"){
+            if(e.type === "ERROR"){
                 setUsernameError(e.error.username);
                 setFirstNameError(e.error.firstName);
                 setLastNameError(e.error.lastName);
@@ -141,7 +141,7 @@ export const Signup = (props) => {
                 variant="contained"
                 color="primary"
                 className={classes.button}
-                onClick={(e) => handleSignupAttempt()}
+                onClick={(e) => handleSignupAttempt(e)}
                 >
                 Sign up
                 </Button>

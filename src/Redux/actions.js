@@ -1,9 +1,9 @@
 export const LOGIN_USER = 'LOGIN_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
-export const SIGNUP_USER = 'SIGNUP_USER';
 export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
 export const UPDATE_USER = 'UPDATE_USER';
+export const UPDATE_POSTS = 'UPDATE_POSTS';
 export const UPDATE_FOLLOWING = 'UPDATE_FOLLOWING';
 export const ERROR = 'ERROR';
 
@@ -30,6 +30,10 @@ export function signupUser(newUser){
                 error: data.error
             });
           }
+          return dispatch({
+              type: LOGIN_USER,
+              user: data.user
+          })
 
     }
 }
@@ -103,9 +107,30 @@ export function updateFollowing(username, following){
     }
 }
 
-export function createPost(){
+export function getPosts(following){
+    return async (dispatch, getState) => {
+        let request = JSON.stringify({following});
+        const response = await fetch('http://mattkearns.ddns.net:3000/getPosts', {
+            method: 'post',
+            dataType: 'json',
+            body: request,
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          })
+          const data = await response.json();
+          console.log(data.posts);
+          return dispatch({
+              type: UPDATE_POSTS,
+              posts: data.posts
+          })
+    }
+}
+
+export function createPost(post){
     return {
-        type: CREATE_POST
+        type: CREATE_POST,
+        post,
     }
 }
 

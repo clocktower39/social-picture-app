@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
-import { connect } from 'react-redux'
-import { Container, Grid, Typography, makeStyles } from '@material-ui/core';
+// import { useDispatch } from 'react-redux'
+import { Button, Container, Grid, Typography, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
     root: {
@@ -8,8 +8,13 @@ const useStyles = makeStyles({
 });
 
 export const Post = (props) => {
+    // const dispatch = useDispatch();
     const classes = useStyles();
     const [opacity, setOpacity] = useState(0);
+
+    const uploadImage = () => {
+
+    }
 
     useEffect(()=>{
         if(opacity<1){
@@ -23,18 +28,12 @@ export const Post = (props) => {
             <Grid container>
                 <Grid item xs={12}>
                     <Typography variant="body1">Post</Typography>
+                    <input type="file" />
+                    <Button variant="contained" onClick={uploadImage}>Upload</Button>
                 </Grid>
             </Grid>
         </Container>
     )
 }
 
-const mapStateToProps = (state) => ({
-    
-})
-
-const mapDispatchToProps = {
-    
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Post)
+export default Post
