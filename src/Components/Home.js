@@ -1,6 +1,7 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useEffect }  from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { getPosts } from '../Redux/actions';
+import Loading from './Loading';
 import {
   Avatar,
   Card,
@@ -52,31 +53,26 @@ export const Home = (props) => {
     const dispatch = useDispatch();
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
-    const [opacity, setOpacity] = useState(0);
+    const [loading, setLoading] = React.useState(true);
 
     useEffect(()=>{
-        dispatch(getPosts([...props.user.following, props.user.username]))
+        dispatch(getPosts([...props.user.following, props.user.username])).then(()=>{
+            setLoading(false);
+        })
         // eslint-disable-next-line
-    },[])
-    
-    useEffect(()=>{
-        if(opacity<1){
-            setOpacity(opacity+0.05);
-        }
-    },[opacity]);
-
+    },[props.user.following])
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
     return (
-        <Container maxWidth='sm' className={classes.root} disableGutters style={{opacity}}>
+        <Container maxWidth='sm' className={classes.root} disableGutters >
             <Grid justify="center" container spacing={3} className={classes.gridContainer}>
                 <Grid item xs={12}>
                     <Typography variant="h5" >Social Photo App</Typography>
                 </Grid>
                 
-                {props.posts.map((post, index) => {
+                {loading?<Loading />:props.posts.map((post, index) => {
                     return(
                         <Grid item xs={12} key={index}>
                             <Card className={classes.cardRoot}>

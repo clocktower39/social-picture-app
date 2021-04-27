@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useState }  from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { Button, Container, Grid, CardMedia, TextField, Typography, makeStyles } from '@material-ui/core';
 import { logoutUser } from '../Redux/actions';
@@ -22,19 +22,11 @@ const useStyles = makeStyles({
 export const Account = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
-    const [opacity, setOpacity] = useState(0);
     const [editMode, setEditMode] = useState(false);
     const [username,setUsername] = useState(props.user.username);
     const [firstName,setFirstName] = useState(props.user.firstName);
     const [lastName,setLastName] = useState(props.user.lastName);
     const [description,setDescription] = useState(props.user.description);
-
-    useEffect(()=>{
-        if(opacity<1){
-            setOpacity(opacity+0.05);
-        }
-        // eslint-disable-next-line
-    },[opacity]);
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -51,7 +43,7 @@ export const Account = (props) => {
     }
 
     return (
-        <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
+        <Container disableGutters maxWidth='sm' className={classes.root} >
             <Grid container justify="center" spacing={1} >
                 <Grid item xs={12}>
                     {editMode

@@ -24,7 +24,6 @@ const useStyles = makeStyles({
 export const Search = (props) => {
     const dispatch = useDispatch();
     const classes = useStyles();
-    const [opacity, setOpacity] = useState(0);
     const [searchInput, setSearchInput] = useState('');
     const [users, setUsers] = useState([]);
 
@@ -68,26 +67,18 @@ export const Search = (props) => {
         dispatch(updateFollowing(props.user.username, newFollowList));
     }
 
-    useEffect(()=>{
-        if(opacity<1){
-            setOpacity(opacity+0.05);
-        }
-        // eslint-disable-next-line
-    },[opacity]);
-
     useEffect(() => {
-        fetchSearch();
+        if(searchInput !== ''){
+            fetchSearch();
+        }
     // eslint-disable-next-line
     }, [searchInput]);
 
     return (
-        <Container maxWidth='sm' className={classes.root} style={{opacity}}>
+        <Container maxWidth='sm' className={classes.root} >
             <Grid container spacing={3} alignItems='center'>
-                <Grid item xs={10}>
+                <Grid item xs={12}>
                     <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} variant='filled' />
-                </Grid>
-                <Grid item xs={2}>
-                    <Button variant='contained' color='primary' fullWidth onClick={fetchSearch} >Search</Button>
                 </Grid>
                 {/* pull X random users then a random post from them */}
                 {users.map((user, index) => {

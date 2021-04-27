@@ -119,7 +119,6 @@ export function getPosts(following){
             }
           })
           const data = await response.json();
-          console.log(data.posts);
           return dispatch({
               type: UPDATE_POSTS,
               posts: data.posts
