@@ -69,7 +69,7 @@ export const Search = (props) => {
 
     useEffect(() => {
         // disable navbar switch when searching or find better work around
-        if(searchInput !== '' && searchInput){
+        if(searchInput !== '' && props.posts !== []){
             fetchSearch();
         }
     // eslint-disable-next-line
@@ -114,6 +114,7 @@ export const Search = (props) => {
 
 const mapStateToProps = (state) => ({
     user: state.user,
+    posts: state.posts,
 })
 
 const mapDispatchToProps = {

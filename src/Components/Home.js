@@ -1,9 +1,10 @@
 import React, { useEffect }  from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getPosts } from '../Redux/actions';
 import Loading from './Loading';
 import {
   Avatar,
+  Button,
   Card,
   CardActions,
   CardContent,
@@ -52,15 +53,18 @@ const useStyles = makeStyles((theme) => ({
 export const Home = (props) => {
     const dispatch = useDispatch();
     const classes = useStyles();
+    const user = useSelector(state => state.user);
+    const posts = useSelector(state => state.posts);
     const [expanded, setExpanded] = React.useState(false);
     const [loading, setLoading] = React.useState(true);
+    const [toggle, setToggle] = React.useState(true);
 
     useEffect(()=>{
-        dispatch(getPosts([...props.user.following, props.user.username])).then(()=>{
+        dispatch(getPosts([...user.following, user.username])).then(()=>{
             setLoading(false);
         })
         // eslint-disable-next-line
-    },[props.user.following])
+    },[toggle])
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -72,7 +76,7 @@ export const Home = (props) => {
                     <Typography variant="h5" >Social Photo App</Typography>
                 </Grid>
                 
-                {loading?<Loading />:props.posts.map((post, index) => {
+                {loading?<Loading />:posts.length>=1?posts.map((post, index) => {
                     return(
                         <Grid item xs={12} key={index}>
                             <Card className={classes.cardRoot}>
@@ -123,19 +127,11 @@ export const Home = (props) => {
                             </Card>
                         </Grid>
                     )
-                })}
+                }):<Button onClick={()=>setToggle(!toggle)}>Refresh</Button>}
             </Grid>
         </Container>
     )
 }
 
-const mapStateToProps = (state) => ({
-    user: state.user,
-    posts: state.posts,    
-})
 
-const mapDispatchToProps = {
-    
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Home)
+export default Home
