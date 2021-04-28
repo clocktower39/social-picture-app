@@ -69,7 +69,7 @@ export const Search = (props) => {
 
     useEffect(() => {
         // disable navbar switch when searching or find better work around
-        if(searchInput !== '' && props.posts !== []){
+        if(searchInput.length >= 1){
             fetchSearch();
         }
     // eslint-disable-next-line

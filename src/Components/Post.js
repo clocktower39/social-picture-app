@@ -1,6 +1,6 @@
-import React, { useState, useEffect }  from 'react';
+import React from 'react';
 // import { useDispatch } from 'react-redux'
-import { Button, Container, Grid, Typography, makeStyles } from '@material-ui/core';
+import { Button, Container, Grid, Input, makeStyles, TextField } from '@material-ui/core';
 
 const useStyles = makeStyles({
     root: {
@@ -9,27 +9,26 @@ const useStyles = makeStyles({
 
 export const Post = (props) => {
     // const dispatch = useDispatch();
-    const classes = useStyles();
-    const [opacity, setOpacity] = useState(0);
+    const classes = useStyles()
 
     const uploadImage = () => {
 
     }
 
-    useEffect(()=>{
-        if(opacity<1){
-            setOpacity(opacity+0.05);
-        }
-        // eslint-disable-next-line
-    },[opacity]);
-
     return (
-        <Container disableGutters maxWidth='sm' className={classes.root} style={{opacity}}>
+        <Container disableGutters maxWidth='sm' className={classes.root} >
             <Grid container>
                 <Grid item xs={12}>
-                    <Typography variant="body1">Post</Typography>
-                    <input type="file" />
-                    <Button variant="contained" onClick={uploadImage}>Upload</Button>
+                    <Input type="file" fullWidth />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField label='Location' fullWidth />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField label='Description' fullWidth />
+                </Grid>
+                <Grid item xs={12}>
+                    <Button variant="contained" onClick={uploadImage} fullWidth >Upload</Button>
                 </Grid>
             </Grid>
         </Container>
