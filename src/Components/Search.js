@@ -28,21 +28,21 @@ export const Search = (props) => {
     const [users, setUsers] = useState([]);
 
     
-    const fetchSearch = () => {
+    const fetchSearch = async () => {
         let payload = JSON.stringify({ username: searchInput});
 
-        fetch('http://mattkearns.ddns.net:3000/search', {
+        let resposne = await fetch('http://mattkearns.ddns.net:3000/search', {
             method: 'post',
             dataType: 'json',
             body: payload,
             headers: {
               "Content-type": "application/json; charset=UTF-8"
             }
-          })
-          .then(res => res.json())
-          .then(data => {
-              setUsers(data.users);
           });
+
+        let data = await resposne.json();
+
+        setUsers(data.users);
     }
 
 
@@ -68,7 +68,8 @@ export const Search = (props) => {
     }
 
     useEffect(() => {
-        if(searchInput !== ''){
+        // disable navbar switch when searching or find better work around
+        if(searchInput !== '' && searchInput){
             fetchSearch();
         }
     // eslint-disable-next-line
