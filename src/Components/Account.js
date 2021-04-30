@@ -1,7 +1,7 @@
 import React, { useState }  from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { Button, Container, Grid, CardMedia, TextField, Typography, makeStyles } from '@material-ui/core';
-import { logoutUser } from '../Redux/actions';
+import { logoutUser, updateUser } from '../Redux/actions';
 
 const useStyles = makeStyles({
     root: {
@@ -35,7 +35,12 @@ export const Account = (props) => {
     }
 
     const handleEdit = () => {
-        setEditMode(!editMode);
+        if(editMode === true){
+            dispatch(updateUser({ username, firstName, lastName, description })).then(()=>setEditMode(!editMode));
+        }
+        else{
+            setEditMode(!editMode);
+        }
     }
 
     const handleChange = (e, setter) => {

@@ -1,4 +1,4 @@
-import { LOGIN_USER, LOGOUT_USER, UPDATE_FOLLOWING, CREATE_POST, UPDATE_POSTS, ERROR } from './actions';
+import { LOGIN_USER, LOGOUT_USER, UPDATE_FOLLOWING, CREATE_POST, UPDATE_POSTS, ERROR, UPDATE_USER } from './actions';
 import { user, authenticated, posts, error } from './states'
 
 export let reducer = (state = { user, authenticated, posts, error }, action) => {
@@ -34,6 +34,11 @@ export let reducer = (state = { user, authenticated, posts, error }, action) => 
             return {
                 ...state,
                 posts: [...action.posts]
+            }
+        case UPDATE_USER:
+            return {
+                ...state,
+                user: {...state.user, ...action.user}
             }
         case ERROR:
             return {

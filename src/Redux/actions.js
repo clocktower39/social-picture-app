@@ -139,8 +139,11 @@ export function deletePost(){
     }
 }
 
-export function updateUser(){
-    return {
-        type: UPDATE_USER,
+export function updateUser(user){
+    return async (dispatch, getState) => {
+        return dispatch({
+            type: UPDATE_USER,
+            user: user
+        })
     }
 }
