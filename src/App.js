@@ -22,17 +22,17 @@ function App() {
     <div className={classes.App}>
       <Router>
         <Switch>
-          <Route exact path='/login' children={<Login/>} />
+          <Route exact path='social-picture-app/login' children={<Login/>} />
           
-          <Route exact path='/signup' children={<Signup/>} />
+          <Route exact path='social-picture-app/signup' children={<Signup/>} />
 
-          <AuthRoute exact path='/' component={Home} />
+          <AuthRoute exact path='social-picture-app/' component={Home} />
           
-          <AuthRoute exact path='/search' component={Search} />
+          <AuthRoute exact path='social-picture-app/search' component={Search} />
           
-          <AuthRoute exact path='/post' component={Post} />
+          <AuthRoute exact path='social-picture-app/post' component={Post} />
           
-          <AuthRoute exact path='/account' component={Account} />
+          <AuthRoute exact path='social-picture-app/account' component={Account} />
             
         </Switch>
         <Navbar />
