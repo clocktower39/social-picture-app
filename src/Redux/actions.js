@@ -9,7 +9,7 @@ export const ERROR = 'ERROR';
 
 export function signupUser(newUser){
     return async (dispatch, getState) => {
-        const response = await fetch('http://mattkearns.ddns.net:3000/signup', {
+        const response = await fetch('https://quiet-lake-34466.herokuapp.com/signup', {
             method: 'post',
             dataType: 'json',
             body: newUser,
@@ -40,7 +40,7 @@ export function signupUser(newUser){
 
 export function loginUser(loginCredentials){
     return async (dispatch, getState) => {
-        const response = await fetch('http://mattkearns.ddns.net:3000/login', {
+        const response = await fetch('https://quiet-lake-34466.herokuapp.com/login', {
             method: 'post',
             dataType: 'json',
             body: loginCredentials,
@@ -63,7 +63,7 @@ export function loginUser(loginCredentials){
             
             let targetUser = JSON.stringify({username: data.user.username});
 
-            const requestFollowers = await fetch('http://mattkearns.ddns.net:3000/followers', {
+            const requestFollowers = await fetch('https://quiet-lake-34466.herokuapp.com/followers', {
                 method: 'post',
                 dataType: 'json',
                 body: targetUser,
@@ -90,7 +90,7 @@ export function logoutUser(){
 export function updateFollowing(username, following){
     return async (dispatch, getState) => {
         let request = JSON.stringify({username, following});
-        const response = await fetch('http://mattkearns.ddns.net:3000/followUser', {
+        const response = await fetch('https://quiet-lake-34466.herokuapp.com/followUser', {
             method: 'post',
             dataType: 'json',
             body: request,
@@ -110,7 +110,7 @@ export function updateFollowing(username, following){
 export function getPosts(following){
     return async (dispatch, getState) => {
         let request = JSON.stringify({following});
-        const response = await fetch('http://mattkearns.ddns.net:3000/getPosts', {
+        const response = await fetch('https://quiet-lake-34466.herokuapp.com/getPosts', {
             method: 'post',
             dataType: 'json',
             body: request,

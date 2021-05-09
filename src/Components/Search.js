@@ -31,7 +31,7 @@ export const Search = (props) => {
     const fetchSearch = async () => {
         let payload = JSON.stringify({ username: searchInput});
 
-        let resposne = await fetch('http://mattkearns.ddns.net:3000/search', {
+        let resposne = await fetch('https://quiet-lake-34466.herokuapp.com/search', {
             method: 'post',
             dataType: 'json',
             body: payload,
