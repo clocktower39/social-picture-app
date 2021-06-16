@@ -24,6 +24,7 @@ export const Login = () => {
     const [authenticated] = useState(localStorage.getItem('authenticated'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const [usernameError, setUsernameError] = useState('');
     const [passwordError, setPasswordError] = useState('');
@@ -35,6 +36,7 @@ export const Login = () => {
         }
     }
     const handleLoginAttempt = (e) => {
+        setLoading(true);
         //change into post request to login, if successful then dispatch login with returned data
         let loginAttempt = JSON.stringify({username:username, password:password, authenticated: authenticated });
 
@@ -43,6 +45,7 @@ export const Login = () => {
                 setUsernameError(e.error.username);
                 setPasswordError(e.error.password);
             }
+            setLoading(false);
         });
     }
 
@@ -86,6 +89,7 @@ export const Login = () => {
                 color="primary"
                 className={classes.button}
                 onClick={(e) => handleLoginAttempt(e)}
+                disabled={loading}
                 >
                 Login
                 </Button>
