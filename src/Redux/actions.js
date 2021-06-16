@@ -206,4 +206,21 @@ export function likePost(post) {
       });
     };
   }
-    
+
+  export function commentOnPost(post, remark) {
+    return async (dispatch, getState) => {
+      const state = getState();
+
+      const posts = state.posts.map((p) => {
+        if (post.src === p.src) {
+          p.comments.push(remark);
+        }
+        return p;
+      });
+
+      return dispatch({
+        type: UPDATE_POSTS,
+        posts,
+      });
+    };
+  }
