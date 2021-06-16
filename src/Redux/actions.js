@@ -172,55 +172,55 @@ export function updateUser(user) {
 }
 
 export function likePost(post) {
-    return async (dispatch, getState) => {
-      const state = getState();
+  return async (dispatch, getState) => {
+    const state = getState();
 
-      const posts = state.posts.map((p) => {
-        if (post.src === p.src) {
-          p.likes.push(state.user.username);
-        }
-        return p;
-      });
+    const posts = state.posts.map((p) => {
+      if (post.src === p.src) {
+        p.likes.push(state.user.username);
+      }
+      return p;
+    });
 
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts,
-      });
-    };
-  }
+    return dispatch({
+      type: UPDATE_POSTS,
+      posts,
+    });
+  };
+}
 
-  export function removeLikeFromPost(post) {
-    return async (dispatch, getState) => {
-      const state = getState();
+export function removeLikeFromPost(post) {
+  return async (dispatch, getState) => {
+    const state = getState();
 
-      const posts = state.posts.map((p) => {
-        if (post.src === p.src) {
-            p.likes = p.likes.filter(like => like !== state.user.username)
-        }
-        return p;
-      });
+    const posts = state.posts.map((p) => {
+      if (post.src === p.src) {
+        p.likes = p.likes.filter((like) => like !== state.user.username);
+      }
+      return p;
+    });
 
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts,
-      });
-    };
-  }
+    return dispatch({
+      type: UPDATE_POSTS,
+      posts,
+    });
+  };
+}
 
-  export function commentOnPost(post, remark) {
-    return async (dispatch, getState) => {
-      const state = getState();
+export function commentOnPost(post, remark) {
+  return async (dispatch, getState) => {
+    const state = getState();
 
-      const posts = state.posts.map((p) => {
-        if (post.src === p.src) {
-          p.comments.push(remark);
-        }
-        return p;
-      });
+    const posts = state.posts.map((p) => {
+      if (post.src === p.src) {
+        p.comments.push(remark);
+      }
+      return p;
+    });
 
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts,
-      });
-    };
-  }
+    return dispatch({
+      type: UPDATE_POSTS,
+      posts,
+    });
+  };
+}
