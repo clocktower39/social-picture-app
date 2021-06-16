@@ -149,6 +149,9 @@ export const Home = (props) => {
                       <ExpandMore />
                     </IconButton>
                   </CardActions>
+                  <CardContent>
+                    <Typography variant="body1">Likes: {(post.likes)?post.likes.length: 0}</Typography>
+                  </CardContent>
                   <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent>
                       <Typography paragraph>Comments:</Typography>
