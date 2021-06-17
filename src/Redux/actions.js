@@ -10,7 +10,8 @@ export const ERROR = "ERROR";
 export function signupUser(newUser) {
   return async (dispatch, getState) => {
     const response = await fetch(
-      "https://quiet-lake-34466.herokuapp.com/signup",
+      // "https://quiet-lake-34466.herokuapp.com/signup",
+      "http://192.168.56.1:3000/signup",
       {
         method: "post",
         dataType: "json",
@@ -53,7 +54,8 @@ export function signupUser(newUser) {
 export function loginUser(loginCredentials) {
   return async (dispatch, getState) => {
     const response = await fetch(
-      "https://quiet-lake-34466.herokuapp.com/login",
+      // "https://quiet-lake-34466.herokuapp.com/login",
+      "http://192.168.56.1:3000/login",
       {
         method: "post",
         dataType: "json",
@@ -78,7 +80,8 @@ export function loginUser(loginCredentials) {
       let targetUser = JSON.stringify({ username: data.user.username });
 
       const requestFollowers = await fetch(
-        "https://quiet-lake-34466.herokuapp.com/followers",
+        // "https://quiet-lake-34466.herokuapp.com/followers",
+        "http://192.168.56.1:3000/followers",
         {
           method: "post",
           dataType: "json",
@@ -108,7 +111,8 @@ export function updateFollowing(username, following) {
   return async (dispatch, getState) => {
     let request = JSON.stringify({ username, following });
     const response = await fetch(
-      "https://quiet-lake-34466.herokuapp.com/followUser",
+      // "https://quiet-lake-34466.herokuapp.com/followUser",
+      "http://192.168.56.1:3000/followUser",
       {
         method: "post",
         dataType: "json",
@@ -131,7 +135,8 @@ export function getPosts(following) {
   return async (dispatch, getState) => {
     let request = JSON.stringify({ following });
     const response = await fetch(
-      "https://quiet-lake-34466.herokuapp.com/getPosts",
+      // "https://quiet-lake-34466.herokuapp.com/getPosts",
+      "http://192.168.56.1:3000/getPosts",
       {
         method: "post",
         dataType: "json",
