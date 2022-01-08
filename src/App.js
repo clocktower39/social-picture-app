@@ -6,36 +6,34 @@ import Post from "./Components/Post";
 import Account from "./Components/Account";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
-import { makeStyles } from "@material-ui/core";
+import { ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { theme } from './theme';
 import "./App.css";
 
-const useStyles = makeStyles({
-  App: {},
-});
 
 function App() {
-  const classes = useStyles();
-
   return (
-    <div className={classes.App}>
-      <Router basename="/social-picture-app/">
-        <Switch>
-          <Route exact path="/login" children={<Login />} />
+    <ThemeProvider theme={theme} >
+      <div>
+        <Router basename="/social-picture-app/">
+          <Switch>
+            <Route exact path="/login" children={<Login />} />
 
-          <Route exact path="/signup" children={<Signup />} />
+            <Route exact path="/signup" children={<Signup />} />
 
-          <AuthRoute exact path="/" component={Home} />
+            <AuthRoute exact path="/" component={Home} />
 
-          <AuthRoute exact path="/search" component={Search} />
+            <AuthRoute exact path="/search" component={Search} />
 
-          <AuthRoute exact path="/post" component={Post} />
+            <AuthRoute exact path="/post" component={Post} />
 
-          <AuthRoute exact path="/account" component={Account} />
-        </Switch>
-        <Navbar />
-      </Router>
-    </div>
+            <AuthRoute exact path="/account" component={Account} />
+          </Switch>
+          <Navbar />
+        </Router>
+      </div>
+    </ThemeProvider>
   );
 }
 

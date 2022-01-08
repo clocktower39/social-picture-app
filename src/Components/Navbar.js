@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import { Home, Search, AddCircle, AccountCircle } from '@material-ui/icons';
+import { makeStyles } from "@mui/styles";
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import { Home, Search, AddCircle, AccountCircle } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
 const useStyles = makeStyles({

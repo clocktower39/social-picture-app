@@ -7,9 +7,13 @@ import {
     Grid,
     TextField,
     Typography,
-    makeStyles
-} from '@material-ui/core';
+} from '@mui/material';
+import { makeStyles } from "@mui/styles";
 import { updateFollowing } from '../Redux/actions';
+
+// dev server
+const currentIP = window.location.href.split(":")[1];
+const serverURL = `http:${currentIP}:3003`;
 
 const useStyles = makeStyles({
     root: {
@@ -31,7 +35,7 @@ export const Search = (props) => {
     const fetchSearch = async () => {
         let payload = JSON.stringify({ username: searchInput});
 
-        let resposne = await fetch('https://quiet-lake-34466.herokuapp.com/search', {
+        let resposne = await fetch(`${serverURL}/search`, {
             method: 'post',
             dataType: 'json',
             body: payload,

@@ -14,10 +14,9 @@ import {
   IconButton,
   TextField,
   Typography,
-  makeStyles,
-} from "@material-ui/core";
-import { Favorite, Share, ExpandMore, MoreVert } from "@material-ui/icons";
-import { red } from "@material-ui/core/colors";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { Favorite, Share, ExpandMore, MoreVert } from "@mui/icons-material";
 import clsx from "clsx";
 
 const useStyles = makeStyles((theme) => ({
@@ -37,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(180deg)",
   },
   avatar: {
-    backgroundColor: red[500],
+    backgroundColor: '#F44336',
   },
   avatarComment: {
     height: "25px",

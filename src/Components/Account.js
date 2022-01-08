@@ -7,8 +7,8 @@ import {
   CardMedia,
   TextField,
   Typography,
-  makeStyles,
-} from "@material-ui/core";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { logoutUser, updateUser } from "../Redux/actions";
 
 const useStyles = makeStyles({

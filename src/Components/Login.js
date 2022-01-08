@@ -1,6 +1,7 @@
 import React, { useState }  from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, TextField, Grid, Paper, makeStyles } from '@material-ui/core';
+import { Button, TextField, Grid, Paper } from '@mui/material';
+import { makeStyles } from "@mui/styles";
 import { Link, Redirect } from 'react-router-dom';
 import { loginUser } from '../Redux/actions';
 

@@ -4,10 +4,14 @@ import {
   Container,
   Grid,
   Input,
-  makeStyles,
   TextField,
-} from "@material-ui/core";
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import axios from "axios";
+
+// dev server
+const currentIP = window.location.href.split(":")[1];
+const serverURL = `http:${currentIP}:3003`;
 
 const useStyles = makeStyles({
   root: {},
@@ -33,7 +37,7 @@ export const Post = (props) => {
     console.log(formData);
 
     axios
-      .post("http://localhost:3000/upload/", formData)
+      .post(`${serverURL}/upload`, formData)
       .then((res) => {
         console.log(res);
       })

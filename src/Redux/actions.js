@@ -7,11 +7,13 @@ export const UPDATE_POSTS = "UPDATE_POSTS";
 export const UPDATE_FOLLOWING = "UPDATE_FOLLOWING";
 export const ERROR = "ERROR";
 
+// dev server
+const currentIP = window.location.href.split(":")[1];
+const serverURL = `http:${currentIP}:3003`;
+
 export function signupUser(newUser) {
   return async (dispatch, getState) => {
-    const response = await fetch(
-      // "https://quiet-lake-34466.herokuapp.com/signup",
-      "http://192.168.56.1:3000/signup",
+    const response = await fetch(`${serverURL}/signup`,
       {
         method: "post",
         dataType: "json",
@@ -53,9 +55,7 @@ export function signupUser(newUser) {
 
 export function loginUser(loginCredentials) {
   return async (dispatch, getState) => {
-    const response = await fetch(
-      // "https://quiet-lake-34466.herokuapp.com/login",
-      "http://192.168.56.1:3000/login",
+    const response = await fetch(`${serverURL}/login`,
       {
         method: "post",
         dataType: "json",
@@ -79,9 +79,7 @@ export function loginUser(loginCredentials) {
 
       let targetUser = JSON.stringify({ username: data.user.username });
 
-      const requestFollowers = await fetch(
-        // "https://quiet-lake-34466.herokuapp.com/followers",
-        "http://192.168.56.1:3000/followers",
+      const requestFollowers = await fetch(`${serverURL}/followers`,
         {
           method: "post",
           dataType: "json",
@@ -110,9 +108,7 @@ export function logoutUser() {
 export function updateFollowing(username, following) {
   return async (dispatch, getState) => {
     let request = JSON.stringify({ username, following });
-    const response = await fetch(
-      // "https://quiet-lake-34466.herokuapp.com/followUser",
-      "http://192.168.56.1:3000/followUser",
+    const response = await fetch(`${serverURL}/followUser`,
       {
         method: "post",
         dataType: "json",
@@ -134,9 +130,7 @@ export function updateFollowing(username, following) {
 export function getPosts(following) {
   return async (dispatch, getState) => {
     let request = JSON.stringify({ following });
-    const response = await fetch(
-      // "https://quiet-lake-34466.herokuapp.com/getPosts",
-      "http://192.168.56.1:3000/getPosts",
+    const response = await fetch(`${serverURL}/getPosts`,
       {
         method: "post",
         dataType: "json",
