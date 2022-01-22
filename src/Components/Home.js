@@ -50,7 +50,7 @@ export const Home = (props) => {
         {loading ? (
           <Loading />
         ) : posts.length >= 1 ? (
-          posts.map((post, index) => <SinglePost post={post} index={index} />)
+          posts.map((post, index) => <SinglePost key={`post-${post.src}`} post={post} index={index} />)
         ) : (
           <Button onClick={() => setToggle(!toggle)}>Refresh</Button>
         )}

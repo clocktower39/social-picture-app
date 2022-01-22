@@ -1,6 +1,6 @@
 import React, { useState }  from 'react';
 import { useDispatch } from 'react-redux';
-import { Link, Redirect} from 'react-router-dom';
+import { Link, Navigate} from 'react-router-dom';
 import { Button, TextField, Grid, Paper } from '@mui/material';
 import { makeStyles } from "@mui/styles";
 import { signupUser } from '../Redux/actions';
@@ -58,7 +58,7 @@ export const Signup = (props) => {
         setter(e.target.value)
     }
     if(redirect){
-        return <Redirect to={'/login'} />
+        return <Navigate to={'/login'} />
     }
     return (
         <Grid container spacing={3} className={classes.root}>

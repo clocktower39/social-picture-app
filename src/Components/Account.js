@@ -39,8 +39,6 @@ export const Account = (props) => {
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    localStorage.removeItem("username");
-    localStorage.setItem("authenticated", false);
   };
 
   const handleEdit = () => {

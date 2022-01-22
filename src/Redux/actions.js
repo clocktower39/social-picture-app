@@ -1,3 +1,5 @@
+import jwt from "jwt-decode";
+
 export const LOGIN_USER = "LOGIN_USER";
 export const LOGOUT_USER = "LOGOUT_USER";
 export const CREATE_POST = "CREATE_POST";
@@ -11,97 +13,91 @@ export const ERROR = "ERROR";
 const currentIP = window.location.href.split(":")[1];
 const serverURL = `http:${currentIP}:3003`;
 
-export function signupUser(newUser) {
-  return async (dispatch, getState) => {
-    const response = await fetch(`${serverURL}/signup`,
-      {
-        method: "post",
-        dataType: "json",
-        body: newUser,
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      }
-    );
+export function signupUser(user) {
+  return async (dispatch) => {
+    const response = await fetch(`${serverURL}/signup`, {
+      method: "post",
+      dataType: "json",
+      body: user,
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
     const data = await response.json();
     if (data.error) {
-      if (data.error.username) {
-        data.error.username = "Please enter a username";
-      }
-      if (data.error.firstName) {
-        data.error.firstName = "Please enter your first name";
-      }
-      if (data.error.lastName) {
-        data.error.lastName = "Please enter your last name";
-      }
-      if (data.error.email) {
-        data.error.email = "Please enter your email";
-      }
-      if (data.error.password) {
-        data.error.password = "Please enter a password";
-      }
-
       return dispatch({
         type: ERROR,
         error: data.error,
       });
     }
+
+    return dispatch(loginUser(user));
+  };
+}
+
+// Retrieves new JWT Token from username and password post request
+export function loginUser(user) {
+  return async (dispatch) => {
+    const response = await fetch(`${serverURL}/login`, {
+      method: "post",
+      dataType: "json",
+      body: user,
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+    const accessToken = data.accessToken;
+    const decodedAccessToken = jwt(accessToken);
+
+    localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
     return dispatch({
       type: LOGIN_USER,
-      user: data.user,
+      user: decodedAccessToken,
     });
   };
 }
 
-export function loginUser(loginCredentials) {
-  return async (dispatch, getState) => {
-    const response = await fetch(`${serverURL}/login`,
-      {
-        method: "post",
-        dataType: "json",
-        body: loginCredentials,
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      }
-    );
-    const data = await response.json();
+// Logs into account with JWT token
+export const loginJWT = (token) => {
+  return async (dispatch) => {
+    const bearer = `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}`;
 
-    if (!data.authenticated) {
-      localStorage.setItem("authenticated", data.authenticated);
+    const response = await fetch(`${serverURL}/checkAuthToken`, {
+      headers: {
+        Authorization: bearer,
+      },
+    });
+
+    const text = await response.text().then((item) => item);
+    if (text === "Authorized") {
+      const decodedAccessToken = jwt(token);
       return dispatch({
-        type: ERROR,
-        error: data.error,
+        type: LOGIN_USER,
+        user: decodedAccessToken,
       });
     } else {
-      localStorage.setItem("username", data.user.username);
-      localStorage.setItem("authenticated", data.authenticated);
-
-      let targetUser = JSON.stringify({ username: data.user.username });
-
-      const requestFollowers = await fetch(`${serverURL}/followers`,
-        {
-          method: "post",
-          dataType: "json",
-          body: targetUser,
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        }
-      );
-      const followers = await requestFollowers.json();
-      data.user.followers = followers.followers;
+      // removes JWT token if invalid or expired
+      localStorage.removeItem("JWT_AUTH_TOKEN");
+      return dispatch({
+        type: LOGOUT_USER,
+      });
     }
-    return dispatch({
-      type: LOGIN_USER,
-      user: data.user,
-    });
   };
-}
+};
 
 export function logoutUser() {
-  return {
-    type: LOGOUT_USER,
+  return async (dispatch) => {
+    localStorage.removeItem("JWT_AUTH_TOKEN");
+    return dispatch({
+      type: LOGOUT_USER,
+    });
   };
 }
 

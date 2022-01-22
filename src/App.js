@@ -7,7 +7,7 @@ import Account from "./Components/Account";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
 import { ThemeProvider } from "@mui/material";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from './theme';
 import "./App.css";
 
@@ -17,19 +17,27 @@ function App() {
     <ThemeProvider theme={theme} >
       <div>
         <Router basename="/social-picture-app/">
-          <Switch>
-            <Route exact path="/login" children={<Login />} />
+          <Routes>
+            <Route exact path="/login" element={<Login />} />
 
-            <Route exact path="/signup" children={<Signup />} />
+            <Route exact path="/signup" element={<Signup />} />
 
-            <AuthRoute exact path="/" component={Home} />
+            <Route exact path="/" element={<AuthRoute />} >
+              <Route exact path="/" element={<Home />} />
+            </Route>
 
-            <AuthRoute exact path="/search" component={Search} />
+            <Route exact path="/search" element={<AuthRoute />} >
+              <Route exact path="/search" element={<Search />} />
+            </Route>
 
-            <AuthRoute exact path="/post" component={Post} />
+            <Route exact path="/post" element={<AuthRoute />} >
+              <Route exact path="/post" element={<Post />} />
+            </Route>
 
-            <AuthRoute exact path="/account" component={Account} />
-          </Switch>
+            <Route exact path="/account" element={<AuthRoute />} >
+              <Route exact path="/account" element={<Account />} />
+            </Route>
+          </Routes>
           <Navbar />
         </Router>
       </div>
