@@ -1,4 +1,5 @@
 import jwt from "jwt-decode";
+import axios from "axios";
 
 export const LOGIN_USER = "LOGIN_USER";
 export const LOGOUT_USER = "LOGOUT_USER";
@@ -11,7 +12,7 @@ export const ERROR = "ERROR";
 
 // dev server
 const currentIP = window.location.href.split(":")[1];
-const serverURL = `http:${currentIP}:3003`;
+export const serverURL = `http:${currentIP}:3003`;
 
 export function signupUser(user) {
   return async (dispatch) => {
@@ -66,31 +67,31 @@ export function loginUser(user) {
 
 // Logs into account with JWT token
 export const loginJWT = (token) => {
-  return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}`;
+  return async (dispatch, getState) => {
+      const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
 
-    const response = await fetch(`${serverURL}/checkAuthToken`, {
-      headers: {
-        Authorization: bearer,
-      },
-    });
+      const response = await fetch(`${serverURL}/checkAuthToken`, {
+          headers: {
+              "Authorization": bearer,
+          }
+      })
 
-    const text = await response.text().then((item) => item);
-    if (text === "Authorized") {
-      const decodedAccessToken = jwt(token);
-      return dispatch({
-        type: LOGIN_USER,
-        user: decodedAccessToken,
-      });
-    } else {
-      // removes JWT token if invalid or expired
-      localStorage.removeItem("JWT_AUTH_TOKEN");
-      return dispatch({
-        type: LOGOUT_USER,
-      });
-    }
-  };
-};
+      const text = await response.text().then(item=>item);
+      if(text === "Authorized"){
+          const decodedAccessToken = jwt(token);
+          return dispatch({
+              type: LOGIN_USER,
+              user: decodedAccessToken,
+          });
+      }
+      else {
+          localStorage.removeItem('JWT_AUTH_TOKEN');
+          return dispatch({
+              type: LOGOUT_USER
+          })
+      }
+  }
+}
 
 export function logoutUser() {
   return async (dispatch) => {
@@ -123,23 +124,22 @@ export function updateFollowing(username, following) {
   };
 }
 
-export function getPosts(following) {
+export function getFollowingPosts(following) {
   return async (dispatch, getState) => {
-    let request = JSON.stringify({ following });
-    const response = await fetch(`${serverURL}/getPosts`,
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/followingPosts`,
       {
-        method: "post",
-        dataType: "json",
-        body: request,
         headers: {
           "Content-type": "application/json; charset=UTF-8",
+          "Authorization": bearer,
         },
       }
     );
     const data = await response.json();
     return dispatch({
       type: UPDATE_POSTS,
-      posts: data.posts,
+      posts: data,
     });
   };
 }
@@ -218,4 +218,34 @@ export function commentOnPost(post, remark) {
       posts,
     });
   };
+}
+
+export function uploadProfilePicture(formData) {
+  return async (dispatch, getState) => {
+      const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+      axios
+          .post(`${serverURL}/user/upload/profilePicture`, formData, { headers: { Authorization: bearer } })
+          .then((res) => {
+              console.log(res);
+          })
+          .catch((err) => {
+              console.log(err);
+          });
+  }
+}
+
+export function uploadUserPost(formData) {
+  return async (dispatch, getState) => {
+      const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+      axios
+          .post(`${serverURL}/post/upload`, formData, { headers: { Authorization: bearer } })
+          .then((res) => {
+              console.log(res);
+          })
+          .catch((err) => {
+              console.log(err);
+          });
+  }
 }

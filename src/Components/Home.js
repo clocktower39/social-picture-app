@@ -1,47 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getPosts } from "../Redux/actions";
+import { getFollowingPosts, } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import {
-  Button,
   Container,
   Grid,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 
-const useStyles = makeStyles((theme) => ({
+const classes = {
   root: {
     paddingBottom: "75px",
   },
   gridContainer: {
     scrollBehavior: "smooth",
   },
-}));
+};
 
 export const Home = (props) => {
   const dispatch = useDispatch();
-  const classes = useStyles();
-  const user = useSelector((state) => state.user);
   const posts = useSelector((state) => state.posts);
-  const [loading, setLoading] = React.useState(true);
-  const [toggle, setToggle] = React.useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(getPosts([...user.following, user.username])).then(() => {
+    dispatch(getFollowingPosts()).then(() => {
       setLoading(false);
     });
     // eslint-disable-next-line
-  }, [toggle]);
+  }, []);
 
   return (
-    <Container maxWidth="sm" className={classes.root} disableGutters>
+    <Container maxWidth="sm" sx={classes.root} disableGutters>
       <Grid
         justify="center"
         container
         spacing={3}
-        className={classes.gridContainer}
+        sx={classes.gridContainer}
       >
         <Grid item xs={12}>
           <Typography variant="h5">Social Photo App</Typography>
@@ -50,9 +45,9 @@ export const Home = (props) => {
         {loading ? (
           <Loading />
         ) : posts.length >= 1 ? (
-          posts.map((post, index) => <SinglePost key={`post-${post.src}`} post={post} index={index} />)
+          posts.map((post, index) => <SinglePost key={`post-${post.image}`} post={post} index={index} />)
         ) : (
-          <Button onClick={() => setToggle(!toggle)}>Refresh</Button>
+          'Loading'
         )}
       </Grid>
     </Container>

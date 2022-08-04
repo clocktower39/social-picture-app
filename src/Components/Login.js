@@ -53,7 +53,7 @@ export const Login = (props) => {
   }
   return (
     <Container maxWidth="sm">
-      <Grid container className={classes.root} component={Paper} spacing={3}>
+      <Grid container sx={classes.root} component={Paper} spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h4" gutterBottom>
             Log in
@@ -64,7 +64,7 @@ export const Login = (props) => {
             color="secondary"
             error={error === true ? true : false}
             helperText={error === true ? "Please enter your username" : false}
-            className={classes.textField}
+            sx={classes.textField}
             label="username"
             value={username}
             onKeyDown={(e) => handleKeyDown(e)}
@@ -76,7 +76,7 @@ export const Login = (props) => {
             color="secondary"
             error={error === true ? true : false}
             helperText={error === true ? "Please enter your password" : false}
-            className={classes.textField}
+            sx={classes.textField}
             label="Password"
             value={password}
             type="password"
@@ -91,7 +91,7 @@ export const Login = (props) => {
           <Button
             variant="contained"
             color="secondary"
-            className={classes.button}
+            sx={classes.button}
             onClick={(e) => handleLoginAttempt(e)}
             disabled={disableButtonDuringLogin}
           >

@@ -61,13 +61,13 @@ export const Signup = (props) => {
         return <Navigate to={'/login'} />
     }
     return (
-        <Grid container spacing={3} className={classes.root}>
+        <Grid container spacing={3} sx={classes.root}>
             <Grid item xs={12}>
                 <Paper>
                 <TextField
                 error={usernameError}
                 helperText={usernameError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="Username"
                 value={username}
                 onChange={(e) => handleChange(e, setUsername)}
@@ -79,7 +79,7 @@ export const Signup = (props) => {
                 <TextField
                 error={firstNameError}
                 helperText={firstNameError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="First Name"
                 value={firstName}
                 onChange={(e) => handleChange(e, setFirstName)}
@@ -91,7 +91,7 @@ export const Signup = (props) => {
                 <TextField
                 error={lastNameError}
                 helperText={lastNameError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="Last Name"
                 value={lastName}
                 onChange={(e) => handleChange(e, setLastName)}
@@ -103,7 +103,7 @@ export const Signup = (props) => {
                 <TextField
                 error={emailError}
                 helperText={emailError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="Email"
                 type="email"
                 value={email}
@@ -116,7 +116,7 @@ export const Signup = (props) => {
                 <TextField
                 error={passwordError}
                 helperText={passwordError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="Password"
                 value={password}
                 type="password"
@@ -129,7 +129,7 @@ export const Signup = (props) => {
                 <TextField
                 error={confirmPasswordError}
                 helperText={confirmPasswordError}
-                className={classes.textField}
+                sx={classes.textField}
                 label="Confirm Password"
                 value={confirmPassword}
                 type="password"
@@ -141,7 +141,7 @@ export const Signup = (props) => {
                 <Button
                 variant="contained"
                 color="primary"
-                className={classes.button}
+                sx={classes.button}
                 onClick={(e) => handleSignupAttempt(e)}
                 >
                 Sign up

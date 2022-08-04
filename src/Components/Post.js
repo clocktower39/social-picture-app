@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   Button,
   Container,
@@ -6,48 +7,28 @@ import {
   Input,
   TextField,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import axios from "axios";
-
-// dev server
-const currentIP = window.location.href.split(":")[1];
-const serverURL = `http:${currentIP}:3003`;
-
-const useStyles = makeStyles({
-  root: {},
-});
+import { uploadUserPost } from '../Redux/actions';
 
 export const Post = (props) => {
-  const classes = useStyles();
-  const [newUser, setNewUser] = useState({
-    name: "",
-    birthdate: "",
-    photo: "",
-  });
+  const dispatch = useDispatch();
+  const [uploadPhoto, setUploadPhoto] = useState(null);
 
   const handlePhoto = (e) => {
-    setNewUser({ ...newUser, photo: e.target.files[0] });
+    setUploadPhoto(e.target.files[0]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("file", newUser.photo);
-    formData.append("name", newUser.name);
-    console.log(formData);
+    formData.append("file", uploadPhoto);
 
-    axios
-      .post(`${serverURL}/upload`, formData)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if(uploadPhoto){
+      dispatch(uploadUserPost(formData));
+    }
   };
 
   return (
-    <Container disableGutters maxWidth="sm" className={classes.root}>
+    <Container disableGutters maxWidth="sm" >
       <form onSubmit={handleSubmit} encType="multipart/form-data">
       <Grid container>
         <Grid item xs={12}>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { connect, useDispatch } from "react-redux";
 import {
+  Avatar,
   Button,
   Container,
   Grid,
@@ -9,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { logoutUser, updateUser } from "../Redux/actions";
+import { logoutUser, updateUser, serverURL } from "../Redux/actions";
 
 const useStyles = makeStyles({
   root: {
@@ -56,7 +57,7 @@ export const Account = (props) => {
   };
 
   return (
-    <Container disableGutters maxWidth="sm" className={classes.root}>
+    <Container disableGutters maxWidth="sm" sx={classes.root}>
       <Grid container justify="center" spacing={1}>
         <Grid item xs={12}>
           {editMode ? (
@@ -73,15 +74,15 @@ export const Account = (props) => {
           <br />
         </Grid>
         <Grid item xs={4}>
-          <img
-            className={classes.profilePic}
-            src={props.user.profilePic}
-            alt="profile pic"
-          />
+            <Avatar
+              sx={classes.avatar}
+              alt="Profile Picture"
+              src={`${serverURL}/user/profilePicture/${props.user.profilePicture}`}
+            />
         </Grid>
         <Grid item xs={2}>
           <Typography variant="body2" align="center">
-            {props.user.posts.length}
+            {props.user.posts ? props.user.posts.length : 0}
             <br />
             Posts
           </Typography>
@@ -161,7 +162,7 @@ export const Account = (props) => {
 
         {/* list all posts from account */}
         <Grid container item xs={12}>
-          {props.user.posts.map((post, index) => {
+          {props.user.posts && props.user.posts.map((post, index) => {
             return (
               <Grid
                 item
@@ -171,7 +172,7 @@ export const Account = (props) => {
                   gridWidth === 4 ? setGridWidth(12) : setGridWidth(4);
                 }}
               >
-                <CardMedia className={classes.media} image={post.src} />
+                <CardMedia sx={classes.media} image={post.src} />
               </Grid>
             );
           })}

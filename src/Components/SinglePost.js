@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { likePost, removeLikeFromPost, commentOnPost } from "../Redux/actions";
+import { likePost, removeLikeFromPost, commentOnPost, serverURL } from "../Redux/actions";
 import {
   Avatar,
   Button,
@@ -15,12 +15,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { Favorite, Share, ExpandMore, MoreVert } from "@mui/icons-material";
 import clsx from "clsx";
+import { theme } from '../theme';
 
-const useStyles = makeStyles((theme) => ({
-  cardRoot: {},
+const classes = {
   media: {
     height: 0,
     paddingTop: "100%",
@@ -42,14 +41,13 @@ const useStyles = makeStyles((theme) => ({
     height: "25px",
     width: "25px",
   },
-}));
+};
 
 export default function SinglePost(props) {
   const dispatch = useDispatch();
-  const classes = useStyles();
   const user = useSelector((state) => state.user);
-  const [comment, setComment] = React.useState("");
-  const [expanded, setExpanded] = React.useState(false);
+  const [comment, setComment] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const post = props.post;
 
   const handleExpandClick = () => {
@@ -57,15 +55,14 @@ export default function SinglePost(props) {
   };
 
   return (
-    <Grid item xs={12} key={props.index}>
-      <Card className={classes.cardRoot}>
+    <Grid item xs={12}>
+      <Card>
         <CardHeader
           avatar={
             <Avatar
-              aria-label="recipe"
-              className={classes.avatar}
-              alt="Profile Pic"
-              src={post.user.profilePic}
+              sx={classes.avatar}
+              alt="Profile Picture"
+              src={post.user.profilePic ? `${serverURL}/user/profilePicture/${post.user.profilePic}` : null}
             />
           }
           action={
@@ -76,7 +73,7 @@ export default function SinglePost(props) {
           title={post.user.username}
           subheader={post.location}
         />
-        <CardMedia className={classes.media} image={post.src} />
+        <CardMedia sx={classes.media} image={post.image ? `${serverURL}/post/image/${post.image}` : null} />
         <CardActions disableSpacing>
           <IconButton
             aria-label="add to favorites"
@@ -102,7 +99,7 @@ export default function SinglePost(props) {
             <Share />
           </IconButton>
           <IconButton
-            className={clsx(classes.expand, {
+            sx={clsx(classes.expand, {
               [classes.expandOpen]: expanded,
             })}
             onClick={handleExpandClick}
@@ -125,18 +122,18 @@ export default function SinglePost(props) {
           <CardContent>
             <Typography paragraph>Comments:</Typography>
             {post.comments.map((comment, i) => (
-              <Grid container>
-              <Grid item xs={1}>
-                <Avatar
-                  aria-label="recipe"
-                  className={classes.avatarComment}
-                  alt={comment.username}
-                  src={comment.username}
-                />
-              </Grid>
+              <Grid container key={comment._id}>
+                <Grid item xs={1}>
+                  <Avatar
+                    aria-label="recipe"
+                    sx={classes.avatarComment}
+                    alt={comment.username}
+                    src={comment.user.profilePic}
+                  />
+                </Grid>
                 <Grid item xs={11}>
                   <Typography key={i} variant="body1" component="p">
-                    <strong>{comment.username}</strong> {comment.remark}
+                    <strong>{comment.user.username}</strong> {comment.comment}
                   </Typography>
                 </Grid>
               </Grid>
@@ -148,7 +145,7 @@ export default function SinglePost(props) {
             <Grid item xs={1}>
               <Avatar
                 aria-label="recipe"
-                className={classes.avatarComment}
+                sx={classes.avatarComment}
                 alt={user.username}
                 src={user.profilePic}
               />

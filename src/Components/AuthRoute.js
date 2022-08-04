@@ -8,8 +8,9 @@ import Loading from './Loading';
 // add initial fetch request for user info if already authenticated so login page doesnt even load if already authenticated from previous login
 
 export const AuthRoute = (props) => {
+    const { socket } = props;
+
     const dispatch = useDispatch();
-    const Component = props.component;
     const user = useSelector(state => state.user);
     const [loading, setLoading] = useState(true);
 
@@ -28,7 +29,7 @@ export const AuthRoute = (props) => {
         // eslint-disable-next-line
     },[])
 
-    return loading?<Loading />:user.username?<Outlet />:<Navigate to={{ pathname: '/login'}} />;
+    return loading?<Loading />:user.username?<Outlet socket={socket} />:<Navigate to={{ pathname: '/login'}} />;
 }
 
 export default AuthRoute

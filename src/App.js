@@ -15,8 +15,8 @@ import "./App.css";
 function App() {
   return (
     <ThemeProvider theme={theme} >
-      <div>
-        <Router basename="/social-picture-app/">
+      <Router basename="/social-picture-app/">
+        <div style={{ marginBottom: '75px' }}>
           <Routes>
             <Route exact path="/login" element={<Login />} />
 
@@ -38,9 +38,9 @@ function App() {
               <Route exact path="/account" element={<Account />} />
             </Route>
           </Routes>
-          <Navbar />
-        </Router>
-      </div>
+        </div>
+        <Navbar />
+      </Router>
     </ThemeProvider>
   );
 }

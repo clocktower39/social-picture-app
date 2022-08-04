@@ -8,26 +8,18 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { makeStyles } from "@mui/styles";
-import { updateFollowing } from '../Redux/actions';
+import { updateFollowing, serverURL } from '../Redux/actions';
 
-// dev server
-const currentIP = window.location.href.split(":")[1];
-const serverURL = `http:${currentIP}:3003`;
-
-const useStyles = makeStyles({
-    root: {
-    },
+const classes = {
     profilePic: {
         height: 0,
         paddingTop: '100%',
         borderRadius: '50%',
       },
-});
+};
 
 export const Search = (props) => {
     const dispatch = useDispatch();
-    const classes = useStyles();
     const [searchInput, setSearchInput] = useState('');
     const [users, setUsers] = useState([]);
 
@@ -35,7 +27,7 @@ export const Search = (props) => {
     const fetchSearch = async () => {
         let payload = JSON.stringify({ username: searchInput});
 
-        let resposne = await fetch(`${serverURL}/search`, {
+        let response = await fetch(`${serverURL}/search`, {
             method: 'post',
             dataType: 'json',
             body: payload,
@@ -44,7 +36,7 @@ export const Search = (props) => {
             }
           });
 
-        let data = await resposne.json();
+        let data = await response.json();
 
         setUsers(data.users);
     }
@@ -80,7 +72,7 @@ export const Search = (props) => {
     }, [searchInput]);
 
     return (
-        <Container maxWidth='sm' className={classes.root} >
+        <Container maxWidth='sm' sx={classes.root} >
             <Grid container spacing={3} alignItems='center'>
                 <Grid item xs={12}>
                     <TextField fullWidth label='Search' onChange={handleInput} value={searchInput} variant='filled' />
@@ -89,7 +81,7 @@ export const Search = (props) => {
                 {users.map((user, index) => {
                     return(
                     <Grid key={index} container item xs={12} alignItems='center' spacing={3} >
-                        <Grid item xs={2}><CardMedia className={classes.profilePic} image={user.profilePic} /></Grid>
+                        <Grid item xs={2}><CardMedia sx={classes.profilePic} image={`${serverURL}/user/profilePicture/${user.profilePicture}`} /></Grid>
                         <Grid item xs={6}>
                             <Typography variant='body1' >{user.username}</Typography>
                             <Typography variant='body2' >{user.firstName} {user.lastName}</Typography>
