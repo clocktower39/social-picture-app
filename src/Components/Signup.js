@@ -2,10 +2,9 @@ import React, { useState }  from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, Navigate} from 'react-router-dom';
 import { Button, TextField, Grid, Paper } from '@mui/material';
-import { makeStyles } from "@mui/styles";
 import { signupUser } from '../Redux/actions';
 
-const useStyles = makeStyles({
+const classes = {
     root: {
         padding: '75px 0',
         textAlign: 'center',
@@ -16,10 +15,9 @@ const useStyles = makeStyles({
     button: {
     },
 
-  });
+  };
 
 export const Signup = (props) => {
-    const classes = useStyles();
     const dispatch = useDispatch();
 
     const [redirect, setRedirect] = useState(false);

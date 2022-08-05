@@ -3,6 +3,7 @@ import Signup from "./Components/Signup";
 import Home from "./Components/Home";
 import Search from "./Components/Search";
 import Post from "./Components/Post";
+import Profile from "./Components/Profile";
 import Account from "./Components/Account";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
@@ -36,6 +37,10 @@ function App() {
 
             <Route exact path="/account" element={<AuthRoute />} >
               <Route exact path="/account" element={<Account />} />
+            </Route>
+
+            <Route exact path="/profile" element={<AuthRoute />} >
+              <Route exact path="/profile/:username" element={<Profile />} />
             </Route>
           </Routes>
         </div>

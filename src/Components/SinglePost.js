@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { likePost, removeLikeFromPost, commentOnPost, serverURL } from "../Redux/actions";
+import { useSelector } from "react-redux";
+import { Link } from 'react-router-dom';
+import { serverURL } from "../Redux/actions";
 import {
   Avatar,
   Button,
@@ -16,7 +17,6 @@ import {
   Typography,
 } from "@mui/material";
 import { Favorite, Share, ExpandMore, MoreVert } from "@mui/icons-material";
-import clsx from "clsx";
 import { theme } from '../theme';
 
 const classes = {
@@ -44,7 +44,6 @@ const classes = {
 };
 
 export default function SinglePost(props) {
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const [comment, setComment] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -62,7 +61,9 @@ export default function SinglePost(props) {
             <Avatar
               sx={classes.avatar}
               alt="Profile Picture"
-              src={post.user.profilePic ? `${serverURL}/user/profilePicture/${post.user.profilePic}` : null}
+              src={post.user.profilePicture ? `${serverURL}/user/profilePicture/${post.user.profilePicture}` : null}
+              component={Link}
+              to={`/profile/${post.user.username}`}
             />
           }
           action={
@@ -77,13 +78,6 @@ export default function SinglePost(props) {
         <CardActions disableSpacing>
           <IconButton
             aria-label="add to favorites"
-            onClick={() => {
-              post.likes
-                ? post.likes.includes(user.username)
-                  ? dispatch(removeLikeFromPost(post))
-                  : dispatch(likePost(post))
-                : alert("add likes array to post");
-            }}
           >
             <Favorite
               style={
@@ -99,9 +93,7 @@ export default function SinglePost(props) {
             <Share />
           </IconButton>
           <IconButton
-            sx={clsx(classes.expand, {
-              [classes.expandOpen]: expanded,
-            })}
+            sx={expanded ? { ...classes.expand, ...classes.expandOpen } : { ...classes.expand }}
             onClick={handleExpandClick}
             aria-expanded={expanded}
             aria-label="show more"
@@ -162,14 +154,7 @@ export default function SinglePost(props) {
             <Grid item xs={2}>
               <Button
                 variant="contained"
-                onClick={() =>
-                  dispatch(
-                    commentOnPost(post, {
-                      remark: comment,
-                      username: user.username,
-                    })
-                  ).then(() => setComment(""))
-                }
+                onClick={() => null}
               >
                 Submit
               </Button>

@@ -1,32 +1,20 @@
-import { LOGIN_USER, LOGOUT_USER, UPDATE_FOLLOWING, CREATE_POST, UPDATE_POSTS, ERROR, UPDATE_USER } from './actions';
-import { user, posts, error } from './states'
+import { LOGIN_USER, LOGOUT_USER, UPDATE_POSTS, ERROR, UPDATE_USER, UPDATE_PROFILE, } from './actions';
+import { user, posts, profile, error } from './states'
 
-export let reducer = (state = { user, posts, error }, action) => {
-    switch(action.type){
+export let reducer = (state = { user, posts, profile, error }, action) => {
+    switch (action.type) {
         case LOGIN_USER:
-            return { 
+            return {
                 ...state,
                 user: {
                     ...action.user,
                 },
             }
         case LOGOUT_USER:
-            return { 
+            return {
                 ...state,
                 user: {
                 },
-            }
-        case UPDATE_FOLLOWING:
-            return { 
-                ...state,
-                user: {
-                    ...state.user,
-                    following: [...action.following],
-                }
-            }
-        case CREATE_POST:
-            return {
-                ...state
             }
         case UPDATE_POSTS:
             return {
@@ -36,14 +24,23 @@ export let reducer = (state = { user, posts, error }, action) => {
         case UPDATE_USER:
             return {
                 ...state,
-                user: {...state.user, ...action.user}
+                user: { ...state.user, ...action.user }
+            }
+        case UPDATE_PROFILE:
+            return {
+                ...state,
+                profile: {
+                    ...state.profile,
+                    user: { ...action.user },
+                    posts: [...action.posts],
+                }
             }
         case ERROR:
             return {
                 ...state,
-                error: {...action.error}
+                error: { ...action.error }
             }
         default:
-            return {...state};
+            return { ...state };
     }
 }

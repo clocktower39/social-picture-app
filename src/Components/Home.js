@@ -45,7 +45,9 @@ export const Home = (props) => {
         {loading ? (
           <Loading />
         ) : posts.length >= 1 ? (
-          posts.map((post, index) => <SinglePost key={`post-${post.image}`} post={post} index={index} />)
+          posts.map((post, index) =>
+            <SinglePost key={`post-${post.image}`} post={post} index={index} />
+          )
         ) : (
           'Loading'
         )}

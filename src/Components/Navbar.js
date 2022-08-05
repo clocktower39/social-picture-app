@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { Home, Search, AddCircle, AccountCircle } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
@@ -14,6 +15,7 @@ const classes = {
 };
 
 export default function Navbar() {
+  const user = useSelector(state => state.user);
   const location = useLocation();
   const [value, setValue] = useState(location.pathname);
   const [disableNav, setDisableNav] = useState(false);
@@ -34,7 +36,7 @@ useEffect(()=>{
       <BottomNavigationAction disabled={disableNav} label="Home" value="/" to='/' icon={<Home />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Search" value="/search" to='/search' icon={<Search />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Post" value="/post" to='/post' icon={<AddCircle />} component={Link} />
-      <BottomNavigationAction disabled={disableNav} label="Account" value="/account" to='/account' icon={<AccountCircle />} component={Link} />
+      <BottomNavigationAction disabled={disableNav} label="Profile" value="/profile" to={`/profile/${user.username}`} icon={<AccountCircle />} component={Link} />
     </BottomNavigation>
   );
 }

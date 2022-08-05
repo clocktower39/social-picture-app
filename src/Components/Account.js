@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { connect, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   Avatar,
   Button,
@@ -9,10 +9,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { logoutUser, updateUser, serverURL } from "../Redux/actions";
 
-const useStyles = makeStyles({
+const classes = {
   root: {
     maxWidth: "700px",
   },
@@ -26,16 +25,16 @@ const useStyles = makeStyles({
     height: 0,
     paddingTop: "100%",
   },
-});
+};
 
 export const Account = (props) => {
-  const classes = useStyles();
+  const { user={}, } = props;
   const dispatch = useDispatch();
   const [editMode, setEditMode] = useState(false);
-  const [username, setUsername] = useState(props.user.username);
-  const [firstName, setFirstName] = useState(props.user.firstName);
-  const [lastName, setLastName] = useState(props.user.lastName);
-  const [description, setDescription] = useState(props.user.description);
+  const [username, setUsername] = useState(user.username | "");
+  const [firstName, setFirstName] = useState(user.firstName | "");
+  const [lastName, setLastName] = useState(user.lastName | "");
+  const [description, setDescription] = useState(user.description | "");
   const [gridWidth, setGridWidth] = useState(4);
 
   const handleLogout = () => {
@@ -69,34 +68,32 @@ export const Account = (props) => {
               }}
             />
           ) : (
-            <Typography variant="h4">{props.user.username}</Typography>
+            <Typography variant="h4">{user.username}</Typography>
           )}
           <br />
         </Grid>
         <Grid item xs={4}>
-            <Avatar
-              sx={classes.avatar}
-              alt="Profile Picture"
-              src={`${serverURL}/user/profilePicture/${props.user.profilePicture}`}
-            />
+          <Avatar
+            sx={classes.avatar}
+            alt="Profile Picture"
+            src={`${serverURL}/user/profilePicture/${user.profilePicture}`}
+          />
         </Grid>
         <Grid item xs={2}>
           <Typography variant="body2" align="center">
-            {props.user.posts ? props.user.posts.length : 0}
+            {user.posts ? user.posts.length : 0}
             <br />
             Posts
           </Typography>
         </Grid>
         <Grid item xs={2}>
           <Typography variant="body2" align="center">
-            {props.user.followers.length}
             <br />
             Followers
           </Typography>
         </Grid>
         <Grid item xs={2}>
           <Typography variant="body2" align="center">
-            {props.user.following.length}
             <br />
             Following
           </Typography>
@@ -121,7 +118,7 @@ export const Account = (props) => {
             </>
           ) : (
             <Typography variant="body1">
-              {props.user.firstName} {props.user.lastName}
+              {user.firstName} {user.lastName}
             </Typography>
           )}
         </Grid>
@@ -136,7 +133,7 @@ export const Account = (props) => {
               }}
             />
           ) : (
-            <Typography variant="body2">{props.user.description}</Typography>
+            <Typography variant="body2">{user.description}</Typography>
           )}
         </Grid>
         <Grid item xs={6}>
@@ -162,7 +159,7 @@ export const Account = (props) => {
 
         {/* list all posts from account */}
         <Grid container item xs={12}>
-          {props.user.posts && props.user.posts.map((post, index) => {
+          {user.posts && user.posts.map((post, index) => {
             return (
               <Grid
                 item
@@ -182,10 +179,4 @@ export const Account = (props) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  user: state.user,
-});
-
-const mapDispatchToProps = {};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Account);
+export default Account;
