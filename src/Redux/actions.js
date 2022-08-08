@@ -6,6 +6,7 @@ export const LOGOUT_USER = "LOGOUT_USER";
 export const UPDATE_USER = "UPDATE_USER";
 export const UPDATE_POSTS = "UPDATE_POSTS";
 export const UPDATE_PROFILE = "UPDATE_PROFILE";
+export const UPDATE_PROFILE_RELATIONSHIPS = "UPDATE_PROFILE_RELATIONSHIPS";
 export const ERROR = "ERROR";
 
 // dev server
@@ -173,5 +174,34 @@ export function getUserProfilePage(username) {
           user: data.user,
         });
       })
+  }
+}
+
+export function getUserProfileRelationships(userId) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/getRelationships`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ userId }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+    
+    return dispatch({
+      type: UPDATE_PROFILE_RELATIONSHIPS,
+      follwoing: data.following,
+      followers: data.followers,
+    });
   }
 }

@@ -11,6 +11,7 @@ const classes = {
     width: '100%',
     position: 'fixed',
     bottom: 0,
+    zIndex: 100
   },
 };
 

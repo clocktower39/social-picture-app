@@ -17,7 +17,6 @@ import {
   Typography,
 } from "@mui/material";
 import { Favorite, Share, ExpandMore, MoreVert } from "@mui/icons-material";
-import { theme } from '../theme';
 
 const classes = {
   media: {
@@ -27,9 +26,6 @@ const classes = {
   expand: {
     transform: "rotate(0deg)",
     marginLeft: "auto",
-    transition: theme.transitions.create("transform", {
-      duration: theme.transitions.duration.shortest,
-    }),
   },
   expandOpen: {
     transform: "rotate(180deg)",
