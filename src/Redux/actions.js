@@ -6,7 +6,7 @@ export const LOGOUT_USER = "LOGOUT_USER";
 export const UPDATE_USER = "UPDATE_USER";
 export const UPDATE_POSTS = "UPDATE_POSTS";
 export const UPDATE_PROFILE = "UPDATE_PROFILE";
-export const UPDATE_PROFILE_RELATIONSHIPS = "UPDATE_PROFILE_RELATIONSHIPS";
+export const UPDATE_RELATIONSHIPS = "UPDATE_RELATIONSHIPS";
 export const ERROR = "ERROR";
 
 // dev server
@@ -105,7 +105,7 @@ export function getFollowingPosts() {
   return async (dispatch, getState) => {
     const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
 
-    const response = await fetch(`${serverURL}/followingPosts`,
+    const response = await fetch(`${serverURL}/post/followingPosts`,
       {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -172,36 +172,62 @@ export function getUserProfilePage(username) {
           type: UPDATE_PROFILE,
           posts: data.posts,
           user: data.user,
+          following: data.following,
+          followers: data.followers,
         });
       })
   }
 }
 
-export function getUserProfileRelationships(userId) {
+export function requestFollow(user) {
   return async (dispatch, getState) => {
     const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
 
-    const response = await fetch(`${serverURL}/getRelationships`, {
+    const response = await fetch(`${serverURL}/follow`, {
       method: "post",
       dataType: "json",
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ user }),
       headers: {
         "Content-type": "application/json; charset=UTF-8",
         "Authorization": bearer,
       },
     });
     const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
-      });
-    }
-    
-    return dispatch({
-      type: UPDATE_PROFILE_RELATIONSHIPS,
-      follwoing: data.following,
-      followers: data.followers,
+    console.log(data);
+  }
+}
+
+export function requestUnfollow(user) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/unfollow`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ user }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
     });
+    const data = await response.json();
+    console.log(data);
+  }
+}
+
+export function getMyRelationships() {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+    axios
+      .get(`${serverURL}/myRelationships`, { headers: { Authorization: bearer } })
+      .then(async (res) => {
+        const data = res.data;
+
+        return dispatch({
+          type: UPDATE_RELATIONSHIPS,
+          following: data.following,
+          followers: data.followers,
+        });
+      })
   }
 }

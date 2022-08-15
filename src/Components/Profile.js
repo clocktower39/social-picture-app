@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Avatar, CardMedia, Container, Dialog, Grid, Typography } from "@mui/material";
-import { getUserProfilePage, getUserProfileRelationships, serverURL } from "../Redux/actions";
+import { getUserProfilePage, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
 
 const classes = {
@@ -22,10 +22,8 @@ const classes = {
 };
 
 const FollowingUsers = ({userId, following}) => {
-  const dispatch = useDispatch();
   
   useEffect(() => {
-    dispatch(getUserProfileRelationships(userId));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -74,20 +72,21 @@ export const Profile = (props) => {
           </Grid>
           <Grid item xs={2}>
             <Typography variant="body2" align="center">
-              {profile.user.posts ? profile.user.posts.length : 0}
+              {profile.posts ? profile.posts.length : 0}
               <br />
               Posts
             </Typography>
           </Grid>
           <Grid item xs={2}>
             <Typography variant="body2" align="center">
+              {profile.followers.length}
               <br />
               Followers
             </Typography>
           </Grid>
           <Grid item xs={2}>
             <Typography variant="body2" align="center" onClick={handleFollowingModal}>
-              {profile.user.following.length}
+              {profile.following.length}
               <br />
               Following
             </Typography>

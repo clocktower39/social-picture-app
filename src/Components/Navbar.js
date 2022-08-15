@@ -37,7 +37,7 @@ useEffect(()=>{
       <BottomNavigationAction disabled={disableNav} label="Home" value="/" to='/' icon={<Home />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Search" value="/search" to='/search' icon={<Search />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Post" value="/post" to='/post' icon={<AddCircle />} component={Link} />
-      <BottomNavigationAction disabled={disableNav} label="Profile" value="/profile" to={`/profile/${user.username}`} icon={<AccountCircle />} component={Link} />
+      <BottomNavigationAction disabled={disableNav} label="Profile" value={`/profile/${user.username}`} to={`/profile/${user.username}`} icon={<AccountCircle />} component={Link} />
     </BottomNavigation>
   );
 }

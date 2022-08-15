@@ -11,4 +11,9 @@ export let profile = {
     followers: [],
 }
 
+export let relationships = {
+    following: [],
+    followers: [],
+};
+
 export const error = {};
