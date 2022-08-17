@@ -21,15 +21,29 @@ const classes = {
   },
 };
 
-const FollowingUsers = ({userId, following}) => {
-  
+const FollowingUsers = ({ userId, following }) => {
+
   useEffect(() => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <Grid container>
     <Grid item xs={12}><Typography variant="h4" textAlign="center" >Following</Typography></Grid>
     {following.map(user => (
+      <Grid ></Grid>
+    ))}
+  </Grid>;
+};
+
+const FollowerUsers = ({ userId, followers }) => {
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return <Grid container>
+    <Grid item xs={12}><Typography variant="h4" textAlign="center" >Followers</Typography></Grid>
+    {followers.map(user => (
       <Grid ></Grid>
     ))}
   </Grid>;
@@ -42,8 +56,10 @@ export const Profile = (props) => {
   const [gridWidth, setGridWidth] = useState(4);
   const [loading, setLoading] = useState(true);
   const [openFollowingModal, setOpenFollowingModal] = useState(false);
+  const [openFollowersModal, setOpenFollowersModal] = useState(false);
 
   const handleFollowingModal = () => setOpenFollowingModal((prev) => !prev);
+  const handleFollowersModal = () => setOpenFollowersModal((prev) => !prev);
 
   useEffect(() => {
     dispatch(getUserProfilePage(params.username)).then(() => setLoading(false));
@@ -78,14 +94,14 @@ export const Profile = (props) => {
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center">
+            <Typography variant="body2" align="center" onClick={handleFollowersModal} >
               {profile.followers.length}
               <br />
               Followers
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center" onClick={handleFollowingModal}>
+            <Typography variant="body2" align="center" onClick={handleFollowingModal} >
               {profile.following.length}
               <br />
               Following
@@ -123,7 +139,12 @@ export const Profile = (props) => {
             })}
         </Grid>
       </Grid>
-      <Dialog open={openFollowingModal}></Dialog>
+      <Dialog
+        open={openFollowersModal}
+        onClose={handleFollowersModal}
+        sx={{ "& .MuiDialog-paper": { padding: "5px", width: "100%", minHeight: "80%" } }}
+      >
+        <FollowerUsers userId={profile.user._id} followers={profile.followers} /></Dialog>
       <Dialog
         open={openFollowingModal}
         onClose={handleFollowingModal}
