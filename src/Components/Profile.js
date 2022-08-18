@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { Avatar, CardMedia, Container, Dialog, Grid, Typography } from "@mui/material";
 import { getUserProfilePage, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
+import { UserCard } from "./Search";
 
 const classes = {
   root: {
@@ -22,31 +23,33 @@ const classes = {
 };
 
 const FollowingUsers = ({ userId, following }) => {
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <Grid container>
-    <Grid item xs={12}><Typography variant="h4" textAlign="center" >Following</Typography></Grid>
-    {following.map(user => (
-      <Grid ></Grid>
-    ))}
-  </Grid>;
+  return (
+    <Grid container spacing={2} >
+      <Grid item xs={12}>
+        <Typography variant="h4" textAlign="center">
+          Following
+        </Typography>
+      </Grid>
+      {following.map((user) => (
+        <UserCard key={user._id} account={user} />
+      ))}
+    </Grid>
+  );
 };
 
 const FollowerUsers = ({ userId, followers }) => {
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <Grid container>
-    <Grid item xs={12}><Typography variant="h4" textAlign="center" >Followers</Typography></Grid>
-    {followers.map(user => (
-      <Grid ></Grid>
-    ))}
-  </Grid>;
+  return (
+    <Grid container spacing={2} >
+      <Grid item xs={12}>
+        <Typography variant="h4" textAlign="center">
+          Followers
+        </Typography>
+      </Grid>
+      {followers.map((user) => (
+        <UserCard key={user._id} account={user} />
+      ))}
+    </Grid>
+  );
 };
 
 export const Profile = (props) => {
@@ -62,8 +65,10 @@ export const Profile = (props) => {
   const handleFollowersModal = () => setOpenFollowersModal((prev) => !prev);
 
   useEffect(() => {
+    setOpenFollowingModal(false);
+    setOpenFollowersModal(false);
     dispatch(getUserProfilePage(params.username)).then(() => setLoading(false));
-  }, [params.username, dispatch]);
+  }, [dispatch, params.username]);
 
   return loading ? (
     <Loading />
@@ -94,14 +99,14 @@ export const Profile = (props) => {
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center" onClick={handleFollowersModal} >
+            <Typography variant="body2" align="center" onClick={handleFollowersModal}>
               {profile.followers.length}
               <br />
               Followers
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center" onClick={handleFollowingModal} >
+            <Typography variant="body2" align="center" onClick={handleFollowingModal}>
               {profile.following.length}
               <br />
               Following
@@ -144,7 +149,8 @@ export const Profile = (props) => {
         onClose={handleFollowersModal}
         sx={{ "& .MuiDialog-paper": { padding: "5px", width: "100%", minHeight: "80%" } }}
       >
-        <FollowerUsers userId={profile.user._id} followers={profile.followers} /></Dialog>
+        <FollowerUsers userId={profile.user._id} followers={profile.followers} />
+      </Dialog>
       <Dialog
         open={openFollowingModal}
         onClose={handleFollowingModal}

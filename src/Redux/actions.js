@@ -13,6 +13,9 @@ export const ERROR = "ERROR";
 const currentIP = window.location.href.split(":")[1];
 export const serverURL = `http:${currentIP}:3003`;
 
+// live server
+// export const serverURL = 'https://social-picture-app.herokuapp.com';
+
 export function signupUser(user) {
   return async (dispatch) => {
     const response = await fetch(`${serverURL}/signup`, {
