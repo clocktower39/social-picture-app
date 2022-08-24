@@ -234,3 +234,71 @@ export function getMyRelationships() {
       })
   }
 }
+
+export function likePost(id, user) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+    const posts = getState().posts;
+
+    const response = await fetch(`${serverURL}/post/like`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ id }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    if (response.status === 200) {
+      const updatedLikes = posts.map(post => {
+        if (post._id === id) {
+          if (!post.likes.includes(user._id)) {
+            post.likes.push({
+              _id: user._id,
+              username: user.username,
+              profilePicture: user.profilePicture || null,
+            });
+          }
+        }
+        return post;
+      });
+
+      return dispatch({
+        type: UPDATE_POSTS,
+        posts: updatedLikes,
+      });
+    }
+  }
+}
+
+export function unlikePost(id, user) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+    const posts = getState().posts;
+
+    const response = await fetch(`${serverURL}/post/unlike`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ id }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    if (response.status === 200) {
+      const removedLikes = posts.map(post => {
+        if (post._id === id) {
+          const removeLike = post.likes.filter(like => like._id !== user._id);
+          post.likes = removeLike;
+        }
+        return post;
+      })
+
+
+      return dispatch({
+        type: UPDATE_POSTS,
+        posts: removedLikes,
+      });
+    }
+  };
+}

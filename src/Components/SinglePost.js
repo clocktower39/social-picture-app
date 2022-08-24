@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import { serverURL } from "../Redux/actions";
+import { serverURL, likePost, unlikePost, } from "../Redux/actions";
 import {
   Avatar,
   Button,
@@ -41,13 +41,17 @@ const classes = {
 
 export default function SinglePost(props) {
   const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [comment, setComment] = useState("");
   const [expanded, setExpanded] = useState(false);
-  const post = props.post;
+  const { post, likes, isLiked } = props;
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+
+  const handleLikePost = () => dispatch(likePost(post._id, user));
+  const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
 
   return (
     <Grid item xs={12}>
@@ -72,19 +76,19 @@ export default function SinglePost(props) {
         />
         <CardMedia sx={classes.media} image={post.image ? `${serverURL}/post/image/${post.image}` : null} />
         <CardActions disableSpacing>
-          <IconButton
-            aria-label="add to favorites"
-          >
-            <Favorite
-              style={
-                post.likes
-                  ? post.likes.includes(user.username)
-                    ? { color: "red" }
-                    : null
-                  : null
-              }
-            />
-          </IconButton>
+          {
+            isLiked
+              ?
+              <IconButton aria-label="unlike" onClick={handleUnlikePost} >
+                <Favorite
+                  sx={{ color: 'red', }}
+                />
+              </IconButton>
+              :
+              <IconButton aria-label="like" onClick={handleLikePost} >
+                <Favorite />
+              </IconButton>
+          }
           <IconButton aria-label="share">
             <Share />
           </IconButton>
@@ -99,7 +103,7 @@ export default function SinglePost(props) {
         </CardActions>
         <CardContent>
           <Typography variant="body2" color="textSecondary" component="p">
-            Likes: {post.likes ? post.likes.length : 0}
+            Likes: {likes ? likes.length : 0}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
             <strong>{post.user.username}: </strong>
