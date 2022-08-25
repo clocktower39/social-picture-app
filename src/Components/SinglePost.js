@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import { serverURL, likePost, unlikePost, } from "../Redux/actions";
+import { serverURL, likePost, unlikePost, commentPost, } from "../Redux/actions";
 import {
   Avatar,
   Button,
@@ -52,6 +52,12 @@ export default function SinglePost(props) {
 
   const handleLikePost = () => dispatch(likePost(post._id, user));
   const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
+  const handlePostComment = () => {
+    if (comment !== '') {
+      dispatch(commentPost(post._id, user, comment));
+      setComment('');
+    }
+  }
 
   return (
     <Grid item xs={12}>
@@ -105,22 +111,18 @@ export default function SinglePost(props) {
           <Typography variant="body2" color="textSecondary" component="p">
             Likes: {likes ? likes.length : 0}
           </Typography>
-          <Typography variant="body2" color="textSecondary" component="p">
-            <strong>{post.user.username}: </strong>
-            {post.description}
-          </Typography>
         </CardContent>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <Typography paragraph>Comments:</Typography>
             {post.comments.map((comment, i) => (
-              <Grid container key={comment._id}>
+              <Grid container key={`${comment.comment}-${comment.user._id}-${i}`}>
                 <Grid item xs={1}>
                   <Avatar
                     aria-label="recipe"
                     sx={classes.avatarComment}
-                    alt={comment.username}
-                    src={comment.user.profilePic}
+                    alt={comment.user.username}
+                    src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
                   />
                 </Grid>
                 <Grid item xs={11}>
@@ -139,25 +141,26 @@ export default function SinglePost(props) {
                 aria-label="recipe"
                 sx={classes.avatarComment}
                 alt={user.username}
-                src={user.profilePic}
+                src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null}
               />
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={11}>
               <TextField
                 label="Add a comment..."
                 fullWidth
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <Button
+                      variant="contained"
+                      onClick={handlePostComment}
+                    >
+                      Submit
+                    </Button>
+                  ),
+                }}
               />
-            </Grid>
-
-            <Grid item xs={2}>
-              <Button
-                variant="contained"
-                onClick={() => null}
-              >
-                Submit
-              </Button>
             </Grid>
           </Grid>
         </CardContent>

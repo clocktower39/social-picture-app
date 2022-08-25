@@ -302,3 +302,39 @@ export function unlikePost(id, user) {
     }
   };
 }
+
+export function commentPost(id, user, comment) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+    const posts = getState().posts;
+
+    const response = await fetch(`${serverURL}/post/comment`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ id, comment }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    if (response.status === 200) {
+      const updatedComments = posts.map(post => {
+        if (post._id === id) {
+          if (!post.likes.includes(user._id)) {
+            post.comments.push({
+              user,
+              comment,
+              likes: [],
+            });
+          }
+        }
+        return post;
+      });
+
+      return dispatch({
+        type: UPDATE_POSTS,
+        posts: updatedComments,
+      });
+    }
+  }
+}

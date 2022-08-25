@@ -125,7 +125,7 @@ export const Profile = (props) => {
         {/* list all posts from account */}
         <Grid container item xs={12}>
           {profile.posts &&
-            profile.posts.map((post, index) => {
+            profile.posts.sort((a,b) => a.timestamp < b.timestamp).map((post, index) => {
               return (
                 <Grid
                   item
