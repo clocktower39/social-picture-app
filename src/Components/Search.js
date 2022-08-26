@@ -8,7 +8,7 @@ export const UserCard = ({ account }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const relationships = useSelector((state) => state.relationships);
-  const followingIds = relationships.following.map((u) => u._id);
+  const isFollowing = relationships.following.some((r) => r.user === account._id);
 
   const handleRequestFollow = (user) => {
     dispatch(requestFollow(user._id));
@@ -31,20 +31,20 @@ export const UserCard = ({ account }) => {
           to={`/profile/${account.username}`}
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <Typography variant="body1">{account.username}</Typography>
         <Typography variant="body2">
           {account.firstName} {account.lastName}
         </Typography>
       </Grid>
-      <Grid container item xs={5} sx={{ justifyContent: "flex-end" }}>
-        {user._id === account._id ? null : followingIds.includes(account._id) ? (
-          <Button variant="contained" onClick={() => handleRequestFollow(account)}>
-            Follow
+      <Grid container item xs={3} sx={{ justifyContent: "flex-end" }}>
+        {user._id === account._id ? null : isFollowing ? (
+          <Button variant="contained" onClick={() => handleRequestUnfollow(account)} fullWidth>
+            Unfollow
           </Button>
         ) : (
-          <Button variant="contained" onClick={() => handleRequestUnfollow(account)}>
-            Unfollow
+          <Button variant="contained" onClick={() => handleRequestFollow(account)} fullWidth>
+            Follow
           </Button>
         )}
       </Grid>
