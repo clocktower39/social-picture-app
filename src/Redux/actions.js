@@ -221,17 +221,26 @@ export function requestUnfollow(user) {
 export function getMyRelationships() {
   return async (dispatch, getState) => {
     const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    axios
-      .get(`${serverURL}/myRelationships`, { headers: { Authorization: bearer } })
-      .then(async (res) => {
-        const data = res.data;
 
-        return dispatch({
-          type: UPDATE_RELATIONSHIPS,
-          following: data.following,
-          followers: data.followers,
-        });
-      })
+    const response = await fetch(`${serverURL}/myRelationships`, {
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+
+    return dispatch({
+      type: UPDATE_RELATIONSHIPS,
+      following: data.following,
+      followers: data.followers,
+    });
   }
 }
 

@@ -52,7 +52,16 @@ const FollowerUsers = ({ userId, followers }) => {
   );
 };
 
-const EditProfile = ({ profile, handleEditProfileModal }) => {
+const EditProfile = ({ user, handleEditProfileModal }) => {
+  const [editUser, setEditUser] = useState(user);
+
+  const handleChange = (e, property) => {
+    setEditUser(prev => ({
+      ...prev,
+      [property]: e.target.value,
+    }));
+  }
+
   return (
     <Grid container >
       <Grid container spacing={2} >
@@ -73,33 +82,29 @@ const EditProfile = ({ profile, handleEditProfileModal }) => {
 
       <Grid container spacing={2} >
         <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <Avatar 
-              alt="Profile Picture"
-              src={
-                profile.user.profilePicture
-                  ? `${serverURL}/user/profilePicture/${profile.user.profilePicture}`
-                  : null
-              }
-          sx={{ width: 85, height: 85 }}
+          <Avatar
+            alt="Profile Picture"
+            src={user.profilePicture && `${serverURL}/user/profilePicture/${user.profilePicture}`}
+            sx={{ width: 85, height: 85 }}
           />
         </Grid>
         <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="First Name" />
+          <TextField label="First Name" value={editUser.firstName} onChange={(e) => handleChange(e, 'firstName')} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="Last Name" />
+        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'lastName')} >
+          <TextField label="Last Name" value={editUser.lastName} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="Username" />
+        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'username')} >
+          <TextField label="Username" value={editUser.username} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="Email" />
+        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'email')} >
+          <TextField label="Email" value={editUser.email} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="Phone Number" />
+        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'phoneNumber')} >
+          <TextField label="Phone Number" value={editUser.phoneNumber} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="Bio" />
+        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'description')} >
+          <TextField label="Bio" value={editUser.description} multiline />
         </Grid>
       </Grid>
 
@@ -139,7 +144,7 @@ export const Profile = (props) => {
 
   return loading ? (
     <Loading />
-  ) : params.username === profile.user.username ? (
+  ) : (
     <Container disableGutters maxWidth="sm" sx={classes.root}>
       <Grid container sx={{ justifyContent: "center" }} spacing={1}>
         <Grid container item xs={11} spacing={1}>
@@ -189,7 +194,6 @@ export const Profile = (props) => {
           </Grid>
         </Grid>
 
-
         <Grid container item xs={12} spacing={1} >
           {user._id === profile.user._id ?
             <>
@@ -214,7 +218,6 @@ export const Profile = (props) => {
             </>
           }
         </Grid>
-
 
         {/* list all posts from account */}
         <Grid container item xs={12} spacing={1} >
@@ -258,11 +261,9 @@ export const Profile = (props) => {
         fullScreen
         TransitionComponent={Transition}
       >
-        <EditProfile profile={profile} handleEditProfileModal={handleEditProfileModal} />
+        <EditProfile user={user} handleEditProfileModal={handleEditProfileModal} />
       </Dialog>
     </Container>
-  ) : (
-    <Typography textAlign={"center"}>User not found.</Typography>
   );
 };
 
