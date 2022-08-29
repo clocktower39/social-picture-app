@@ -347,3 +347,22 @@ export function commentPost(id, user, comment) {
     }
   }
 }
+
+export function deletePost(postId, imageId) {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/post/delete`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ postId, imageId }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    if (response.status === 200) {
+      return dispatch(getFollowingPosts());
+    }
+  }
+}

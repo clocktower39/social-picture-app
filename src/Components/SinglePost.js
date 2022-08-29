@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import { serverURL, likePost, unlikePost, commentPost, } from "../Redux/actions";
+import { serverURL, likePost, unlikePost, commentPost, deletePost, } from "../Redux/actions";
 import {
   Avatar,
   Button,
@@ -11,8 +11,15 @@ import {
   CardHeader,
   CardMedia,
   Collapse,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  DialogTitle,
   Grid,
   IconButton,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
 } from "@mui/material";
@@ -44,11 +51,17 @@ export default function SinglePost(props) {
   const dispatch = useDispatch();
   const [comment, setComment] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState(false);
   const { post, likes, isLiked } = props;
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
+  const handleExpandClick = () => setExpanded((prev) => !prev);
+  const handleDeleteDialog = () => setDeleteDialog((prev) => !prev);
+  const handleMenu = (event) => setOpenMenu(prev => {
+    !prev ? setAnchorEl(event.currentTarget) : setAnchorEl(null);
+    return !prev;
+  });
 
   const handleLikePost = () => dispatch(likePost(post._id, user));
   const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
@@ -57,6 +70,9 @@ export default function SinglePost(props) {
       dispatch(commentPost(post._id, user, comment));
       setComment('');
     }
+  }
+  const handleConfirmDelete = () => {
+    dispatch(deletePost(post._id, post.image)).then(() => setDeleteDialog(false));
   }
 
   return (
@@ -72,10 +88,32 @@ export default function SinglePost(props) {
               to={`/profile/${post.user.username}`}
             />
           }
-          action={
-            <IconButton aria-label="settings">
+          action=
+          {<>
+            <IconButton aria-label="settings" onClick={handleMenu} >
               <MoreVert />
             </IconButton>
+            <Menu
+              open={openMenu}
+              onClose={handleMenu}
+              anchorEl={anchorEl}
+              PaperProps={{
+                style: {
+                  width: '20ch',
+                },
+              }}
+            >
+              <MenuItem onClick={null} disabled >
+                Profile
+              </MenuItem>
+              {
+                post.user._id === user._id &&
+                <MenuItem onClick={handleDeleteDialog}>
+                  Delete
+                </MenuItem>
+              }
+            </Menu>
+          </>
           }
           title={post.user.username}
           subheader={post.location}
@@ -165,6 +203,27 @@ export default function SinglePost(props) {
           </Grid>
         </CardContent>
       </Card>
+      <Dialog
+        open={deleteDialog}
+        onClose={handleDeleteDialog}
+      >
+        <DialogTitle >
+          {"Are you sure you want to delete this post?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This post will be deleted immediately.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleDeleteDialog}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }
