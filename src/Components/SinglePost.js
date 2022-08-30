@@ -104,7 +104,10 @@ export default function SinglePost(props) {
               }}
             >
               <MenuItem onClick={null} disabled >
-                Profile
+                Share
+              </MenuItem>
+              <MenuItem onClick={null} disabled >
+                Report
               </MenuItem>
               {
                 post.user._id === user._id &&

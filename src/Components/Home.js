@@ -46,9 +46,9 @@ export const Home = (props) => {
         {loading ? (
           <Loading />
         ) : posts.length >= 1 ? (
-          posts.map((post, index) => {
+          posts.map((post) => {
             const isLiked = post.likes.some(u => u._id === user._id);
-            return <SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} index={index} />
+            return <SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} />
         })
         ) : (
           'Loading'

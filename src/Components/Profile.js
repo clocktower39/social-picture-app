@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Avatar, Button, CardMedia, Container, Dialog, Grid, Slide, TextField, Typography } from "@mui/material";
+import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Slide, TextField, Typography } from "@mui/material";
+import { GridOn, Portrait, } from "@mui/icons-material";
 import { getUserProfilePage, getMyRelationships, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
+import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
 
 const classes = {
@@ -217,25 +219,36 @@ export const Profile = (props) => {
               </Grid>
             </>
           }
+          <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
+            <IconButton onClick={()=>setGridWidth(4)}>
+              <GridOn/>
+            </IconButton>
+          </Grid>
+          <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
+            <IconButton onClick={()=>setGridWidth(12)}>
+              <Portrait/>
+            </IconButton>
+          </Grid>
         </Grid>
 
         {/* list all posts from account */}
         <Grid container item xs={12} spacing={1} >
           {profile.posts &&
             profile.posts.sort((a, b) => a.timestamp < b.timestamp).map((post, index) => {
+              const isLiked = post.likes.some(u => u._id === user._id);
               return (
                 <Grid
                   item
                   xs={gridWidth}
                   key={index}
-                  onClick={() => {
-                    gridWidth === 4 ? setGridWidth(12) : setGridWidth(4);
-                  }}
-                >
+                > {
+                  gridWidth === 4 ? 
                   <CardMedia
                     sx={classes.media}
                     image={post.image ? `${serverURL}/post/image/${post.image}` : null}
                   />
+                  : (<SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} />)
+                }
                 </Grid>
               );
             })}
