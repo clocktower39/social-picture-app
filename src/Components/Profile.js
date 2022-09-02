@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Slide, TextField, Typography } from "@mui/material";
-import { GridOn, Portrait, } from "@mui/icons-material";
-import { getUserProfilePage, getMyRelationships, serverURL } from "../Redux/actions";
+import { Close, GridOn, Logout, Portrait, } from "@mui/icons-material";
+import { getUserProfilePage, getMyRelationships, logoutUser, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
@@ -55,7 +55,12 @@ const FollowerUsers = ({ userId, followers }) => {
 };
 
 const EditProfile = ({ user, handleEditProfileModal }) => {
+  const dispatch = useDispatch();
   const [editUser, setEditUser] = useState(user);
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
 
   const handleChange = (e, property) => {
     setEditUser(prev => ({
@@ -66,18 +71,22 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
 
   return (
     <Grid container >
-      <Grid container spacing={2} >
-        <Grid item xs={2}>
-          <Button onClick={handleEditProfileModal} >Cancel</Button>
+      <Grid container spacing={2} sx={{ padding: '15px' }}>
+        <Grid container item xs={3}>
+          <IconButton title="Close" variant="contained" onClick={handleEditProfileModal} >
+            <Close />
+          </IconButton>
 
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs={6}>
           <Typography variant="h4" textAlign="center">
             Edit Profile
           </Typography>
         </Grid>
-        <Grid item xs={2}>
-          <Button >Done</Button>
+        <Grid container item xs={3} sx={{ justifyContent: 'flex-end', }}>
+          <IconButton title="Logout" variant="contained" onClick={handleLogout} >
+            <Logout />
+          </IconButton>
         </Grid>
       </Grid>
 
@@ -108,6 +117,12 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'description')} >
           <TextField label="Bio" value={editUser.description} multiline />
         </Grid>
+        <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
+          <Button variant="contained" >Cancel</Button>
+        </Grid>
+        <Grid container item xs={6} sx={{ justifyContent: 'flex-start', }} >
+          <Button variant="contained" >Save</Button>
+        </Grid>
       </Grid>
 
     </Grid>
@@ -132,6 +147,7 @@ export const Profile = (props) => {
   const handleFollowingModal = () => setOpenFollowingModal((prev) => !prev);
   const handleFollowersModal = () => setOpenFollowersModal((prev) => !prev);
   const handleEditProfileModal = () => setOpenEditProfileModal((prev) => !prev);
+
 
   useEffect(() => {
     setOpenFollowingModal(false);
@@ -220,13 +236,13 @@ export const Profile = (props) => {
             </>
           }
           <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
-            <IconButton onClick={()=>setGridWidth(4)}>
-              <GridOn/>
+            <IconButton onClick={() => setGridWidth(4)}>
+              <GridOn />
             </IconButton>
           </Grid>
           <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
-            <IconButton onClick={()=>setGridWidth(12)}>
-              <Portrait/>
+            <IconButton onClick={() => setGridWidth(12)}>
+              <Portrait />
             </IconButton>
           </Grid>
         </Grid>
@@ -242,13 +258,13 @@ export const Profile = (props) => {
                   xs={gridWidth}
                   key={index}
                 > {
-                  gridWidth === 4 ? 
-                  <CardMedia
-                    sx={classes.media}
-                    image={post.image ? `${serverURL}/post/image/${post.image}` : null}
-                  />
-                  : (<SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} />)
-                }
+                    gridWidth === 4 ?
+                      <CardMedia
+                        sx={classes.media}
+                        image={post.image ? `${serverURL}/post/image/${post.image}` : null}
+                      />
+                      : (<SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} />)
+                  }
                 </Grid>
               );
             })}
