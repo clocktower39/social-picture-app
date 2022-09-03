@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Slide, TextField, Typography } from "@mui/material";
+import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Input, Slide, TextField, Typography } from "@mui/material";
 import { Close, GridOn, Logout, Portrait, } from "@mui/icons-material";
-import { getUserProfilePage, getMyRelationships, logoutUser, serverURL } from "../Redux/actions";
+import { getUserProfilePage, getMyRelationships, logoutUser, updateUser, uploadProfilePicture, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
@@ -54,13 +54,80 @@ const FollowerUsers = ({ userId, followers }) => {
   );
 };
 
+const ProfilePictureUpload = () => {
+  const dispatch = useDispatch();
+  const [uploadPhoto, setUploadPhoto] = useState(null);
+
+  const handlePhoto = (e) => {
+    setUploadPhoto(e.target.files[0]);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("file", uploadPhoto);
+
+    if (uploadPhoto) {
+      dispatch(uploadProfilePicture(formData));
+    }
+  };
+
+  return (
+    <Container disableGutters maxWidth="sm" >
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Grid container>
+          <Input
+            type="file"
+            accept=".png, .jpg, .jpeg"
+            name="photo"
+            onChange={handlePhoto}
+            fullWidth
+            id="hidden-input"
+            sx={{ display: 'none' }}
+          />
+          <Grid item xs={12}>
+            <label htmlFor="hidden-input">
+              <CardMedia
+                sx={{
+                  height: 0,
+                  paddingTop: "100%",
+                  backgroundColor: 'gray'
+                }}
+                image={uploadPhoto && URL.createObjectURL(uploadPhoto)}
+                alt="upload an image"
+              />
+            </label>
+            { !uploadPhoto && <Typography variant="h6" sx={{ textAlign: "center", position: 'relative', bottom: '55%', }}>Click to upload and preview an image.</Typography>}
+          </Grid>
+          <Grid item xs={12}>
+            <Button variant="contained" fullWidth type="submit">
+              Upload
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+    </Container>
+  );
+}
+
 const EditProfile = ({ user, handleEditProfileModal }) => {
   const dispatch = useDispatch();
   const [editUser, setEditUser] = useState(user);
+  const [profilePictureDialog, setProfilePictureDialog] = useState(false);
 
   const handleLogout = () => {
     dispatch(logoutUser());
   };
+
+  const handleCancel = () => {
+    setEditUser(user);
+  };
+
+  const handleSave = () => {
+    dispatch(updateUser(editUser));
+  };
+
+  const handleProfilePictureDialog = () => setProfilePictureDialog(prev => !prev);
 
   const handleChange = (e, property) => {
     setEditUser(prev => ({
@@ -97,6 +164,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
             alt="Profile Picture"
             src={user.profilePicture && `${serverURL}/user/profilePicture/${user.profilePicture}`}
             sx={{ width: 85, height: 85 }}
+            onClick={handleProfilePictureDialog}
           />
         </Grid>
         <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
@@ -118,13 +186,18 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
           <TextField label="Bio" value={editUser.description} multiline />
         </Grid>
         <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
-          <Button variant="contained" >Cancel</Button>
+          <Button variant="contained" onClick={handleCancel}>Cancel</Button>
         </Grid>
         <Grid container item xs={6} sx={{ justifyContent: 'flex-start', }} >
-          <Button variant="contained" >Save</Button>
+          <Button variant="contained" onClick={handleSave} disabled >Save</Button>
         </Grid>
       </Grid>
-
+      <Dialog
+        open={profilePictureDialog}
+        onClose={handleProfilePictureDialog}
+      >
+        <ProfilePictureUpload />
+      </Dialog>
     </Grid>
   );
 };
