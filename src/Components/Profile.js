@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Input, Slide, TextField, Typography } from "@mui/material";
-import { Close, GridOn, Logout, Portrait, } from "@mui/icons-material";
+import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Input, Menu, MenuItem, Slide, TextField, Typography } from "@mui/material";
+import { Close, GridOn, Menu as MenuIcon, Portrait, } from "@mui/icons-material";
 import { getUserProfilePage, getMyRelationships, logoutUser, updateUser, uploadProfilePicture, serverURL } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
+import ChangePassword from './ChangePassword';
 
 const classes = {
   root: {
@@ -114,6 +115,11 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
   const dispatch = useDispatch();
   const [editUser, setEditUser] = useState(user);
   const [profilePictureDialog, setProfilePictureDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+  const [passwordModal, setPasswordModal] = useState(false);
+  const handlePasswordOpen = () => setPasswordModal(true);
+  const handlePasswordClose = () => setPasswordModal(false);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -136,6 +142,14 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
     }));
   }
 
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Grid container >
       <Grid container spacing={2} sx={{ padding: '15px' }}>
@@ -151,8 +165,8 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
           </Typography>
         </Grid>
         <Grid container item xs={3} sx={{ justifyContent: 'flex-end', }}>
-          <IconButton title="Logout" variant="contained" onClick={handleLogout} >
-            <Logout />
+          <IconButton title="Settings" variant="contained" onClick={handleMenuClick} >
+            <MenuIcon />
           </IconButton>
         </Grid>
       </Grid>
@@ -189,9 +203,16 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
           <Button variant="contained" onClick={handleCancel}>Cancel</Button>
         </Grid>
         <Grid container item xs={6} sx={{ justifyContent: 'flex-start', }} >
-          <Button variant="contained" onClick={handleSave} disabled >Save</Button>
+          <Button variant="contained" onClick={handleSave} >Save</Button>
         </Grid>
       </Grid>
+      <Menu open={openMenu} onClose={handleMenuClose} anchorEl={anchorEl}>
+        <MenuItem onClick={handlePasswordOpen}>Change password</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
+      {passwordModal && openMenu && (
+        <ChangePassword open={openMenu} handlePasswordClose={handlePasswordClose} />
+      )}
       <Dialog
         open={profilePictureDialog}
         onClose={handleProfilePictureDialog}
