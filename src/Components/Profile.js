@@ -306,7 +306,7 @@ export const Profile = (props) => {
           </Grid>
         </Grid>
 
-        <Grid container item xs={12} spacing={1} >
+        <Grid container item xs={12} >
           {user._id === profile.user._id ?
             <>
               <Grid container item xs={12}>
@@ -329,12 +329,12 @@ export const Profile = (props) => {
               </Grid>
             </>
           }
-          <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
+          <Grid container item xs={6} sx={{ justifyContent: 'center', backgroundColor: gridWidth === 4 ? 'gray' : null, }} >
             <IconButton onClick={() => setGridWidth(4)}>
               <GridOn />
             </IconButton>
           </Grid>
-          <Grid container item xs={6} sx={{ justifyContent: 'center', }} >
+          <Grid container item xs={6} sx={{ justifyContent: 'center', backgroundColor: gridWidth === 4 ? null : 'gray',}} >
             <IconButton onClick={() => setGridWidth(12)}>
               <Portrait />
             </IconButton>
