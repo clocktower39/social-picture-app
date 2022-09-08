@@ -3,6 +3,7 @@ import Signup from "./Components/Signup";
 import Home from "./Components/Home";
 import Search from "./Components/Search";
 import Post from "./Components/Post";
+import Messages from "./Components/Messages";
 import Profile from "./Components/Profile";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
@@ -32,6 +33,10 @@ function App() {
 
             <Route exact path="/post" element={<AuthRoute />} >
               <Route exact path="/post" element={<Post />} />
+            </Route>
+
+            <Route exact path="/messages" element={<AuthRoute />} >
+              <Route exact path="/messages" element={<Messages />} />
             </Route>
 
             <Route exact path="/profile" element={<AuthRoute />} >
