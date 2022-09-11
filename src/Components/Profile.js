@@ -1,13 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Avatar, Button, CardMedia, Container, Dialog, Grid, IconButton, Input, Menu, MenuItem, Slide, TextField, Typography } from "@mui/material";
-import { Close, GridOn, Menu as MenuIcon, Portrait, } from "@mui/icons-material";
-import { getUserProfilePage, getMyRelationships, logoutUser, updateUser, uploadProfilePicture, serverURL } from "../Redux/actions";
+import {
+  Avatar,
+  Button,
+  CardMedia,
+  Container,
+  Dialog,
+  Grid,
+  IconButton,
+  Input,
+  Menu,
+  MenuItem,
+  Slide,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Close, GridOn, Menu as MenuIcon, Portrait } from "@mui/icons-material";
+import {
+  getUserProfilePage,
+  getMyRelationships,
+  logoutUser,
+  updateUser,
+  uploadProfilePicture,
+  serverURL,
+} from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
-import ChangePassword from './ChangePassword';
+import ChangePassword from "./ChangePassword";
 
 const classes = {
   root: {
@@ -27,7 +50,7 @@ const classes = {
 
 const FollowingUsers = ({ userId, following }) => {
   return (
-    <Grid container spacing={2} >
+    <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4" textAlign="center">
           Following
@@ -42,7 +65,7 @@ const FollowingUsers = ({ userId, following }) => {
 
 const FollowerUsers = ({ userId, followers }) => {
   return (
-    <Grid container spacing={2} >
+    <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4" textAlign="center">
           Followers
@@ -74,7 +97,7 @@ const ProfilePictureUpload = () => {
   };
 
   return (
-    <Container disableGutters maxWidth="sm" >
+    <Container disableGutters maxWidth="sm">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <Grid container>
           <Input
@@ -84,7 +107,7 @@ const ProfilePictureUpload = () => {
             onChange={handlePhoto}
             fullWidth
             id="hidden-input"
-            sx={{ display: 'none' }}
+            sx={{ display: "none" }}
           />
           <Grid item xs={12}>
             <label htmlFor="hidden-input">
@@ -92,13 +115,20 @@ const ProfilePictureUpload = () => {
                 sx={{
                   height: 0,
                   paddingTop: "100%",
-                  backgroundColor: 'gray'
+                  backgroundColor: "gray",
                 }}
                 image={uploadPhoto && URL.createObjectURL(uploadPhoto)}
                 alt="upload an image"
               />
             </label>
-            { !uploadPhoto && <Typography variant="h6" sx={{ textAlign: "center", position: 'relative', bottom: '55%', }}>Click to upload and preview an image.</Typography>}
+            {!uploadPhoto && (
+              <Typography
+                variant="h6"
+                sx={{ textAlign: "center", position: "relative", bottom: "55%" }}
+              >
+                Click to upload and preview an image.
+              </Typography>
+            )}
           </Grid>
           <Grid item xs={12}>
             <Button variant="contained" fullWidth type="submit">
@@ -109,7 +139,7 @@ const ProfilePictureUpload = () => {
       </form>
     </Container>
   );
-}
+};
 
 const EditProfile = ({ user, handleEditProfileModal }) => {
   const dispatch = useDispatch();
@@ -133,14 +163,14 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
     dispatch(updateUser(editUser));
   };
 
-  const handleProfilePictureDialog = () => setProfilePictureDialog(prev => !prev);
+  const handleProfilePictureDialog = () => setProfilePictureDialog((prev) => !prev);
 
   const handleChange = (e, property) => {
-    setEditUser(prev => ({
+    setEditUser((prev) => ({
       ...prev,
       [property]: e.target.value,
     }));
-  }
+  };
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -151,29 +181,27 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
   };
 
   return (
-    <Grid container >
-      <Grid container spacing={2} sx={{ padding: '15px' }}>
+    <Grid container>
+      <Grid container spacing={2} sx={{ padding: "15px" }}>
         <Grid container item xs={3}>
-          <IconButton title="Close" variant="contained" onClick={handleEditProfileModal} >
+          <IconButton title="Close" variant="contained" onClick={handleEditProfileModal}>
             <Close />
           </IconButton>
-
         </Grid>
         <Grid item xs={6}>
           <Typography variant="h4" textAlign="center">
             Edit Profile
           </Typography>
         </Grid>
-        <Grid container item xs={3} sx={{ justifyContent: 'flex-end', }}>
-          <IconButton title="Settings" variant="contained" onClick={handleMenuClick} >
+        <Grid container item xs={3} sx={{ justifyContent: "flex-end" }}>
+          <IconButton title="Settings" variant="contained" onClick={handleMenuClick}>
             <MenuIcon />
           </IconButton>
         </Grid>
       </Grid>
 
-
-      <Grid container spacing={2} >
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
+      <Grid container spacing={2}>
+        <Grid container item xs={12} sx={{ justifyContent: "center" }}>
           <Avatar
             alt="Profile Picture"
             src={user.profilePicture && `${serverURL}/user/profilePicture/${user.profilePicture}`}
@@ -181,29 +209,67 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
             onClick={handleProfilePictureDialog}
           />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} >
-          <TextField label="First Name" value={editUser.firstName} onChange={(e) => handleChange(e, 'firstName')} />
+        <Grid container item xs={12} sx={{ justifyContent: "center" }}>
+          <TextField
+            label="First Name"
+            value={editUser.firstName}
+            onChange={(e) => handleChange(e, "firstName")}
+          />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'lastName')} >
+        <Grid
+          container
+          item
+          xs={12}
+          sx={{ justifyContent: "center" }}
+          onChange={(e) => handleChange(e, "lastName")}
+        >
           <TextField label="Last Name" value={editUser.lastName} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'username')} >
+        <Grid
+          container
+          item
+          xs={12}
+          sx={{ justifyContent: "center" }}
+          onChange={(e) => handleChange(e, "username")}
+        >
           <TextField label="Username" value={editUser.username} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'email')} >
+        <Grid
+          container
+          item
+          xs={12}
+          sx={{ justifyContent: "center" }}
+          onChange={(e) => handleChange(e, "email")}
+        >
           <TextField label="Email" value={editUser.email} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'phoneNumber')} >
+        <Grid
+          container
+          item
+          xs={12}
+          sx={{ justifyContent: "center" }}
+          onChange={(e) => handleChange(e, "phoneNumber")}
+        >
           <TextField label="Phone Number" value={editUser.phoneNumber} />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: 'center', }} onChange={(e) => handleChange(e, 'description')} >
+        <Grid
+          container
+          item
+          xs={12}
+          sx={{ justifyContent: "center" }}
+          onChange={(e) => handleChange(e, "description")}
+        >
           <TextField label="Bio" value={editUser.description} multiline />
         </Grid>
-        <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
-          <Button variant="contained" onClick={handleCancel}>Cancel</Button>
+        <Grid container item xs={6} sx={{ justifyContent: "flex-end" }}>
+          <Button variant="contained" onClick={handleCancel}>
+            Cancel
+          </Button>
         </Grid>
-        <Grid container item xs={6} sx={{ justifyContent: 'flex-start', }} >
-          <Button variant="contained" onClick={handleSave} >Save</Button>
+        <Grid container item xs={6} sx={{ justifyContent: "flex-start" }}>
+          <Button variant="contained" onClick={handleSave}>
+            Save
+          </Button>
         </Grid>
       </Grid>
       <Menu open={openMenu} onClose={handleMenuClose} anchorEl={anchorEl}>
@@ -213,10 +279,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
       {passwordModal && openMenu && (
         <ChangePassword open={openMenu} handlePasswordClose={handlePasswordClose} />
       )}
-      <Dialog
-        open={profilePictureDialog}
-        onClose={handleProfilePictureDialog}
-      >
+      <Dialog open={profilePictureDialog} onClose={handleProfilePictureDialog}>
         <ProfilePictureUpload />
       </Dialog>
     </Grid>
@@ -237,11 +300,15 @@ export const Profile = (props) => {
   const [openFollowingModal, setOpenFollowingModal] = useState(false);
   const [openFollowersModal, setOpenFollowersModal] = useState(false);
   const [openEditProfileModal, setOpenEditProfileModal] = useState(false);
+  const [tabValue, setTabValue] = React.useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
 
   const handleFollowingModal = () => setOpenFollowingModal((prev) => !prev);
   const handleFollowersModal = () => setOpenFollowersModal((prev) => !prev);
   const handleEditProfileModal = () => setOpenEditProfileModal((prev) => !prev);
-
 
   useEffect(() => {
     setOpenFollowingModal(false);
@@ -252,7 +319,7 @@ export const Profile = (props) => {
   useEffect(() => {
     dispatch(getMyRelationships());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return loading ? (
     <Loading />
@@ -306,62 +373,85 @@ export const Profile = (props) => {
           </Grid>
         </Grid>
 
-        <Grid container item xs={12} >
-          {user._id === profile.user._id ?
-            <>
-              <Grid container item xs={12}>
-                <Button variant="contained" fullWidth onClick={handleEditProfileModal} >Edit</Button>
-              </Grid>
-            </>
-            : <>
-              <Grid container item xs={6}>
-                <Button variant="contained" fullWidth >
-                  {
-                    profile.followers.some(u => u._id === user._id)
-                      ? 'Unfollow'
-                      : profile.following.some(u => u._id === user._id)
-                        ? 'Follow Back'
-                        : 'Follow'}
-                </Button>
-              </Grid>
-              <Grid container item xs={6}>
-                <Button variant="contained" fullWidth disabled >Message</Button>
-              </Grid>
-            </>
-          }
-          <Grid container item xs={6} sx={{ justifyContent: 'center', backgroundColor: gridWidth === 4 ? 'gray' : null, }} >
-            <IconButton onClick={() => setGridWidth(4)}>
-              <GridOn />
-            </IconButton>
+        <Grid container item xs={12}>
+          <Grid container item xs={12} spacing={1}>
+            {user._id === profile.user._id ? (
+              <>
+                <Grid container item xs={12}>
+                  <Button variant="contained" fullWidth onClick={handleEditProfileModal}>
+                    Edit
+                  </Button>
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Grid container item xs={6}>
+                  <Button variant="contained" fullWidth>
+                    {profile.followers.some((u) => u._id === user._id)
+                      ? "Unfollow"
+                      : profile.following.some((u) => u._id === user._id)
+                      ? "Follow Back"
+                      : "Follow"}
+                  </Button>
+                </Grid>
+                <Grid container item xs={6}>
+                  <Button variant="contained" fullWidth disabled>
+                    Message
+                  </Button>
+                </Grid>
+              </>
+            )}
           </Grid>
-          <Grid container item xs={6} sx={{ justifyContent: 'center', backgroundColor: gridWidth === 4 ? null : 'gray',}} >
-            <IconButton onClick={() => setGridWidth(12)}>
-              <Portrait />
-            </IconButton>
+          <Grid container item xs={12} >
+            <Tabs
+              value={tabValue} 
+              onChange={handleTabChange} 
+              sx={{
+                width: "100%",
+                '& .MuiTabs-flexContainer': {
+                  justifyContent: 'space-around',
+                },
+              }}
+            >
+              <Tab icon={<GridOn />} onClick={() => setGridWidth(4)} />
+              <Tab icon={<Portrait />} onClick={() => setGridWidth(12)}/>
+            </Tabs>
           </Grid>
         </Grid>
 
         {/* list all posts from account */}
-        <Grid container item xs={12} spacing={1} >
-          {profile.posts &&
-            profile.posts.sort((a, b) => a.timestamp < b.timestamp).map((post, index) => {
-              const isLiked = post.likes.some(u => u._id === user._id);
-              return (
-                <Grid
-                  item
-                  xs={gridWidth}
-                  key={index}
-                > {
-                    gridWidth === 4 ?
+        <Grid container item xs={12} spacing={1}>
+          {profile.posts.length > 0 ? (
+            profile.posts
+              .sort((a, b) => a.timestamp < b.timestamp)
+              .map((post, index) => {
+                const isLiked = post.likes.some((u) => u._id === user._id);
+                return (
+                  <Grid item xs={gridWidth} key={index}>
+                    {" "}
+                    {gridWidth === 4 ? (
                       <CardMedia
                         sx={classes.media}
                         image={post.image ? `${serverURL}/post/image/${post.image}` : null}
                       />
-                      : (<SinglePost key={`post-${post.image}`} post={post} likes={post.likes} isLiked={isLiked} />)
-                  }
-                </Grid>
-              );
-            })}
+                    ) : (
+                      <SinglePost
+                        key={`post-${post.image}`}
+                        post={post}
+                        likes={post.likes}
+                        isLiked={isLiked}
+                      />
+                    )}
+                  </Grid>
+                );
+              })
+          ) : (
+            <Grid container item xs={12} spacing={1} sx={{ justifyContent: "center" }}>
+              <Typography variant="h5" sx={{ padding: "15px 0px" }}>
+                No posts yet.
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </Grid>
       <Dialog

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { getFollowingPosts } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
@@ -36,7 +37,7 @@ export const Home = (props) => {
             <Typography variant="h5">Social Photo App</Typography>
           </Grid>
           <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
-            <IconButton><MessageIcon /></IconButton>
+            <IconButton component={Link} to="/messages" ><MessageIcon /></IconButton>
           </Grid>
         </Grid>
 

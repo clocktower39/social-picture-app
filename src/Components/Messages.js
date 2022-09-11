@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Grid, Typography, } from "@mui/material";
+import { Link } from "react-router-dom";
+import { Container, Grid, IconButton, Typography, } from "@mui/material";
+import { Create, } from "@mui/icons-material";
 
 const classes = {
   root: {
@@ -18,8 +20,11 @@ export default function Messages() {
   return (
     <Container maxWidth="sm" sx={classes.root} disableGutters>
       <Grid justify="center" container spacing={3} sx={classes.gridContainer}>
-          <Grid container item xs={12}>
-            <Typography variant="h5" textAlign="center" >Messages</Typography>
+          <Grid container item xs={6}>
+            <Typography variant="h5" component={Link} to="/" sx={{ textDecoration: 'none', color: 'text.primary', }} >Social Photo App</Typography>
+          </Grid>
+          <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
+            <IconButton component={Link} to="/messages" ><Create /></IconButton>
           </Grid>
       </Grid>
     </Container>
