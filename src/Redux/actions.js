@@ -7,6 +7,7 @@ export const UPDATE_USER = "UPDATE_USER";
 export const UPDATE_POSTS = "UPDATE_POSTS";
 export const UPDATE_PROFILE = "UPDATE_PROFILE";
 export const UPDATE_RELATIONSHIPS = "UPDATE_RELATIONSHIPS";
+export const UPDATE_CONVERSATIONS = "UPDATE_CONVERSATIONS";
 export const ERROR = "ERROR";
 
 // dev server
@@ -424,5 +425,30 @@ export function deletePost(postId, imageId) {
     if (response.status === 200) {
       return dispatch(getFollowingPosts());
     }
+  }
+}
+
+export function getConversations() {
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/conversation/getConversations`, {
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+
+    return dispatch({
+      type: UPDATE_CONVERSATIONS,
+      conversations: data
+    });
   }
 }

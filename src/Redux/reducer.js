@@ -1,7 +1,7 @@
-import { LOGIN_USER, LOGOUT_USER, UPDATE_POSTS, ERROR, UPDATE_USER, UPDATE_PROFILE, UPDATE_RELATIONSHIPS, } from './actions';
-import { user, posts, relationships, profile, error } from './states'
+import { LOGIN_USER, LOGOUT_USER, UPDATE_POSTS, ERROR, UPDATE_USER, UPDATE_PROFILE, UPDATE_RELATIONSHIPS, UPDATE_CONVERSATIONS, } from './actions';
+import { user, posts, relationships, profile, conversations, error } from './states'
 
-export let reducer = (state = { user, posts, relationships, profile, error }, action) => {
+export let reducer = (state = { user, posts, relationships, profile, conversations, error }, action) => {
     switch (action.type) {
         case LOGIN_USER:
             return {
@@ -44,6 +44,11 @@ export let reducer = (state = { user, posts, relationships, profile, error }, ac
                     following: [...action.following],
                     followers: [...action.followers],
                 }
+            }
+        case UPDATE_CONVERSATIONS:
+            return {
+                ...state,
+                conversations: [...action.conversations]
             }
         case ERROR:
             return {

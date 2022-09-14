@@ -16,4 +16,6 @@ export let relationships = {
     followers: [],
 };
 
+export let conversations = [];
+
 export const error = {};
