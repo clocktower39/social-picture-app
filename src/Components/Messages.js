@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Avatar, AvatarGroup, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, Typography, } from "@mui/material";
+import { Avatar, AvatarGroup, Button, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
 import { Create, Close as CloseIcon, Delete, } from "@mui/icons-material";
 import { getConversations, serverURL } from '../Redux/actions';
 
@@ -36,83 +36,146 @@ const Conversation = ({ conversation, handleMessageDrawerOpen }) => {
   )
 };
 
-const MessageList = ({ users, messages }) => {
+const MessageList = ({ users, messages, handleMessageDrawerClose }) => {
   const user = useSelector(state => state.user);
 
   return (
-    <>
-      {messages.map((message, i) => {
-        return (
-          <Grid
-            key={message._id || i}
-            sx={
-              message.user.username === user.username
-                ? {
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  margin: "10px 0px",
-                  borderRadius: "7.5px",
-                  backgroundColor: "rgb(21, 101, 192)",
-                  color: "white"
+    <Container maxWidth="sm" sx={{ padding: "0 0 95px 0", }}>
+      <Grid container item >
+        <Grid container item xs={1} >
+          <IconButton onClick={handleMessageDrawerClose} ><CloseIcon /></IconButton>
+        </Grid>
+        <Grid container item xs={11} sx={{ alignContent: 'center', }} >
+          <Typography variant="h5">{users.map(u => u.username).join(' ')}</Typography>
+        </Grid>
+        <Grid container item xs={12} >
+          {messages.map((message, i) => {
+            return (
+              <Grid
+                key={message._id || i}
+                sx={
+                  message.user.username === user.username
+                    ? {
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      margin: "10px 0px",
+                      borderRadius: "7.5px",
+                      backgroundColor: "rgb(21, 101, 192)",
+                      color: "white"
+                    }
+                    : {
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      margin: "10px 0px",
+                      borderRadius: "7.5px",
+                      backgroundColor: "#23272A",
+                      color: "white"
+                    }
                 }
-                : {
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  margin: "10px 0px",
-                  borderRadius: "7.5px",
-                  backgroundColor: "#23272A",
-                  color: "white"
-                }
-            }
-            container
-            item
-            xs={12}
-          >
-            <Grid container item xs={2} sx={{ justifyContent: 'center', }}>
-              <Avatar src={message.user.profilePicture ? `${serverURL}/user/image/${message.user.profilePicture}` : null} />
-            </Grid>
-            <Grid item xs={8}>
-              <Typography variant="h6" display="inline">
-                {message.user.username}{" "}
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                display="inline"
-                sx={{
-                  fontSize: "16px",
-                  opacity: ".33",
-                }}
+                container
+                item
+                xs={12}
               >
-                {message.timeStamp == null
-                  ? null
-                  : `${new Date(message.timeStamp)
-                    .toLocaleDateString()
-                    .substr(
-                      0,
-                      new Date(message.timeStamp).toLocaleDateString()
-                        .length - 5
-                    )} ${new Date(message.timeStamp).toLocaleTimeString()}`}
-              </Typography>
-              <Typography variant="subtitle1" display="block">
-                {message.message}
-              </Typography>
-            </Grid>
-            <Grid item xs={2}>
-              {message.user.username === user.username && (
-                <IconButton disabled >
-                  <Delete />
-                </IconButton>
-              )}
-            </Grid>
-          </Grid>
-        );
-      })}
-    </>
+                <Grid container item xs={2} sx={{ justifyContent: 'center', }}>
+                  <Avatar src={message.user.profilePicture ? `${serverURL}/user/image/${message.user.profilePicture}` : null} />
+                </Grid>
+                <Grid item xs={8}>
+                  <Typography variant="h6" display="inline">
+                    {message.user.username}{" "}
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    display="inline"
+                    sx={{
+                      fontSize: "16px",
+                      opacity: ".33",
+                    }}
+                  >
+                    {message.timeStamp == null
+                      ? null
+                      : `${new Date(message.timeStamp)
+                        .toLocaleDateString()
+                        .substr(
+                          0,
+                          new Date(message.timeStamp).toLocaleDateString()
+                            .length - 5
+                        )} ${new Date(message.timeStamp).toLocaleTimeString()}`}
+                  </Typography>
+                  <Typography variant="subtitle1" display="block">
+                    {message.message}
+                  </Typography>
+                </Grid>
+                <Grid item xs={2}>
+                  {message.user.username === user.username && (
+                    <IconButton disabled >
+                      <Delete />
+                    </IconButton>
+                  )}
+                </Grid>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Grid>
+    </Container>
   )
 };
 
+const MessageInput = () => {
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleMessageSubmit(e);
+    }
+  };
+
+  const handleMessageSubmit = (e) => {
+    if (message !== '') {
+      // dispatch(sendMessage(message))
+      setMessage('');
+    }
+  }
+
+  return (
+    <Container maxWidth="sm">
+      <Grid
+        container
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          padding: '12.5px 0px'
+        }}
+      >
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            error={error === true ? true : false}
+            helperText={error === true ? "Please enter a message" : false}
+            label="Message"
+            value={message}
+            onKeyDown={(e) => handleKeyDown(e)}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              e.target.value === "" ? setError(true) : setError(false);
+            }}
+            InputProps={{
+              endAdornment: (
+                <Button variant="contained" color="primary" onClick={(e) => handleMessageSubmit(e)}>
+                  Send
+                </Button>
+              ),
+            }}
+          />
+        </Grid>
+      </Grid>
+    </Container>
+  );
+}
 
 export default function Messages() {
   const dispatch = useDispatch();
@@ -164,14 +227,22 @@ export default function Messages() {
         onClose={handleMessageDrawerClose}
         sx={{ '& .MuiPaper-root': { width: '100%' } }}
       >
-        <Grid container >
-          <Grid container item >
-            <IconButton onClick={handleMessageDrawerClose} ><CloseIcon /></IconButton>
-            <Grid container item xs={12} >
-              <MessageList users={messageListUsers} messages={messageListMessages} />
-            </Grid>
-          </Grid>
-        </Grid>
+        <div style={{
+          height: 'calc(100% - 72px)',
+          display: 'flex',
+          flexDirection: 'column',
+        }} >
+          <MessageList users={messageListUsers} messages={messageListMessages} handleMessageDrawerClose={handleMessageDrawerClose} />
+
+        </div>
+        <div style={{
+          bottom: 0,
+          left: 0,
+          position: "fixed",
+          width: '100%',
+        }}>
+          <MessageInput />
+        </div>
       </Drawer>
     </Container>
   )
