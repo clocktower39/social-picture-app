@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarGroup, Button, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
 import { Create, Close as CloseIcon, Delete, } from "@mui/icons-material";
-import { getConversations, serverURL } from '../Redux/actions';
+import { getConversations, sendMessage, serverURL } from '../Redux/actions';
 
 const classes = {
   root: {
@@ -23,7 +23,7 @@ const Conversation = ({ conversation, handleMessageDrawerOpen }) => {
       disablePadding
       sx={{ width: '100%', }}
     >
-      <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages)} >
+      <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages, conversation._id)} >
         <ListItemAvatar>
           <AvatarGroup max={3} >
             {/* {users.map()} */}
@@ -123,7 +123,8 @@ const MessageList = ({ users, messages, handleMessageDrawerClose }) => {
   )
 };
 
-const MessageInput = () => {
+const MessageInput = ({ conversationId }) => {
+  const dispatch = useDispatch();
   const [error, setError] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -135,7 +136,7 @@ const MessageInput = () => {
 
   const handleMessageSubmit = (e) => {
     if (message !== '') {
-      // dispatch(sendMessage(message))
+      dispatch(sendMessage(conversationId, message))
       setMessage('');
     }
   }
@@ -181,19 +182,22 @@ export default function Messages() {
   const dispatch = useDispatch();
   const conversations = useSelector(state => state.conversations);
   const [openMessageDrawer, setOpenMessageDrawer] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
   const [messageListUsers, setMessageListUsers] = useState([]);
   const [messageListMessages, setMessageListMessages] = useState([]);
 
-  const handleMessageDrawerOpen = (users, messages) => {
+  const handleMessageDrawerOpen = (users, messages, convoId) => {
     setMessageListUsers([...users]);
     setMessageListMessages([...messages]);
     setOpenMessageDrawer(true);
+    setConversationId(convoId);
   }
 
   const handleMessageDrawerClose = () => {
     setOpenMessageDrawer(false);
     setMessageListUsers([]);
     setMessageListMessages([]);
+    setConversationId(null);
   }
 
   useEffect(() => {
@@ -215,7 +219,7 @@ export default function Messages() {
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {conversations.length > 0
               ? conversations.map(conversation => {
-                return <Conversation conversation={conversation} handleMessageDrawerOpen={handleMessageDrawerOpen} />
+                return <Conversation key={conversation._id} conversation={conversation} handleMessageDrawerOpen={handleMessageDrawerOpen} />
               })
               : 'No messages'}
           </List>
@@ -241,7 +245,7 @@ export default function Messages() {
           position: "fixed",
           width: '100%',
         }}>
-          <MessageInput />
+          <MessageInput conversationId={conversationId} />
         </div>
       </Drawer>
     </Container>
