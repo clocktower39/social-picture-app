@@ -54,6 +54,7 @@ export let reducer = (state = { user, posts, relationships, profile, conversatio
             const updatedConversations = [...state.conversations.map(c => {
                 if( c._id === action.conversation._id){
                     c.messages = action.conversation.messages
+                    console.log(c)
                 }
                 return c;
             })];

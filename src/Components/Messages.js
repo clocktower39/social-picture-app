@@ -14,25 +14,59 @@ const classes = {
   },
 };
 
-const Conversation = ({ conversation, handleMessageDrawerOpen }) => {
+const Conversation = ({ conversation }) => {
   const user = useSelector(state => state.user);
   const users = conversation.users.filter(u => u._id !== user._id);
+  const [openMessageDrawer, setOpenMessageDrawer] = useState(false);
+
+  const handleMessageDrawerOpen = (users, messages, convoId) => {
+    setOpenMessageDrawer(true);
+  }
+
+  const handleMessageDrawerClose = () => {
+    setOpenMessageDrawer(false);
+  }
 
   return (
-    <ListItem
-      disablePadding
-      sx={{ width: '100%', }}
-    >
-      <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages, conversation._id)} >
-        <ListItemAvatar>
-          <AvatarGroup max={3} >
-            {/* {users.map()} */}
-            <Avatar src={users[0].profilePicture ? `${serverURL}/user/profilePicture/${users[0].profilePicture}` : null} />
-          </AvatarGroup>
-        </ListItemAvatar>
-        <ListItemText primary={users.map(u => u.username).join(' ')} />
-      </ListItemButton>
-    </ListItem>
+    <>
+      <ListItem
+        disablePadding
+        sx={{ width: '100%', }}
+      >
+        <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages, conversation._id)} >
+          <ListItemAvatar>
+            <AvatarGroup max={3} >
+              {/* {users.map()} */}
+              <Avatar src={users[0].profilePicture ? `${serverURL}/user/profilePicture/${users[0].profilePicture}` : null} />
+            </AvatarGroup>
+          </ListItemAvatar>
+          <ListItemText primary={users.map(u => u.username).join(' ')} />
+        </ListItemButton>
+      </ListItem>
+      <Drawer
+        anchor={"right"}
+        open={openMessageDrawer}
+        onClose={handleMessageDrawerClose}
+        sx={{ '& .MuiPaper-root': { width: '100%' } }}
+      >
+        <div style={{
+          height: 'calc(100% - 72px)',
+          display: 'flex',
+          flexDirection: 'column',
+        }} >
+          <MessageList users={users} messages={conversation.messages} handleMessageDrawerClose={handleMessageDrawerClose} />
+
+        </div>
+        <div style={{
+          bottom: 0,
+          left: 0,
+          position: "fixed",
+          width: '100%',
+        }}>
+          <MessageInput conversationId={conversation._id} />
+        </div>
+      </Drawer>
+    </>
   )
 };
 
@@ -181,24 +215,6 @@ const MessageInput = ({ conversationId }) => {
 export default function Messages() {
   const dispatch = useDispatch();
   const conversations = useSelector(state => state.conversations);
-  const [openMessageDrawer, setOpenMessageDrawer] = useState(false);
-  const [conversationId, setConversationId] = useState(null);
-  const [messageListUsers, setMessageListUsers] = useState([]);
-  const [messageListMessages, setMessageListMessages] = useState([]);
-
-  const handleMessageDrawerOpen = (users, messages, convoId) => {
-    setMessageListUsers([...users]);
-    setMessageListMessages([...messages]);
-    setOpenMessageDrawer(true);
-    setConversationId(convoId);
-  }
-
-  const handleMessageDrawerClose = () => {
-    setOpenMessageDrawer(false);
-    setMessageListUsers([]);
-    setMessageListMessages([]);
-    setConversationId(null);
-  }
 
   useEffect(() => {
     dispatch(getConversations())
@@ -219,35 +235,12 @@ export default function Messages() {
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {conversations.length > 0
               ? conversations.map(conversation => {
-                return <Conversation key={conversation._id} conversation={conversation} handleMessageDrawerOpen={handleMessageDrawerOpen} />
+                return <Conversation key={conversation._id} conversation={conversation} />
               })
               : 'No messages'}
           </List>
         </Grid>
       </Grid>
-      <Drawer
-        anchor={"right"}
-        open={openMessageDrawer}
-        onClose={handleMessageDrawerClose}
-        sx={{ '& .MuiPaper-root': { width: '100%' } }}
-      >
-        <div style={{
-          height: 'calc(100% - 72px)',
-          display: 'flex',
-          flexDirection: 'column',
-        }} >
-          <MessageList users={messageListUsers} messages={messageListMessages} handleMessageDrawerClose={handleMessageDrawerClose} />
-
-        </div>
-        <div style={{
-          bottom: 0,
-          left: 0,
-          position: "fixed",
-          width: '100%',
-        }}>
-          <MessageInput conversationId={conversationId} />
-        </div>
-      </Drawer>
     </Container>
   )
 }
