@@ -34,7 +34,7 @@ export const Home = (props) => {
       <Grid justify="center" container spacing={3} sx={classes.gridContainer}>
         <Grid container item xs={12}>
           <Grid container item xs={6}>
-            <Typography variant="h5">Social Photo App</Typography>
+            <Typography variant="h5" color="text.primary">Social Photo App</Typography>
           </Grid>
           <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
             <IconButton component={Link} to="/messages" ><MessageIcon /></IconButton>

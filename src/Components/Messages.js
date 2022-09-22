@@ -40,7 +40,7 @@ const Conversation = ({ conversation }) => {
               <Avatar src={users[0].profilePicture ? `${serverURL}/user/profilePicture/${users[0].profilePicture}` : null} />
             </AvatarGroup>
           </ListItemAvatar>
-          <ListItemText primary={users.map(u => u.username).join(' ')} />
+          <ListItemText primary={users.map(u => u.username).join(' ')} sx={{ color: 'text.primary', }} />
         </ListItemButton>
       </ListItem>
       <Drawer

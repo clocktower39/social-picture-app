@@ -7,7 +7,7 @@ import Messages from "./Components/Messages";
 import Profile from "./Components/Profile";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
-import { ThemeProvider } from "@mui/material";
+import { Box, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from './theme';
 import "./App.css";
@@ -17,7 +17,7 @@ function App() {
   return (
     <ThemeProvider theme={theme} >
       <Router basename="/social-picture-app/">
-        <div style={{ marginBottom: '75px' }}>
+        <Box sx={{  backgroundColor: 'background.default', minHeight: '100%' }}>
           <Routes>
             <Route exact path="/login" element={<Login />} />
 
@@ -43,7 +43,7 @@ function App() {
               <Route exact path="/profile/:username" element={<Profile />} />
             </Route>
           </Routes>
-        </div>
+        </Box>
         <Navbar />
       </Router>
     </ThemeProvider>

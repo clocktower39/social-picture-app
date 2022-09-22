@@ -12,11 +12,11 @@ export const UPDATE_CONVERSATION_MESSAGES = "UPDATE_CONVERSATION_MESSAGES";
 export const ERROR = "ERROR";
 
 // dev server
-const currentIP = window.location.href.split(":")[1];
-export const serverURL = `http:${currentIP}:3003`;
+// const currentIP = window.location.href.split(":")[1];
+// export const serverURL = `http:${currentIP}:3003`;
 
 // live server
-// export const serverURL = 'https://social-picture-app.herokuapp.com';
+export const serverURL = 'https://social-picture-app.herokuapp.com';
 
 export function signupUser(user) {
   return async (dispatch) => {

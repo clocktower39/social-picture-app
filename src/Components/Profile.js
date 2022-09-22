@@ -52,7 +52,7 @@ const FollowingUsers = ({ userId, following }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h4" textAlign="center">
+        <Typography variant="h4" textAlign="center" color="text.primary">
           Following
         </Typography>
       </Grid>
@@ -67,7 +67,7 @@ const FollowerUsers = ({ userId, followers }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h4" textAlign="center">
+        <Typography variant="h4" textAlign="center" color="text.primary">
           Followers
         </Typography>
       </Grid>
@@ -328,7 +328,7 @@ export const Profile = (props) => {
       <Grid container sx={{ justifyContent: "center" }} spacing={1}>
         <Grid container item xs={11} spacing={1}>
           <Grid item xs={12}>
-            <Typography variant="h4">{profile.user.username}</Typography>
+            <Typography variant="h4" color="text.primary">{profile.user.username}</Typography>
             <br />
           </Grid>
           <Grid item xs={4}>
@@ -343,33 +343,33 @@ export const Profile = (props) => {
             />
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center">
+            <Typography variant="body2" align="center" color="text.primary">
               {profile.posts ? profile.posts.length : 0}
               <br />
               Posts
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center" onClick={handleFollowersModal}>
+            <Typography variant="body2" align="center" color="text.primary" onClick={handleFollowersModal}>
               {profile.followers.length}
               <br />
               Followers
             </Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="body2" align="center" onClick={handleFollowingModal}>
+            <Typography variant="body2" align="center" color="text.primary" onClick={handleFollowingModal}>
               {profile.following.length}
               <br />
               Following
             </Typography>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="body1">
+            <Typography variant="body1" color="text.primary">
               {profile.user.firstName} {profile.user.lastName}
             </Typography>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="body2">{profile.user.description}</Typography>
+            <Typography variant="body2" color="text.primary">{profile.user.description}</Typography>
           </Grid>
         </Grid>
 
@@ -447,7 +447,7 @@ export const Profile = (props) => {
               })
           ) : (
             <Grid container item xs={12} spacing={1} sx={{ justifyContent: "center" }}>
-              <Typography variant="h5" sx={{ padding: "15px 0px" }}>
+              <Typography variant="h5" color="text.primary" sx={{ padding: "15px 0px" }}>
                 No posts yet.
               </Typography>
             </Grid>

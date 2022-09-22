@@ -16,7 +16,7 @@ export default function Loading() {
 
   return (
     <Box sx={classes.root}>
-      <Typography variant="h4">Loading</Typography>
+      <Typography variant="h4" color="text.primary">Loading</Typography>
       <CircularProgress />
     </Box>
   );

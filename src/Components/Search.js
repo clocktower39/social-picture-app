@@ -32,8 +32,8 @@ export const UserCard = ({ account }) => {
         />
       </Grid>
       <Grid item xs={8}>
-        <Typography variant="body1">{account.username}</Typography>
-        <Typography variant="body2">
+        <Typography variant="body1" color="text.primary">{account.username}</Typography>
+        <Typography variant="body2" color="text.primary">
           {account.firstName} {account.lastName}
         </Typography>
       </Grid>
