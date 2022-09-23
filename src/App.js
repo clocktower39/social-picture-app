@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from "react";
+import { useSelector } from 'react-redux';
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
 import Home from "./Components/Home";
@@ -14,8 +16,15 @@ import "./App.css";
 
 
 function App() {
+  const themeMode = useSelector(state => state.user.themeMode);
+  const [themeSelection, setThemeSelection] = useState(theme());
+
+  useEffect(()=>{
+    setThemeSelection(theme());
+  },[themeMode])
+
   return (
-    <ThemeProvider theme={theme} >
+    <ThemeProvider theme={themeSelection} >
       <Router basename="/social-picture-app/">
         <Box sx={{  backgroundColor: 'background.default', minHeight: '100%' }}>
           <Routes>

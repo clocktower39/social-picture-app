@@ -31,6 +31,7 @@ import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Search";
 import ChangePassword from "./ChangePassword";
+import ThemeSettings from "./ThemeSettings";
 
 const classes = {
   root: {
@@ -150,6 +151,10 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
   const [passwordModal, setPasswordModal] = useState(false);
   const handlePasswordOpen = () => setPasswordModal(true);
   const handlePasswordClose = () => setPasswordModal(false);
+  
+  const [themeModal, setThemeModal] = useState(false);
+  const handleThemeOpen = () => setThemeModal(true);
+  const handleThemeClose = () => setThemeModal(false);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -273,11 +278,15 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
       </Grid>
       <Menu open={openMenu} onClose={handleMenuClose} anchorEl={anchorEl}>
-        <MenuItem onClick={handlePasswordOpen}>Change password</MenuItem>
+        <MenuItem onClick={handlePasswordOpen}>Password</MenuItem>
+        <MenuItem onClick={handleThemeOpen}>Theme</MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
       {passwordModal && openMenu && (
         <ChangePassword open={openMenu} handlePasswordClose={handlePasswordClose} />
+      )}
+      {themeModal && openMenu && (
+        <ThemeSettings open={openMenu} handleThemeClose={handleThemeClose} />
       )}
       <Dialog open={profilePictureDialog} onClose={handleProfilePictureDialog}>
         <ProfilePictureUpload />

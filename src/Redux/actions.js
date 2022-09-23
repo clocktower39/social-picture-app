@@ -12,11 +12,11 @@ export const UPDATE_CONVERSATION_MESSAGES = "UPDATE_CONVERSATION_MESSAGES";
 export const ERROR = "ERROR";
 
 // dev server
-// const currentIP = window.location.href.split(":")[1];
-// export const serverURL = `http:${currentIP}:3003`;
+const currentIP = window.location.href.split(":")[1];
+export const serverURL = `http:${currentIP}:3003`;
 
 // live server
-export const serverURL = 'https://social-picture-app.herokuapp.com';
+// export const serverURL = 'https://social-picture-app.herokuapp.com';
 
 export function signupUser(user) {
   return async (dispatch) => {
@@ -478,6 +478,36 @@ export function sendMessage(conversationId, message) {
     return dispatch({
       type: UPDATE_CONVERSATION_MESSAGES,
       conversation: { ...data }
+    });
+  }
+}
+
+export function updateThemeMode(mode) {
+  return async (dispatch) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+    const response = await fetch(`${serverURL}/user/update`, {
+      method: 'post',
+      dataType: 'json',
+      body: JSON.stringify({ themeMode: mode }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      }
+    })
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error
+      });
+    }
+    const accessToken = data.accessToken;
+    const decodedAccessToken = jwt(accessToken);
+
+    localStorage.setItem('JWT_AUTH_TOKEN', accessToken);
+    return dispatch({
+      type: LOGIN_USER,
+      user: decodedAccessToken,
     });
   }
 }
