@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarGroup, Button, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
 import { Create, Close as CloseIcon, Delete, } from "@mui/icons-material";
-import { getConversations, sendMessage, serverURL } from '../Redux/actions';
+import { getConversations, sendMessage, deleteMessage, serverURL } from '../Redux/actions';
 
 const classes = {
   root: {
@@ -19,13 +19,9 @@ const Conversation = ({ conversation }) => {
   const users = conversation.users.filter(u => u._id !== user._id);
   const [openMessageDrawer, setOpenMessageDrawer] = useState(false);
 
-  const handleMessageDrawerOpen = (users, messages, convoId) => {
-    setOpenMessageDrawer(true);
-  }
+  const handleMessageDrawerOpen = () => setOpenMessageDrawer(true)
 
-  const handleMessageDrawerClose = () => {
-    setOpenMessageDrawer(false);
-  }
+  const handleMessageDrawerClose = () => setOpenMessageDrawer(false)
 
   return (
     <>
@@ -35,9 +31,8 @@ const Conversation = ({ conversation }) => {
       >
         <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages, conversation._id)} >
           <ListItemAvatar>
-            <AvatarGroup max={3} >
-              {/* {users.map()} */}
-              <Avatar src={users[0].profilePicture ? `${serverURL}/user/profilePicture/${users[0].profilePicture}` : null} />
+            <AvatarGroup max={3} spacing="small">
+              {users.slice(0,3).map(user => <Avatar key={user._id} src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null} />)}
             </AvatarGroup>
           </ListItemAvatar>
           <ListItemText primary={users.map(u => u.username).join(' ')} sx={{ color: 'text.primary', }} />
@@ -54,7 +49,7 @@ const Conversation = ({ conversation }) => {
           display: 'flex',
           flexDirection: 'column',
         }} >
-          <MessageList users={users} messages={conversation.messages} handleMessageDrawerClose={handleMessageDrawerClose} />
+          <MessageList users={users} conversationId={conversation._id} messages={conversation.messages} handleMessageDrawerClose={handleMessageDrawerClose} />
 
         </div>
         <div style={{
@@ -70,8 +65,11 @@ const Conversation = ({ conversation }) => {
   )
 };
 
-const MessageList = ({ users, messages, handleMessageDrawerClose }) => {
+const MessageList = ({ users, conversationId, messages, handleMessageDrawerClose }) => {
   const user = useSelector(state => state.user);
+  const dispatch = useDispatch();
+
+  const handleMessageDelete = (messageId) => dispatch(deleteMessage(conversationId, messageId))
 
   return (
     <Container maxWidth="sm" sx={{ padding: "0 0 95px 0", }}>
@@ -113,7 +111,7 @@ const MessageList = ({ users, messages, handleMessageDrawerClose }) => {
                 xs={12}
               >
                 <Grid container item xs={2} sx={{ justifyContent: 'center', }}>
-                  <Avatar src={message.user.profilePicture ? `${serverURL}/user/image/${message.user.profilePicture}` : null} />
+                  <Avatar src={message.user.profilePicture ? `${serverURL}/user/profilePicture/${message.user.profilePicture}` : null} />
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="h6" display="inline">
@@ -143,7 +141,7 @@ const MessageList = ({ users, messages, handleMessageDrawerClose }) => {
                 </Grid>
                 <Grid item xs={2}>
                   {message.user.username === user.username && (
-                    <IconButton disabled >
+                    <IconButton onClick={() => handleMessageDelete(message._id)} >
                       <Delete />
                     </IconButton>
                   )}
