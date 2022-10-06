@@ -20,7 +20,7 @@ export const UserCard = ({ account }) => {
 
   return (
     <Grid container item xs={12} alignItems="center" spacing={3}>
-      <Grid item xs={1}>
+      <Grid item xs={2}>
         <Avatar
           src={
             account.profilePicture
@@ -31,13 +31,13 @@ export const UserCard = ({ account }) => {
           to={`/profile/${account.username}`}
         />
       </Grid>
-      <Grid item xs={8}>
+      <Grid item xs={6}>
         <Typography variant="body1" color="text.primary">{account.username}</Typography>
         <Typography variant="body2" color="text.primary">
           {account.firstName} {account.lastName}
         </Typography>
       </Grid>
-      <Grid container item xs={3} sx={{ justifyContent: "flex-end" }}>
+      <Grid container item xs={4} sx={{ justifyContent: "flex-end" }}>
         {user._id === account._id ? null : isFollowing ? (
           <Button variant="contained" onClick={() => handleRequestUnfollow(account)} fullWidth>
             Unfollow
