@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Avatar, AvatarGroup, Button, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
+import { Autocomplete, Avatar, AvatarGroup, Button, Chip, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
 import { Create, Close as CloseIcon, Delete, } from "@mui/icons-material";
 import { getConversations, sendMessage, deleteMessage, serverURL } from '../Redux/actions';
 
@@ -32,7 +32,7 @@ const Conversation = ({ conversation }) => {
         <ListItemButton onClick={() => handleMessageDrawerOpen(conversation.users, conversation.messages, conversation._id)} >
           <ListItemAvatar>
             <AvatarGroup max={3} spacing="small">
-              {users.slice(0,3).map(user => <Avatar key={user._id} src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null} />)}
+              {users.slice(0, 3).map(user => <Avatar key={user._id} src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null} />)}
             </AvatarGroup>
           </ListItemAvatar>
           <ListItemText primary={users.map(u => u.username).join(' ')} sx={{ color: 'text.primary', }} />
@@ -210,9 +210,97 @@ const MessageInput = ({ conversationId }) => {
   );
 }
 
+const CreateConversationDialog = ({ open, handleClose, }) => {
+  const [searchUser, setSearchUser] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userSearchResults, setUserSearchResults] = useState([]);
+
+  const handleSelectedUsers = (getTagProps) => setSelectedUsers(getTagProps);
+
+  const fetchSearch = async () => {
+    let payload = JSON.stringify({ username: searchUser });
+
+    let response = await fetch(`${serverURL}/search`, {
+      method: "post",
+      dataType: "json",
+      body: payload,
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+
+    let data = await response.json();
+    const removedDuplicates = data.users.filter(dataUser => !selectedUsers.some(user => user.username === dataUser.username))
+    setUserSearchResults([...selectedUsers, ...removedDuplicates]);
+  };
+  useEffect(() => {
+    fetchSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchUser])
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+    >
+      <DialogTitle >
+        Create New Conversation
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          Select users for new chat.
+        </DialogContentText>
+        
+        <Autocomplete
+          disableCloseOnSelect
+          value={selectedUsers}
+          fullWidth
+          multiple
+          options={userSearchResults.map((option) => option)}
+          getOptionLabel={option => option.username}
+          onChange={(e, getTagProps) => handleSelectedUsers(getTagProps)}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip variant="outlined" label={option.username} {...getTagProps({ index })} />
+            ))
+          }
+          sx={{ marginTop: '25px' }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Users"
+              value={searchUser}
+              onChange={(e) => setSearchUser(e.target.value)}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose} autoFocus>
+          {/* onClick, send action, wait for response in case of errors, if successful close dialog and move user to new conversation automatically*/}
+          Create
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function Messages() {
   const dispatch = useDispatch();
   const conversations = useSelector(state => state.conversations);
+  const [conversationDialog, setConversationDialog] = useState(false);
+
+  const handleConversationDialogOpen = () => setConversationDialog(true);
+  const handleConversationDialogClose = () => setConversationDialog(false);
 
   useEffect(() => {
     dispatch(getConversations())
@@ -226,7 +314,7 @@ export default function Messages() {
             <Typography variant="h5" component={Link} to="/" sx={{ textDecoration: 'none', color: 'text.primary', }} >Social Photo App</Typography>
           </Grid>
           <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
-            <IconButton component={Link} to="/messages" ><Create /></IconButton>
+            <IconButton onClick={handleConversationDialogOpen}><Create /></IconButton>
           </Grid>
         </Grid>
         <Grid container item xs={12} >
@@ -239,6 +327,7 @@ export default function Messages() {
           </List>
         </Grid>
       </Grid>
+      <CreateConversationDialog open={conversationDialog} handleClose={handleConversationDialogClose} />
     </Container>
   )
 }
