@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Autocomplete, Avatar, AvatarGroup, Button, Chip, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
-import { Create, Close as CloseIcon, Delete, } from "@mui/icons-material";
+import { Autocomplete, Avatar, AvatarGroup, Button, Chip, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
+import { AddCircle, Create, ArrowBackIosNew, Delete, } from "@mui/icons-material";
 import { getConversations, sendMessage, deleteMessage, serverURL } from '../Redux/actions';
 
 const classes = {
@@ -75,7 +75,7 @@ const MessageList = ({ users, conversationId, messages, handleMessageDrawerClose
     <Container maxWidth="sm" sx={{ padding: "0 0 95px 0", }}>
       <Grid container item >
         <Grid container item xs={1} >
-          <IconButton onClick={handleMessageDrawerClose} ><CloseIcon /></IconButton>
+          <IconButton onClick={handleMessageDrawerClose} ><ArrowBackIosNew /></IconButton>
         </Grid>
         <Grid container item xs={11} sx={{ alignContent: 'center', }} >
           <Typography variant="h5">{users.map(u => u.username).join(' ')}</Typography>
@@ -210,7 +210,7 @@ const MessageInput = ({ conversationId }) => {
   );
 }
 
-const CreateConversationDialog = ({ open, handleClose, }) => {
+const CreateConversationView = ({ open, handleClose, }) => {
   const [searchUser, setSearchUser] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [userSearchResults, setUserSearchResults] = useState([]);
@@ -239,18 +239,21 @@ const CreateConversationDialog = ({ open, handleClose, }) => {
   }, [searchUser])
 
   return (
-    <Dialog
+    <Drawer
+      anchor={"right"}
       open={open}
       onClose={handleClose}
+      sx={{ '& .MuiPaper-root': { width: '100%' } }}
     >
-      <DialogTitle >
-        Create New Conversation
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          Select users for new chat.
-        </DialogContentText>
-        
+      <Container maxWidth="sm">
+        <Grid container >
+          <Grid container item xs={12}>
+            <Grid container xs={1}><IconButton onClick={handleClose} ><ArrowBackIosNew /></IconButton></Grid>
+            <Grid container xs={10} sx={{ justifyContent: 'center', alignContent: 'center', }} ><Typography textAlign="center" variant="h6">New Message</Typography></Grid>
+            <Grid container xs={1}><IconButton onClick={handleClose} ><AddCircle /></IconButton></Grid>
+          </Grid>
+        </Grid>
+
         <Autocomplete
           disableCloseOnSelect
           value={selectedUsers}
@@ -282,15 +285,8 @@ const CreateConversationDialog = ({ open, handleClose, }) => {
             />
           )}
         />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleClose} autoFocus>
-          {/* onClick, send action, wait for response in case of errors, if successful close dialog and move user to new conversation automatically*/}
-          Create
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </Container>
+    </Drawer>
   );
 }
 
@@ -327,7 +323,7 @@ export default function Messages() {
           </List>
         </Grid>
       </Grid>
-      <CreateConversationDialog open={conversationDialog} handleClose={handleConversationDialogClose} />
+      <CreateConversationView open={conversationDialog} handleClose={handleConversationDialogClose} />
     </Container>
   )
 }
