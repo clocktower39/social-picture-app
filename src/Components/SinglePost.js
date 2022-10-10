@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Favorite, Share, ExpandMore, MoreVert } from "@mui/icons-material";
+import { Favorite, Share, MoreVert } from "@mui/icons-material";
 
 const classes = {
   media: {
@@ -46,17 +46,40 @@ const classes = {
   },
 };
 
+const CommentSection = ({ post }) => {
+
+  return (
+    <CardContent>
+      {post.comments.map((comment, i) => (
+        <Grid container key={`${comment.comment}-${comment.user._id}-${i}`}>
+          <Grid item xs={1}>
+            <Avatar
+              aria-label="recipe"
+              sx={classes.avatarComment}
+              alt={comment.user.username}
+              src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
+            />
+          </Grid>
+          <Grid item xs={11}>
+            <Typography key={i} variant="body1" component="p">
+              <strong>{comment.user.username}</strong> {comment.comment}
+            </Typography>
+          </Grid>
+        </Grid>
+      ))}
+    </CardContent>
+  )
+}
+
 export default function SinglePost(props) {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [comment, setComment] = useState("");
-  const [expanded, setExpanded] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const { post, likes, isLiked } = props;
 
-  const handleExpandClick = () => setExpanded((prev) => !prev);
   const handleDeleteDialog = () => setDeleteDialog((prev) => !prev);
   const handleMenu = (event) => setOpenMenu(prev => {
     !prev ? setAnchorEl(event.currentTarget) : setAnchorEl(null);
@@ -139,42 +162,11 @@ export default function SinglePost(props) {
           <IconButton aria-label="share">
             <Share />
           </IconButton>
-          <IconButton
-            sx={expanded ? { ...classes.expand, ...classes.expandOpen } : { ...classes.expand }}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMore />
-          </IconButton>
         </CardActions>
-        <CardContent>
-          <Typography variant="body2" color="textSecondary" component="p">
-            Likes: {likes ? likes.length : 0}
-          </Typography>
-        </CardContent>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography paragraph>Comments:</Typography>
-            {post.comments.map((comment, i) => (
-              <Grid container key={`${comment.comment}-${comment.user._id}-${i}`}>
-                <Grid item xs={1}>
-                  <Avatar
-                    aria-label="recipe"
-                    sx={classes.avatarComment}
-                    alt={comment.user.username}
-                    src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
-                  />
-                </Grid>
-                <Grid item xs={11}>
-                  <Typography key={i} variant="body1" component="p">
-                    <strong>{comment.user.username}</strong> {comment.comment}
-                  </Typography>
-                </Grid>
-              </Grid>
-            ))}
-          </CardContent>
-        </Collapse>
+        <Typography variant="body2" color="textSecondary" sx={{ padding: '0 16px' }}>
+          Likes: {likes ? likes.length : 0}
+        </Typography>
+        <CommentSection post={post} />
         <CardContent>
           <Grid container alignItems="center" spacing={2}>
             <Grid item xs={1}>
