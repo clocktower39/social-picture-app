@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Favorite, Share, MoreVert } from "@mui/icons-material";
+import { ModeComment, ExpandMore, Favorite, Share, MoreVert } from "@mui/icons-material";
 
 const classes = {
   media: {
@@ -46,39 +46,100 @@ const classes = {
   },
 };
 
-const CommentSection = ({ post }) => {
+const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
+  const dispatch = useDispatch();
+  const [comment, setComment] = useState("");
+
+  const handlePostComment = () => {
+    if (comment !== '') {
+      dispatch(commentPost(post._id, user, comment));
+      setComment('');
+    }
+  }
+
+  const CommentCard = ({ comment, firstComment = false }) => (
+    <Grid container spacing={1}>
+      <Grid item xs={1}>
+        <Avatar
+          aria-label="recipe"
+          sx={classes.avatarComment}
+          alt={comment.user.username}
+          src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
+        />
+      </Grid>
+      <Grid item xs={10}>
+        <Typography variant="body1" >
+          <strong>{comment.user.username}</strong> {comment.comment}
+        </Typography>
+      </Grid>
+      <Grid container item xs={1} sx={{ justifyContent: 'center' }}>
+
+        {firstComment && (
+          <IconButton
+            sx={expanded ? { ...classes.expand, ...classes.expandOpen } : { ...classes.expand }}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+          >
+            <ExpandMore />
+          </IconButton>
+
+        )}
+      </Grid>
+    </Grid>
+  )
+
+  const CommentField = () => (
+    <Grid container alignItems="center" spacing={2} sx={{ marginTop: '5px', }}>
+      <Grid item xs={1}>
+        <Avatar
+          sx={classes.avatarComment}
+          alt={user.username}
+          src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null}
+        />
+      </Grid>
+      <Grid item xs={11}>
+        <TextField
+          label="Add a comment..."
+          fullWidth
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <Button
+                variant="contained"
+                onClick={handlePostComment}
+              >
+                Submit
+              </Button>
+            ),
+          }}
+        />
+      </Grid>
+    </Grid>
+  )
 
   return (
     <CardContent>
-      {post.comments.map((comment, i) => (
-        <Grid container key={`${comment.comment}-${comment.user._id}-${i}`}>
-          <Grid item xs={1}>
-            <Avatar
-              aria-label="recipe"
-              sx={classes.avatarComment}
-              alt={comment.user.username}
-              src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
-            />
-          </Grid>
-          <Grid item xs={11}>
-            <Typography key={i} variant="body1" component="p">
-              <strong>{comment.user.username}</strong> {comment.comment}
-            </Typography>
-          </Grid>
-        </Grid>
-      ))}
+      {post.comments.slice(0, 1).map((comment, i) => <CommentCard key={comment._id} comment={comment} firstComment={true} />)}
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id} comment={comment} />)}
+        <CommentField />
+      </Collapse>
     </CardContent>
   )
 }
 
 export default function SinglePost(props) {
+  const { post, likes, isLiked } = props;
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const [comment, setComment] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(false);
-  const { post, likes, isLiked } = props;
+
+  const [expanded, setExpanded] = useState(false);
+  const handleExpandClick = () => setExpanded((prev) => !prev);
 
   const handleDeleteDialog = () => setDeleteDialog((prev) => !prev);
   const handleMenu = (event) => setOpenMenu(prev => {
@@ -88,12 +149,6 @@ export default function SinglePost(props) {
 
   const handleLikePost = () => dispatch(likePost(post._id, user));
   const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
-  const handlePostComment = () => {
-    if (comment !== '') {
-      dispatch(commentPost(post._id, user, comment));
-      setComment('');
-    }
-  }
   const handleConfirmDelete = () => {
     dispatch(deletePost(post._id, post.image)).then(() => setDeleteDialog(false));
   }
@@ -159,6 +214,9 @@ export default function SinglePost(props) {
                 <Favorite />
               </IconButton>
           }
+          <IconButton aria-label="comments" onClick={handleExpandClick} >
+            <ModeComment />
+          </IconButton>
           <IconButton aria-label="share">
             <Share />
           </IconButton>
@@ -166,37 +224,7 @@ export default function SinglePost(props) {
         <Typography variant="body2" color="textSecondary" sx={{ padding: '0 16px' }}>
           Likes: {likes ? likes.length : 0}
         </Typography>
-        <CommentSection post={post} />
-        <CardContent>
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={1}>
-              <Avatar
-                aria-label="recipe"
-                sx={classes.avatarComment}
-                alt={user.username}
-                src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null}
-              />
-            </Grid>
-            <Grid item xs={11}>
-              <TextField
-                label="Add a comment..."
-                fullWidth
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <Button
-                      variant="contained"
-                      onClick={handlePostComment}
-                    >
-                      Submit
-                    </Button>
-                  ),
-                }}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
+        <CommentSection post={post} user={user} expanded={expanded} handleExpandClick={handleExpandClick} />
       </Card>
       <Dialog
         open={deleteDialog}
