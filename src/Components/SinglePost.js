@@ -47,15 +47,6 @@ const classes = {
 };
 
 const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
-  const dispatch = useDispatch();
-  const [comment, setComment] = useState("");
-
-  const handlePostComment = () => {
-    if (comment !== '') {
-      dispatch(commentPost(post._id, user, comment));
-      setComment('');
-    }
-  }
 
   const CommentCard = ({ comment, firstComment = false }) => (
     <Grid container spacing={1}>
@@ -89,7 +80,31 @@ const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
     </Grid>
   )
 
-  const CommentField = () => (
+
+  return (
+    <CardContent>
+      {post.comments.slice(0, 1).map((comment, i) => <CommentCard key={`${comment._id}-first`} comment={comment} firstComment={true} />)}
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id||i} comment={comment} />)}
+        <CommentField post={post} user={user} />
+      </Collapse>
+    </CardContent>
+  )
+}
+
+const CommentField = ({ post, user }) => {
+  const dispatch = useDispatch();
+  const [comment, setComment] = useState("");
+
+  const handlePostComment = () => {
+    if (comment !== '') {
+      dispatch(commentPost(post._id, user, comment));
+      setComment('');
+    }
+  }
+  
+
+  return (
     <Grid container alignItems="center" spacing={2} sx={{ marginTop: '5px', }}>
       <Grid item xs={1}>
         <Avatar
@@ -118,17 +133,7 @@ const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
       </Grid>
     </Grid>
   )
-
-  return (
-    <CardContent>
-      {post.comments.slice(0, 1).map((comment, i) => <CommentCard key={comment._id} comment={comment} firstComment={true} />)}
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id} comment={comment} />)}
-        <CommentField />
-      </Collapse>
-    </CardContent>
-  )
-}
+};
 
 export default function SinglePost(props) {
   const { post, likes, isLiked } = props;

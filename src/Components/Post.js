@@ -16,7 +16,9 @@ export const Post = (props) => {
   const [uploadPhoto, setUploadPhoto] = useState(null);
 
   const handlePhoto = (e) => {
-    setUploadPhoto(e.target.files[0]);
+    if(e.target.files[0].type.substr(0,6) === 'image/'){
+      setUploadPhoto(e.target.files[0]);
+    }
   };
 
   const handleSubmit = (e) => {
