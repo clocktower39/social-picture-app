@@ -15,7 +15,7 @@ import { theme } from './theme';
 import "./App.css";
 
 
-function App() {
+function App({ socket }) {
   const themeMode = useSelector(state => state.user.themeMode);
   const [themeSelection, setThemeSelection] = useState(theme());
 
