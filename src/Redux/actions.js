@@ -482,6 +482,15 @@ export function sendMessage(conversationId, message) {
   }
 }
 
+export function socketMessage(conversation) {
+  return async (dispatch) => {
+    return dispatch({
+      type: UPDATE_CONVERSATION_MESSAGES,
+      conversation
+    })
+  }
+}
+
 export function deleteMessage(conversationId, messageId) {
   return async (dispatch, getState) => {
     const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;

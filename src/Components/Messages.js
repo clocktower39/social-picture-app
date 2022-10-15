@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Autocomplete, Avatar, AvatarGroup, Button, Chip, Container, Drawer, Grid, IconButton, List, ListItem, ListItemButton, ListItemAvatar, ListItemText, TextField, Typography, } from "@mui/material";
 import { AddCircle, Create, ArrowBackIosNew, Delete, } from "@mui/icons-material";
-import { getConversations, sendMessage, deleteMessage, serverURL } from '../Redux/actions';
+import { getConversations, sendMessage, socketMessage, deleteMessage, serverURL } from '../Redux/actions';
 
 const classes = {
   root: {
@@ -14,7 +14,8 @@ const classes = {
   },
 };
 
-const Conversation = ({ conversation }) => {
+const Conversation = ({ conversation, socket }) => {
+  const dispatch = useDispatch();
   const user = useSelector(state => state.user);
   const users = conversation.users.filter(u => u._id !== user._id);
   const [openMessageDrawer, setOpenMessageDrawer] = useState(false);
@@ -22,6 +23,13 @@ const Conversation = ({ conversation }) => {
   const handleMessageDrawerOpen = () => setOpenMessageDrawer(true)
 
   const handleMessageDrawerClose = () => setOpenMessageDrawer(false)
+
+  useEffect(()=>{
+    if(openMessageDrawer) {
+      socket.emit('join', { conversationId: conversation._id })
+      socket.on("update_messages", (data) => dispatch(socketMessage(data)))
+    }
+  },[conversation._id, dispatch, openMessageDrawer, socket])
 
   return (
     <>
@@ -248,9 +256,9 @@ const CreateConversationView = ({ open, handleClose, }) => {
       <Container maxWidth="sm">
         <Grid container >
           <Grid container item xs={12}>
-            <Grid container xs={1}><IconButton onClick={handleClose} ><ArrowBackIosNew /></IconButton></Grid>
-            <Grid container xs={10} sx={{ justifyContent: 'center', alignContent: 'center', }} ><Typography textAlign="center" variant="h6">New Message</Typography></Grid>
-            <Grid container xs={1}><IconButton onClick={handleClose} ><AddCircle /></IconButton></Grid>
+            <Grid container item xs={1}><IconButton onClick={handleClose} ><ArrowBackIosNew /></IconButton></Grid>
+            <Grid container item xs={10} sx={{ justifyContent: 'center', alignContent: 'center', }} ><Typography textAlign="center" variant="h6">New Message</Typography></Grid>
+            <Grid container item xs={1}><IconButton onClick={handleClose} ><AddCircle /></IconButton></Grid>
           </Grid>
         </Grid>
 
@@ -290,7 +298,7 @@ const CreateConversationView = ({ open, handleClose, }) => {
   );
 }
 
-export default function Messages() {
+export default function Messages({ socket }) {
   const dispatch = useDispatch();
   const conversations = useSelector(state => state.conversations);
   const [conversationDialog, setConversationDialog] = useState(false);
@@ -317,7 +325,7 @@ export default function Messages() {
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {conversations.length > 0
               ? conversations.map(conversation => {
-                return <Conversation key={conversation._id} conversation={conversation} />
+                return <Conversation key={conversation._id} conversation={conversation} socket={socket} />
               })
               : 'No messages'}
           </List>

@@ -45,7 +45,7 @@ function App({ socket }) {
             </Route>
 
             <Route exact path="/messages" element={<AuthRoute />} >
-              <Route exact path="/messages" element={<Messages />} />
+              <Route exact path="/messages" element={<Messages socket={socket} />} />
             </Route>
 
             <Route exact path="/profile" element={<AuthRoute />} >
