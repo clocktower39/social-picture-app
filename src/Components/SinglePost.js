@@ -20,10 +20,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Slide,
   TextField,
   Typography,
 } from "@mui/material";
-import { ModeComment, ExpandMore, Favorite, Share, MoreVert } from "@mui/icons-material";
+import { Close, ModeComment, ExpandMore, Favorite, Share, MoreVert } from "@mui/icons-material";
 
 const classes = {
   media: {
@@ -85,7 +86,7 @@ const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
     <CardContent>
       {post.comments.slice(0, 1).map((comment, i) => <CommentCard key={`${comment._id}-first`} comment={comment} firstComment={true} />)}
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id||i} comment={comment} />)}
+        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id || i} comment={comment} />)}
         <CommentField post={post} user={user} />
       </Collapse>
     </CardContent>
@@ -102,7 +103,7 @@ const CommentField = ({ post, user }) => {
       setComment('');
     }
   }
-  
+
 
   return (
     <Grid container alignItems="center" spacing={2} sx={{ marginTop: '5px', }}>
@@ -135,6 +136,11 @@ const CommentField = ({ post, user }) => {
   )
 };
 
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
+
 export default function SinglePost(props) {
   const { post, likes, isLiked } = props;
   const user = useSelector((state) => state.user);
@@ -142,6 +148,9 @@ export default function SinglePost(props) {
   const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [likesDrawer, setLikesDrawer] = useState(false);
+
+  const handleLikesDrawer = () => setLikesDrawer(prev => !prev);
 
   const [expanded, setExpanded] = useState(false);
   const handleExpandClick = () => setExpanded((prev) => !prev);
@@ -226,7 +235,7 @@ export default function SinglePost(props) {
             <Share />
           </IconButton>
         </CardActions>
-        <Typography variant="body2" color="textSecondary" sx={{ padding: '0 16px' }}>
+        <Typography variant="body2" color="textSecondary" sx={{ padding: '0 16px' }} onClick={handleLikesDrawer} >
           Likes: {likes ? likes.length : 0}
         </Typography>
         <CommentSection post={post} user={user} expanded={expanded} handleExpandClick={handleExpandClick} />
@@ -251,6 +260,29 @@ export default function SinglePost(props) {
             Delete
           </Button>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        open={likesDrawer}
+        onClose={handleLikesDrawer}
+        fullScreen
+        TransitionComponent={Transition}
+      >
+        <Grid container>
+          <Grid container spacing={2} sx={{ padding: "15px" }}>
+            <Grid container item xs={3}>
+              <IconButton title="Close" variant="contained" onClick={handleLikesDrawer}>
+                <Close />
+              </IconButton>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="h4" textAlign="center">
+                Likes
+              </Typography>
+            </Grid>
+            <Grid container item xs={3} >
+            </Grid>
+          </Grid>
+        </Grid>
       </Dialog>
     </Grid>
   );
