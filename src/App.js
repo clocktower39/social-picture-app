@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
 import Home from "./Components/Home";
-import Search from "./Components/Search";
+import Explore from "./Components/Explore";
 import Post from "./Components/Post";
 import Messages from "./Components/Messages";
 import Profile from "./Components/Profile";
@@ -36,8 +36,8 @@ function App({ socket }) {
               <Route exact path="/" element={<Home />} />
             </Route>
 
-            <Route exact path="/search" element={<AuthRoute />} >
-              <Route exact path="/search" element={<Search />} />
+            <Route exact path="/explore" element={<AuthRoute />} >
+              <Route exact path="/explore" element={<Explore />} />
             </Route>
 
             <Route exact path="/post" element={<AuthRoute />} >

@@ -29,7 +29,7 @@ import {
 } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
-import { UserCard } from "./Search";
+import { UserCard } from "./Explore";
 import ChangePassword from "./ChangePassword";
 import ThemeSettings from "./ThemeSettings";
 
