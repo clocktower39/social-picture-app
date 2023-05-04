@@ -35,7 +35,7 @@ useEffect(()=>{
   return (
     <BottomNavigation value={value} onChange={handleChange} sx={classes.root}>
       <BottomNavigationAction disabled={disableNav} label="Home" value="/" to='/' icon={<Home />} component={Link} />
-      <BottomNavigationAction disabled={disableNav} label="Explore" value="/search" to='/explore' icon={<Search />} component={Link} />
+      <BottomNavigationAction disabled={disableNav} label="Explore" value="/explore" to='/explore' icon={<Search />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Post" value="/post" to='/post' icon={<AddCircle />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Profile" value={`/profile/${user.username}`} to={`/profile/${user.username}`} icon={<AccountCircle />} component={Link} />
     </BottomNavigation>

@@ -213,7 +213,7 @@ export default function SinglePost(props) {
           title={post.user.username}
           subheader={post.location}
         />
-        <CardMedia sx={classes.media} image={post.image ? `${serverURL}/post/image/${post.image}` : null} />
+        <CardMedia sx={classes.media} image={post.image._id ?  `${serverURL}/post/image/${post.image._id}`: post.image ? `${serverURL}/post/image/${post.image}` : null} />
         <CardActions disableSpacing>
           {
             isLiked
