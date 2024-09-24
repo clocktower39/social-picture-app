@@ -1,4 +1,4 @@
-import jwt from "jwt-decode";
+import { jwtDecode as jwt } from "jwt-decode";
 import axios from "axios";
 
 export const LOGIN_USER = "LOGIN_USER";
@@ -12,18 +12,18 @@ export const UPDATE_CONVERSATION_MESSAGES = "UPDATE_CONVERSATION_MESSAGES";
 export const ERROR = "ERROR";
 
 // dev server
-// const currentIP = window.location.href.split(":")[1];
-// export const serverURL = `http:${currentIP}:3003`;
+const currentIP = window.location.href.split(":")[1];
+export const serverURL = `http:${currentIP}:3003`;
 
 // live server
-export const serverURL = 'https://social-picture-app.herokuapp.com';
+// export const serverURL = 'https://social-picture-app.herokuapp.com';
 
 export function signupUser(user) {
   return async (dispatch) => {
     const response = await fetch(`${serverURL}/signup`, {
       method: "post",
       dataType: "json",
-      body: user,
+      body: JSON.stringify(user),
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
@@ -36,7 +36,7 @@ export function signupUser(user) {
       });
     }
 
-    return dispatch(loginUser(user));
+    return dispatch(loginUser({ email: user.email, password: user.password }));
   };
 }
 
@@ -46,7 +46,7 @@ export function loginUser(user) {
     const response = await fetch(`${serverURL}/login`, {
       method: "post",
       dataType: "json",
-      body: user,
+      body: JSON.stringify(user),
       headers: {
         "Content-type": "application/json; charset=UTF-8",
       },
@@ -59,9 +59,11 @@ export function loginUser(user) {
       });
     }
     const accessToken = data.accessToken;
+    const refreshToken = data.refreshToken;
     const decodedAccessToken = jwt(accessToken);
 
     localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
+    localStorage.setItem("JWT_REFRESH_TOKEN", refreshToken);
     return dispatch({
       type: LOGIN_USER,
       user: decodedAccessToken,
@@ -70,63 +72,61 @@ export function loginUser(user) {
 }
 
 export function changePassword(currentPassword, newPassword) {
-  return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+  return async (dispatch, getState) => {
+    const bearer = `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}`;
 
-    const response = await fetch(`${serverURL}/user/changePassword`, {
-      method: 'post',
-      dataType: 'json',
+    const response = await fetch(`${serverURL}/changePassword`, {
+      method: "post",
+      dataType: "json",
       body: JSON.stringify({ currentPassword, newPassword }),
       headers: {
         "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      }
-    })
+        Authorization: bearer,
+      },
+    });
     const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error
-      });
-    }
+    if (data.error) return data;
+
     const accessToken = data.accessToken;
     const decodedAccessToken = jwt(accessToken);
 
-    localStorage.setItem('JWT_AUTH_TOKEN', accessToken);
+    localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
     return dispatch({
       type: LOGIN_USER,
-      user: decodedAccessToken,
+      agent: decodedAccessToken,
     });
-  }
+  };
 }
 
 // Logs into account with JWT token
-export const loginJWT = (token) => {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+export const loginJWT = () => {
+  return async (dispatch) => {
+    const refreshToken = localStorage.getItem("JWT_REFRESH_TOKEN");
 
-    const response = await fetch(`${serverURL}/checkAuthToken`, {
+    const response = await fetch(`${serverURL}/refresh-tokens`, {
+      method: "POST",
       headers: {
-        "Authorization": bearer,
-      }
-    })
+        "Content-Type": "application/json", // Set the content type to JSON
+      },
+      body: JSON.stringify({ refreshToken }), // Send the refresh token in the request body
+    });
 
-    const text = await response.text().then(item => item);
-    if (text === "Authorized") {
-      const decodedAccessToken = jwt(token);
+    const data = await response.json();
+    if (data.accessToken) {
+      const decodedAccessToken = jwt(data.accessToken);
+      localStorage.setItem("JWT_AUTH_TOKEN", data.accessToken);
       return dispatch({
         type: LOGIN_USER,
         user: decodedAccessToken,
       });
-    }
-    else {
-      localStorage.removeItem('JWT_AUTH_TOKEN');
+    } else {
       return dispatch({
-        type: LOGOUT_USER
-      })
+        type: LOGOUT_USER,
+      });
     }
-  }
-}
+  };
+};
+
 
 export function logoutUser() {
   return async (dispatch) => {

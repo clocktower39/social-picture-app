@@ -22,7 +22,7 @@ export const Login = (props) => {
   const handleLoginAttempt = (e) => {
     if (username && password) {
       setDisableButtonDuringLogin(true);
-      dispatch(loginUser(JSON.stringify({ username: username, password: password }))).then((res) => {
+      dispatch(loginUser({ username: username, password: password })).then((res) => {
         if (res.error) {
           setError(true);
         }
