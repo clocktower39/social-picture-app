@@ -25,7 +25,7 @@ function App({ socket }) {
 
   return (
     <ThemeProvider theme={themeSelection} >
-      <Router >
+      <Router basename="/social-picture-app/">
         <Box sx={{  backgroundColor: 'background.default', minHeight: '100%' }}>
           <Routes>
             <Route exact path="/login" element={<Login />} />
