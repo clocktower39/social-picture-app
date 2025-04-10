@@ -52,7 +52,7 @@ const classes = {
 const FollowingUsers = ({ userId, following }) => {
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Typography variant="h4" textAlign="center" color="text.primary">
           Following
         </Typography>
@@ -67,7 +67,7 @@ const FollowingUsers = ({ userId, following }) => {
 const FollowerUsers = ({ userId, followers }) => {
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Typography variant="h4" textAlign="center" color="text.primary">
           Followers
         </Typography>
@@ -112,7 +112,7 @@ const ProfilePictureUpload = () => {
             id="hidden-input"
             sx={{ display: "none" }}
           />
-          <Grid item xs={12}>
+          <Grid size={12}>
             <label htmlFor="hidden-input">
               <CardMedia
                 sx={{
@@ -133,7 +133,7 @@ const ProfilePictureUpload = () => {
               </Typography>
             )}
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Button variant="contained" fullWidth type="submit">
               Upload
             </Button>
@@ -190,17 +190,17 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
   return (
     <Grid container>
       <Grid container spacing={2} sx={{ padding: "15px" }}>
-        <Grid container item xs={3}>
+        <Grid container size={3}>
           <IconButton title="Close" variant="contained" onClick={handleEditProfileModal}>
             <Close />
           </IconButton>
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <Typography variant="h4" textAlign="center">
             Edit Profile
           </Typography>
         </Grid>
-        <Grid container item xs={3} sx={{ justifyContent: "flex-end" }}>
+        <Grid container size={3} sx={{ justifyContent: "flex-end" }}>
           <IconButton title="Settings" variant="contained" onClick={handleMenuClick}>
             <MenuIcon />
           </IconButton>
@@ -208,7 +208,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
       </Grid>
 
       <Grid container spacing={2}>
-        <Grid container item xs={12} sx={{ justifyContent: "center" }}>
+        <Grid container size={12} sx={{ justifyContent: "center" }}>
           <Avatar
             alt="Profile Picture"
             src={user.profilePicture && `${serverURL}/user/profilePicture/${user.profilePicture}`}
@@ -216,7 +216,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
             onClick={handleProfilePictureDialog}
           />
         </Grid>
-        <Grid container item xs={12} sx={{ justifyContent: "center" }}>
+        <Grid container size={12} sx={{ justifyContent: "center" }}>
           <TextField
             label="First Name"
             value={editUser.firstName}
@@ -225,8 +225,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={12}
           sx={{ justifyContent: "center" }}
           onChange={(e) => handleChange(e, "lastName")}
         >
@@ -234,8 +233,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={12}
           sx={{ justifyContent: "center" }}
           onChange={(e) => handleChange(e, "username")}
         >
@@ -243,8 +241,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={12}
           sx={{ justifyContent: "center" }}
           onChange={(e) => handleChange(e, "email")}
         >
@@ -252,8 +249,7 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={12}
           sx={{ justifyContent: "center" }}
           onChange={(e) => handleChange(e, "phoneNumber")}
         >
@@ -261,19 +257,18 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={12}
           sx={{ justifyContent: "center" }}
           onChange={(e) => handleChange(e, "description")}
         >
           <TextField label="Bio" value={editUser.description} multiline />
         </Grid>
-        <Grid container item xs={6} sx={{ justifyContent: "flex-end" }}>
+        <Grid container size={6} sx={{ justifyContent: "flex-end" }}>
           <Button variant="contained" onClick={handleCancel}>
             Cancel
           </Button>
         </Grid>
-        <Grid container item xs={6} sx={{ justifyContent: "flex-start" }}>
+        <Grid container size={6} sx={{ justifyContent: "flex-start" }}>
           <Button variant="contained" onClick={handleSave}>
             Save
           </Button>
@@ -337,12 +332,12 @@ export const Profile = (props) => {
   ) : (
     <Container disableGutters maxWidth="sm" sx={classes.root}>
       <Grid container sx={{ justifyContent: "center" }} spacing={1}>
-        <Grid container item xs={11} spacing={1}>
-          <Grid item xs={12}>
+        <Grid container size={11} spacing={1}>
+          <Grid size={12}>
             <Typography variant="h4" color="text.primary">{profile.user.username}</Typography>
             <br />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={4}>
             <Avatar
               sx={classes.avatar}
               alt="Profile Picture"
@@ -353,42 +348,42 @@ export const Profile = (props) => {
               }
             />
           </Grid>
-          <Grid item xs={2}>
+          <Grid size={2}>
             <Typography variant="body2" align="center" color="text.primary">
               {profile.posts ? profile.posts.length : 0}
               <br />
               Posts
             </Typography>
           </Grid>
-          <Grid item xs={2}>
+          <Grid size={2}>
             <Typography variant="body2" align="center" color="text.primary" onClick={handleFollowersModal}>
               {profile.followers.length}
               <br />
               Followers
             </Typography>
           </Grid>
-          <Grid item xs={2}>
+          <Grid size={2}>
             <Typography variant="body2" align="center" color="text.primary" onClick={handleFollowingModal}>
               {profile.following.length}
               <br />
               Following
             </Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="body1" color="text.primary">
               {profile.user.firstName} {profile.user.lastName}
             </Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="body2" color="text.primary">{profile.user.description}</Typography>
           </Grid>
         </Grid>
 
-        <Grid container item xs={12}>
-          <Grid container item xs={12} spacing={1}>
+        <Grid container size={12}>
+          <Grid container size={12} spacing={1}>
             {user._id === profile.user._id ? (
               <>
-                <Grid container item xs={12}>
+                <Grid container size={12}>
                   <Button variant="contained" fullWidth onClick={handleEditProfileModal}>
                     Edit
                   </Button>
@@ -396,7 +391,7 @@ export const Profile = (props) => {
               </>
             ) : (
               <>
-                <Grid container item xs={6}>
+                <Grid container size={6}>
                   <Button variant="contained" fullWidth>
                     {profile.followers.some((u) => u._id === user._id)
                       ? "Unfollow"
@@ -405,7 +400,7 @@ export const Profile = (props) => {
                       : "Follow"}
                   </Button>
                 </Grid>
-                <Grid container item xs={6}>
+                <Grid container size={6}>
                   <Button variant="contained" fullWidth disabled>
                     Message
                   </Button>
@@ -413,7 +408,7 @@ export const Profile = (props) => {
               </>
             )}
           </Grid>
-          <Grid container item xs={12} >
+          <Grid container size={12} >
             <Tabs
               value={tabValue} 
               onChange={handleTabChange} 
@@ -431,14 +426,14 @@ export const Profile = (props) => {
         </Grid>
 
         {/* list all posts from account */}
-        <Grid container item xs={12} spacing={1}>
+        <Grid container size={12} spacing={1}>
           {profile.posts.length > 0 ? (
             profile.posts
               .sort((a, b) => a.timestamp < b.timestamp)
               .map((post, index) => {
                 const isLiked = post.likes.some((u) => u._id === user._id);
                 return (
-                  <Grid item xs={gridWidth} key={index}>
+                  <Grid size={gridWidth} key={index}>
                     {" "}
                     {gridWidth === 4 ? (
                       <CardMedia
@@ -457,7 +452,7 @@ export const Profile = (props) => {
                 );
               })
           ) : (
-            <Grid container item xs={12} spacing={1} sx={{ justifyContent: "center" }}>
+            <Grid container size={12} spacing={1} sx={{ justifyContent: "center" }}>
               <Typography variant="h5" color="text.primary" sx={{ padding: "15px 0px" }}>
                 No posts yet.
               </Typography>

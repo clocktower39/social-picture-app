@@ -42,12 +42,12 @@ export const Login = (props) => {
     <Container maxWidth="md" >
       <Paper sx={{ marginTop: "25px", padding: '12.5px 0', textAlign: 'center', height: '85vh', }}>
         <Grid container spacing={2} >
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h4" gutterBottom>
               Log in
             </Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               error={error === true ? true : false}
               helperText={error === true ? "Please enter your email" : false}
@@ -57,7 +57,7 @@ export const Login = (props) => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               error={error === true ? true : false}
               helperText={error === true ? "Please enter your password" : false}
@@ -71,8 +71,8 @@ export const Login = (props) => {
               }}
             />
           </Grid>
-          <Grid item container spacing={2}>
-            <Grid item xs={12}>
+          <Grid container spacing={2}>
+            <Grid size={12}>
               <Button
                 variant="contained"
                 onClick={(e) => handleLoginAttempt(e)}

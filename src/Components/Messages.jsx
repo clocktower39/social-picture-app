@@ -81,14 +81,14 @@ const MessageList = ({ users, conversationId, messages, handleMessageDrawerClose
 
   return (
     <Container maxWidth="sm" sx={{ padding: "0 0 95px 0", }}>
-      <Grid container item >
-        <Grid container item xs={1} >
+      <Grid container >
+        <Grid container size={1} >
           <IconButton onClick={handleMessageDrawerClose} ><ArrowBackIosNew /></IconButton>
         </Grid>
-        <Grid container item xs={11} sx={{ alignContent: 'center', }} >
+        <Grid container size={11} sx={{ alignContent: 'center', }} >
           <Typography variant="h5">{users.map(u => u.username).join(' ')}</Typography>
         </Grid>
-        <Grid container item xs={12} >
+        <Grid container size={12} >
           {messages.map((message, i) => {
             return (
               <Grid
@@ -115,13 +115,12 @@ const MessageList = ({ users, conversationId, messages, handleMessageDrawerClose
                     }
                 }
                 container
-                item
-                xs={12}
+                size={12}
               >
-                <Grid container item xs={2} sx={{ justifyContent: 'center', }}>
+                <Grid container size={2} sx={{ justifyContent: 'center', }}>
                   <Avatar src={message.user.profilePicture ? `${serverURL}/user/profilePicture/${message.user.profilePicture}` : null} />
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                   <Typography variant="h6" display="inline">
                     {message.user.username}{" "}
                   </Typography>
@@ -147,7 +146,7 @@ const MessageList = ({ users, conversationId, messages, handleMessageDrawerClose
                     {message.message}
                   </Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid size={2}>
                   {message.user.username === user.username && (
                     <IconButton onClick={() => handleMessageDelete(message._id)} >
                       <Delete />
@@ -192,7 +191,7 @@ const MessageInput = ({ conversationId }) => {
           padding: '12.5px 0px'
         }}
       >
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TextField
             fullWidth
             error={error === true ? true : false}
@@ -255,10 +254,10 @@ const CreateConversationView = ({ open, handleClose, }) => {
     >
       <Container maxWidth="sm">
         <Grid container >
-          <Grid container item xs={12}>
-            <Grid container item xs={1}><IconButton onClick={handleClose} ><ArrowBackIosNew /></IconButton></Grid>
-            <Grid container item xs={10} sx={{ justifyContent: 'center', alignContent: 'center', }} ><Typography textAlign="center" variant="h6">New Message</Typography></Grid>
-            <Grid container item xs={1}><IconButton onClick={handleClose} ><AddCircle /></IconButton></Grid>
+          <Grid container size={12}>
+            <Grid container size={1}><IconButton onClick={handleClose} ><ArrowBackIosNew /></IconButton></Grid>
+            <Grid container size={10} sx={{ justifyContent: 'center', alignContent: 'center', }} ><Typography textAlign="center" variant="h6">New Message</Typography></Grid>
+            <Grid container size={1}><IconButton onClick={handleClose} ><AddCircle /></IconButton></Grid>
           </Grid>
         </Grid>
 
@@ -314,14 +313,14 @@ export default function Messages({ socket }) {
     <Container maxWidth="sm" sx={classes.root} disableGutters>
       <Grid container sx={classes.gridContainer}>
         <Grid justify="center" container spacing={3}>
-          <Grid container item xs={6}>
+          <Grid container size={6}>
             <Typography variant="h5" component={Link} to="/" sx={{ textDecoration: 'none', color: 'text.primary', }} >Social Photo App</Typography>
           </Grid>
-          <Grid container item xs={6} sx={{ justifyContent: 'flex-end', }} >
+          <Grid container size={6} sx={{ justifyContent: 'flex-end', }} >
             <IconButton onClick={handleConversationDialogOpen}><Create /></IconButton>
           </Grid>
         </Grid>
-        <Grid container item xs={12} >
+        <Grid container size={12} >
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {conversations.length > 0
               ? conversations.map(conversation => {

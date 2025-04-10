@@ -38,7 +38,7 @@ export default function ThemeSettings({ open, handleThemeClose }) {
             </DialogTitle>
             <DialogContent>
                 <Grid container spacing={2} sx={{ padding: "15px" }}>
-                    <Grid container item xs={12} sx={{ justifyContent: 'center' }}>
+                    <Grid container size={12} sx={{ justifyContent: 'center' }}>
                         <Autocomplete
                             fullWidth
                             value={themeSelection}

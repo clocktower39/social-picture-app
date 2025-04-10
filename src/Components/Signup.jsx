@@ -60,7 +60,7 @@ export const Signup = (props) => {
     }
     return (
         <Grid container spacing={3} sx={classes.root}>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={usernameError}
@@ -72,7 +72,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={firstNameError}
@@ -84,7 +84,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={lastNameError}
@@ -96,7 +96,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={emailError}
@@ -109,7 +109,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={passwordError}
@@ -122,7 +122,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Paper>
                 <TextField
                 error={confirmPasswordError}
@@ -135,7 +135,7 @@ export const Signup = (props) => {
                 />
                 </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Button
                 variant="contained"
                 color="primary"
@@ -145,7 +145,7 @@ export const Signup = (props) => {
                 Sign up
                 </Button>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
                 <Link to='./login'>
                     Already have an Account?
                 </Link>

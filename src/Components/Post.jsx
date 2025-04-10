@@ -44,7 +44,7 @@ export const Post = (props) => {
             id="hidden-input"
             sx={{ display: 'none' }}
           />
-          <Grid item xs={12}>
+          <Grid size={12}>
             <label htmlFor="hidden-input">
               <CardMedia
                 sx={{
@@ -58,13 +58,13 @@ export const Post = (props) => {
             </label>
             { !uploadPhoto && <Typography variant="h6" sx={{ textAlign: "center", position: 'relative', bottom: '55%', }}>Click to upload and preview an image.</Typography>}
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField label="Location" fullWidth />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField label="Description" fullWidth />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Button variant="contained" fullWidth type="submit">
               Upload
             </Button>

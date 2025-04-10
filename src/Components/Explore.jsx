@@ -39,8 +39,8 @@ export const UserCard = ({ account }) => {
   };
 
   return (
-    <Grid container item xs={12} alignItems="center" spacing={3}>
-      <Grid item xs={2}>
+    <Grid container size={12} alignItems="center" spacing={3}>
+      <Grid size={2}>
         <Avatar
           src={
             account.profilePicture
@@ -51,7 +51,7 @@ export const UserCard = ({ account }) => {
           to={`/profile/${account.username}`}
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid size={6}>
         <Typography variant="body1" color="text.primary">
           {account.username}
         </Typography>
@@ -59,7 +59,7 @@ export const UserCard = ({ account }) => {
           {account.firstName} {account.lastName}
         </Typography>
       </Grid>
-      <Grid container item xs={4} sx={{ justifyContent: "flex-end" }}>
+      <Grid container size={4} sx={{ justifyContent: "flex-end" }}>
         {user._id === account._id ? null : isFollowing ? (
           <Button
             variant="contained"
@@ -168,13 +168,13 @@ export const Explore = (props) => {
     <Container maxWidth="sm">
       <Grid container spacing={0} alignItems="center">
         {searchDialogOpen && (
-          <Grid item xs={1} sx={{ zIndex: 2000 }}>
+          <Grid size={1} sx={{ zIndex: 2000 }}>
             <IconButton onClick={handleSearchDialogClose}>
               <ArrowBack />
             </IconButton>
           </Grid>
         )}
-        <Grid item xs={searchDialogOpen ? 11 : 12}>
+        <Grid size={searchDialogOpen ? 11 : 12}>
           <TextField
             fullWidth
             label="Search"
@@ -215,7 +215,7 @@ export const Explore = (props) => {
         >
           <DialogContent>
             <Container maxWidth="sm">
-              <Grid item xs={1}>
+              <Grid size={1}>
                 <IconButton onClick={handleSinglePostDialogClose}>
                   <ArrowBack />
                 </IconButton>
@@ -235,8 +235,7 @@ export const Explore = (props) => {
           const isLiked = post.likes.some((u) => u._id === user._id);
           return (
             <Grid
-              item
-              xs={4}
+              size={4}
               key={post.image._id}
               onClick={() => handleSinglePostDialogOpen(post, post.likes, isLiked)}
             >

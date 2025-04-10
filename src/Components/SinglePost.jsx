@@ -51,7 +51,7 @@ const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
 
   const CommentCard = ({ comment, firstComment = false }) => (
     <Grid container spacing={1}>
-      <Grid item xs={1}>
+      <Grid size={1}>
         <Avatar
           aria-label="recipe"
           sx={classes.avatarComment}
@@ -59,12 +59,12 @@ const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
           src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
         />
       </Grid>
-      <Grid item xs={10}>
+      <Grid size={10}>
         <Typography variant="body1" >
           <strong>{comment.user.username}</strong> {comment.comment}
         </Typography>
       </Grid>
-      <Grid container item xs={1} sx={{ justifyContent: 'center' }}>
+      <Grid container size={1} sx={{ justifyContent: 'center' }}>
 
         {firstComment && (
           <IconButton
@@ -107,14 +107,14 @@ const CommentField = ({ post, user }) => {
 
   return (
     <Grid container alignItems="center" spacing={2} sx={{ marginTop: '5px', }}>
-      <Grid item xs={1}>
+      <Grid size={1}>
         <Avatar
           sx={classes.avatarComment}
           alt={user.username}
           src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null}
         />
       </Grid>
-      <Grid item xs={11}>
+      <Grid size={11}>
         <TextField
           label="Add a comment..."
           fullWidth
@@ -168,7 +168,7 @@ export default function SinglePost(props) {
   }
 
   return (
-    <Grid item xs={12}>
+    <Grid size={12}>
       <Card>
         <CardHeader
           avatar={
@@ -269,17 +269,17 @@ export default function SinglePost(props) {
       >
         <Grid container>
           <Grid container spacing={2} sx={{ padding: "15px" }}>
-            <Grid container item xs={3}>
+            <Grid container size={3}>
               <IconButton title="Close" variant="contained" onClick={handleLikesDrawer}>
                 <Close />
               </IconButton>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <Typography variant="h4" textAlign="center">
                 Likes
               </Typography>
             </Grid>
-            <Grid container item xs={3} >
+            <Grid container size={3} >
             </Grid>
           </Grid>
         </Grid>
