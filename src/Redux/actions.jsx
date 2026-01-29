@@ -9,14 +9,17 @@ export const UPDATE_PROFILE = "UPDATE_PROFILE";
 export const UPDATE_RELATIONSHIPS = "UPDATE_RELATIONSHIPS";
 export const UPDATE_CONVERSATIONS = "UPDATE_CONVERSATIONS";
 export const UPDATE_CONVERSATION_MESSAGES = "UPDATE_CONVERSATION_MESSAGES";
+export const UPDATE_NOTIFICATIONS = "UPDATE_NOTIFICATIONS";
+export const PUSH_NOTIFICATION = "PUSH_NOTIFICATION";
+export const MARK_NOTIFICATIONS_READ = "MARK_NOTIFICATIONS_READ";
 export const ERROR = "ERROR";
 
 // dev server
-// const currentIP = window.location.href.split(":")[1];
-// export const serverURL = `http:${currentIP}:3003`;
+const currentIP = window.location.href.split(":")[1];
+export const serverURL = `http:${currentIP}:3003`;
 
 // live server
-export const serverURL = 'https://social-picture-app.herokuapp.com';
+// export const serverURL = 'https://social-picture-app.herokuapp.com';
 
 export function signupUser(user) {
   return async (dispatch) => {
@@ -517,6 +520,70 @@ export function deleteMessage(conversationId, messageId) {
       conversation: { ...data }
     });
   }
+}
+
+export function getNotifications() {
+  return async (dispatch) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/notifications`, {
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+
+    return dispatch({
+      type: UPDATE_NOTIFICATIONS,
+      notifications: data.notifications || [],
+      unreadCount: data.unreadCount || 0,
+    });
+  };
+}
+
+export function markNotificationsRead(ids = [], markAll = false) {
+  return async (dispatch) => {
+    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
+
+    const response = await fetch(`${serverURL}/notifications/read`, {
+      method: "post",
+      dataType: "json",
+      body: JSON.stringify({ ids, all: markAll }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+        "Authorization": bearer,
+      },
+    });
+    const data = await response.json();
+    if (data.error) {
+      return dispatch({
+        type: ERROR,
+        error: data.error,
+      });
+    }
+
+    return dispatch({
+      type: MARK_NOTIFICATIONS_READ,
+      updatedIds: data.updatedIds,
+      unreadCount: data.unreadCount,
+    });
+  };
+}
+
+export function socketNotification(notification) {
+  return async (dispatch) => {
+    return dispatch({
+      type: PUSH_NOTIFICATION,
+      notification,
+    });
+  };
 }
 
 export function updateThemeMode(mode) {

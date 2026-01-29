@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { Home, Search, AddCircle, AccountCircle } from '@mui/icons-material';
+import { Badge, BottomNavigation, BottomNavigationAction } from '@mui/material';
+import { Home, Search, AddCircle, AccountCircle, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
 const classes = {
@@ -17,6 +17,7 @@ const classes = {
 
 export default function Navbar() {
   const user = useSelector(state => state.user);
+  const unreadCount = useSelector(state => state.notifications.unreadCount);
   const location = useLocation();
   const [value, setValue] = useState(location.pathname);
   const [disableNav, setDisableNav] = useState(false);
@@ -37,6 +38,18 @@ useEffect(()=>{
       <BottomNavigationAction disabled={disableNav} label="Home" value="/" to='/' icon={<Home />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Explore" value="/explore" to='/explore' icon={<Search />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Post" value="/post" to='/post' icon={<AddCircle />} component={Link} />
+      <BottomNavigationAction
+        disabled={disableNav}
+        label="Notifications"
+        value="/notifications"
+        to='/notifications'
+        icon={
+          <Badge color="error" badgeContent={unreadCount || 0} overlap="circular">
+            <NotificationsIcon />
+          </Badge>
+        }
+        component={Link}
+      />
       <BottomNavigationAction disabled={disableNav} label="Profile" value={`/profile/${user.username}`} to={`/profile/${user.username}`} icon={<AccountCircle />} component={Link} />
     </BottomNavigation>
   );
