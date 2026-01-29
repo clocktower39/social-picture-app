@@ -10,7 +10,7 @@ import Profile from "./Components/Profile";
 import Notifications from "./Components/Notifications";
 import Navbar from "./Components/Navbar";
 import AuthRoute from "./Components/AuthRoute";
-import { Box, ThemeProvider } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { theme } from './theme';
 import { getNotifications, socketNotification } from "./Redux/actions";
@@ -50,6 +50,7 @@ function App({ socket }) {
 
   return (
     <ThemeProvider theme={themeSelection} >
+      <CssBaseline />
       <Router basename="/social-picture-app/">
         <Box sx={{  backgroundColor: 'background.default', minHeight: '100%' }}>
           <Routes>
