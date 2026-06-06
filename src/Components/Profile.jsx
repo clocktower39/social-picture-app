@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Avatar,
   Button,
@@ -18,15 +18,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Close, GridOn, Menu as MenuIcon, Portrait } from "@mui/icons-material";
+import { Close, GridOn, Message, Menu as MenuIcon, Portrait } from "@mui/icons-material";
 import {
   getUserProfilePage,
   getMyRelationships,
   logoutUser,
+  requestFollow,
+  requestUnfollow,
+  createConversation,
   updateUser,
   uploadProfilePicture,
   serverURL,
 } from "../Redux/actions";
+import { getFilterCss } from "../filters";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
 import { UserCard } from "./Explore";
@@ -299,14 +303,17 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export const Profile = (props) => {
   const params = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const profile = useSelector((state) => state.profile);
+  const relationships = useSelector((state) => state.relationships);
   const [gridWidth, setGridWidth] = useState(4);
   const [loading, setLoading] = useState(true);
   const [openFollowingModal, setOpenFollowingModal] = useState(false);
   const [openFollowersModal, setOpenFollowersModal] = useState(false);
   const [openEditProfileModal, setOpenEditProfileModal] = useState(false);
   const [tabValue, setTabValue] = React.useState(0);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -315,6 +322,39 @@ export const Profile = (props) => {
   const handleFollowingModal = () => setOpenFollowingModal((prev) => !prev);
   const handleFollowersModal = () => setOpenFollowersModal((prev) => !prev);
   const handleEditProfileModal = () => setOpenEditProfileModal((prev) => !prev);
+
+  const isSelf = user._id === profile.user._id;
+  const isFollowing = relationships.following.some((u) => u._id === profile.user._id);
+  const isFollower = profile.followers?.some((u) => u._id === user._id);
+
+  const handleFollowToggle = async () => {
+    if (!profile.user._id || actionLoading) return;
+    setActionLoading(true);
+    try {
+      if (isFollowing) {
+        await dispatch(requestUnfollow(profile.user._id));
+      } else {
+        await dispatch(requestFollow(profile.user._id));
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMessage = async () => {
+    if (!profile.user._id) return;
+    setActionLoading(true);
+    try {
+      const action = await dispatch(
+        createConversation({ userIds: [profile.user._id], isGroup: false })
+      );
+      if (action?.conversation) {
+        navigate("/messages", { state: { openConvoId: action.conversation._id } });
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   useEffect(() => {
     setOpenFollowingModal(false);
@@ -381,27 +421,34 @@ export const Profile = (props) => {
 
         <Grid container size={12}>
           <Grid container size={12} spacing={1}>
-            {user._id === profile.user._id ? (
+            {isSelf ? (
               <>
                 <Grid container size={12}>
                   <Button variant="contained" fullWidth onClick={handleEditProfileModal}>
-                    Edit
+                    Edit Profile
                   </Button>
                 </Grid>
               </>
             ) : (
               <>
                 <Grid container size={6}>
-                  <Button variant="contained" fullWidth>
-                    {profile.followers.some((u) => u._id === user._id)
-                      ? "Unfollow"
-                      : profile.following.some((u) => u._id === user._id)
-                      ? "Follow Back"
-                      : "Follow"}
+                  <Button
+                    variant={isFollowing ? "outlined" : "contained"}
+                    fullWidth
+                    onClick={handleFollowToggle}
+                    disabled={actionLoading}
+                  >
+                    {isFollowing ? "Unfollow" : isFollower ? "Follow Back" : "Follow"}
                   </Button>
                 </Grid>
                 <Grid container size={6}>
-                  <Button variant="contained" fullWidth disabled>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleMessage}
+                    disabled={actionLoading}
+                    startIcon={<Message />}
+                  >
                     Message
                   </Button>
                 </Grid>
@@ -437,7 +484,7 @@ export const Profile = (props) => {
                     {" "}
                     {gridWidth === 4 ? (
                       <CardMedia
-                        sx={classes.media}
+                        sx={{ ...classes.media, filter: getFilterCss(post.filter) }}
                         image={post.image ? `${serverURL}/post/image/${post.image}` : null}
                       />
                     ) : (

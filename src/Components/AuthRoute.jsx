@@ -1,35 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 import { loginJWT } from '../Redux/actions';
 import Loading from './Loading';
 
-// hook state to redirect to history of last requested component
-// add initial fetch request for user info if already authenticated so login page doesnt even load if already authenticated from previous login
-
-export const AuthRoute = (props) => {
-    const { socket } = props;
-
+export const AuthRoute = () => {
     const dispatch = useDispatch();
-    const user = useSelector(state => state.user);
+    const user = useSelector((state) => state.user);
     const [loading, setLoading] = useState(true);
 
-
-    const handleLoginAttempt = async (e) => {
-        dispatch(loginJWT(localStorage.getItem('JWT_AUTH_TOKEN'))).then(()=>setLoading(false));
-    }
-
-    useEffect(()=>{
-        if(localStorage.getItem('JWT_AUTH_TOKEN')!==null){
-            handleLoginAttempt();
-        }
-        else{
+    useEffect(() => {
+        if (localStorage.getItem("JWT_REFRESH_TOKEN")) {
+            dispatch(loginJWT()).finally(() => setLoading(false));
+        } else {
             setLoading(false);
         }
-        // eslint-disable-next-line
-    },[])
+    }, [dispatch]);
 
-    return loading?<Loading />:user.username?<Outlet socket={socket} />:<Navigate to={{ pathname: '/login'}} />;
-}
+    if (loading) return <Loading />;
+    if (!user.username) return <Navigate to="/login" replace />;
+    return <Outlet />;
+};
 
-export default AuthRoute
+export default AuthRoute;

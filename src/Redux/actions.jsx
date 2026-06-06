@@ -1,5 +1,6 @@
 import { jwtDecode as jwt } from "jwt-decode";
 import axios from "axios";
+import { request, serverURL } from "../api";
 
 export const LOGIN_USER = "LOGIN_USER";
 export const LOGOUT_USER = "LOGOUT_USER";
@@ -9,609 +10,517 @@ export const UPDATE_PROFILE = "UPDATE_PROFILE";
 export const UPDATE_RELATIONSHIPS = "UPDATE_RELATIONSHIPS";
 export const UPDATE_CONVERSATIONS = "UPDATE_CONVERSATIONS";
 export const UPDATE_CONVERSATION_MESSAGES = "UPDATE_CONVERSATION_MESSAGES";
+export const ADD_CONVERSATION = "ADD_CONVERSATION";
 export const UPDATE_NOTIFICATIONS = "UPDATE_NOTIFICATIONS";
 export const PUSH_NOTIFICATION = "PUSH_NOTIFICATION";
 export const MARK_NOTIFICATIONS_READ = "MARK_NOTIFICATIONS_READ";
+export const SET_EXPLORE = "SET_EXPLORE";
+export const SET_TRENDING_TAGS = "SET_TRENDING_TAGS";
+export const SET_TAG_RESULTS = "SET_TAG_RESULTS";
+export const SET_USER_SEARCH = "SET_USER_SEARCH";
 export const ERROR = "ERROR";
 
-// dev server
-const currentIP = window.location.href.split(":")[1];
-export const serverURL = `http:${currentIP}:3003`;
+export { serverURL };
 
-// live server
-// export const serverURL = 'https://social-picture-app.herokuapp.com';
+const persistToken = (accessToken, refreshToken) => {
+  if (accessToken) localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
+  if (refreshToken) localStorage.setItem("JWT_REFRESH_TOKEN", refreshToken);
+};
+
+const errorDispatch = (dispatch, err) => {
+  const message = err?.data?.error || err?.message || "Unknown error";
+  return dispatch({ type: ERROR, error: message });
+};
 
 export function signupUser(user) {
   return async (dispatch) => {
-    const response = await fetch(`${serverURL}/signup`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify(user),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
-      });
+    try {
+      await request("/signup", { method: "POST", body: user });
+      return dispatch(loginUser({ username: user.username, password: user.password }));
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-
-    return dispatch(loginUser({ email: user.email, password: user.password }));
   };
 }
 
-// Retrieves new JWT Token from username and password post request
 export function loginUser(user) {
   return async (dispatch) => {
-    const response = await fetch(`${serverURL}/login`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify(user),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
-      });
+    try {
+      const data = await request("/login", { method: "POST", body: user });
+      persistToken(data.accessToken, data.refreshToken);
+      const decoded = jwt(data.accessToken);
+      return dispatch({ type: LOGIN_USER, user: decoded });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-    const accessToken = data.accessToken;
-    const refreshToken = data.refreshToken;
-    const decodedAccessToken = jwt(accessToken);
-
-    localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
-    localStorage.setItem("JWT_REFRESH_TOKEN", refreshToken);
-    return dispatch({
-      type: LOGIN_USER,
-      user: decodedAccessToken,
-    });
+  };
+}export function changePassword(currentPassword, newPassword) {
+  return async (dispatch) => {
+    try {
+      const data = await request("/user/changePassword", {
+        method: "POST",
+        body: { currentPassword, newPassword },
+      });
+      persistToken(data.accessToken);
+      const decoded = jwt(data.accessToken);
+      return dispatch({ type: LOGIN_USER, user: decoded });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
   };
 }
 
-export function changePassword(currentPassword, newPassword) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}`;
-
-    const response = await fetch(`${serverURL}/changePassword`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ currentPassword, newPassword }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        Authorization: bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) return data;
-
-    const accessToken = data.accessToken;
-    const decodedAccessToken = jwt(accessToken);
-
-    localStorage.setItem("JWT_AUTH_TOKEN", accessToken);
-    return dispatch({
-      type: LOGIN_USER,
-      agent: decodedAccessToken,
-    });
-  };
-}
-
-// Logs into account with JWT token
 export const loginJWT = () => {
   return async (dispatch) => {
     const refreshToken = localStorage.getItem("JWT_REFRESH_TOKEN");
-
-    const response = await fetch(`${serverURL}/refresh-tokens`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Set the content type to JSON
-      },
-      body: JSON.stringify({ refreshToken }), // Send the refresh token in the request body
-    });
-
-    const data = await response.json();
-    if (data.accessToken) {
-      const decodedAccessToken = jwt(data.accessToken);
-      localStorage.setItem("JWT_AUTH_TOKEN", data.accessToken);
-      return dispatch({
-        type: LOGIN_USER,
-        user: decodedAccessToken,
-      });
-    } else {
-      return dispatch({
-        type: LOGOUT_USER,
-      });
+    if (!refreshToken) {
+      return dispatch({ type: LOGOUT_USER });
+    }
+    try {
+      const data = await request("/refresh-tokens", { method: "POST", body: { refreshToken } });
+      persistToken(data.accessToken);
+      const decoded = jwt(data.accessToken);
+      return dispatch({ type: LOGIN_USER, user: decoded });
+    } catch {
+      localStorage.removeItem("JWT_AUTH_TOKEN");
+      localStorage.removeItem("JWT_REFRESH_TOKEN");
+      return dispatch({ type: LOGOUT_USER });
     }
   };
 };
 
-
 export function logoutUser() {
   return async (dispatch) => {
     localStorage.removeItem("JWT_AUTH_TOKEN");
-    return dispatch({
-      type: LOGOUT_USER,
-    });
+    localStorage.removeItem("JWT_REFRESH_TOKEN");
+    return dispatch({ type: LOGOUT_USER });
   };
 }
 
 export function getFollowingPosts() {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/post/followingPosts`,
-      {
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-          "Authorization": bearer,
-        },
-      }
-    );
-    const data = await response.json();
-    return dispatch({
-      type: UPDATE_POSTS,
-      posts: data,
-    });
+  return async (dispatch) => {
+    try {
+      const data = await request("/post/followingPosts");
+      return dispatch({ type: UPDATE_POSTS, posts: data });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
   };
 }
 
 export function updateUser(user) {
   return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}`;
-
-    const response = await fetch(`${serverURL}/user/update`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        description: user.description,
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        Authorization: bearer,
-      },
-    });
-    const data = await response.json();
-
-    if (data.status === "error") {
-      return dispatch({
-        type: ERROR,
-        error: "User not updated",
-      });
-    } else {
-      localStorage.setItem("JWT_AUTH_TOKEN", data.accessToken);
-      const decodedAccessToken = jwt(data.accessToken);
-      return dispatch({
-        type: LOGIN_USER,
-        user: decodedAccessToken,
-      });
+    try {
+      const data = await request("/user/update", { method: "POST", body: user });
+      persistToken(data.accessToken);
+      const decoded = jwt(data.accessToken);
+      return dispatch({ type: LOGIN_USER, user: decoded });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
   };
 }
 
 export function uploadProfilePicture(formData) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    axios
-      .post(`${serverURL}/user/upload/profilePicture`, formData, { headers: { Authorization: bearer } })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
+  return async (dispatch) => {
+    try {
+      const response = await axios.post(`${serverURL}/user/upload/profilePicture`, formData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}` },
       });
-  }
-}
-
-export function uploadUserPost(formData) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    axios
-      .post(`${serverURL}/post/upload`, formData, { headers: { Authorization: bearer } })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-}
-
-export function getUserProfilePage(username) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    axios
-      .get(`${serverURL}/user/profile/${username}`, { headers: { Authorization: bearer } })
-      .then(async (res) => {
-        const data = res.data;
-
-        return dispatch({
-          type: UPDATE_PROFILE,
-          posts: data.posts,
-          user: data.user,
-          following: data.following,
-          followers: data.followers,
-        });
-      })
-  }
-}
-
-export function requestFollow(user) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/follow`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ user }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-  }
-}
-
-export function requestUnfollow(user) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/unfollow`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ user }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-  }
-}
-
-export function getMyRelationships() {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/myRelationships`, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
-      });
-    }
-
-    return dispatch({
-      type: UPDATE_RELATIONSHIPS,
-      following: data.following,
-      followers: data.followers,
-    });
-  }
-}
-
-export function likePost(id, user) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    const posts = getState().posts;
-
-    const response = await fetch(`${serverURL}/post/like`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ id }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    if (response.status === 200) {
-      const updatedLikes = posts.map(post => {
-        if (post._id === id) {
-          if (!post.likes.includes(user._id)) {
-            post.likes.push({
-              _id: user._id,
-              username: user.username,
-              profilePicture: user.profilePicture || null,
-            });
-          }
-        }
-        return post;
-      });
-
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts: updatedLikes,
-      });
-    }
-  }
-}
-
-export function unlikePost(id, user) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    const posts = getState().posts;
-
-    const response = await fetch(`${serverURL}/post/unlike`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ id }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    if (response.status === 200) {
-      const removedLikes = posts.map(post => {
-        if (post._id === id) {
-          const removeLike = post.likes.filter(like => like._id !== user._id);
-          post.likes = removeLike;
-        }
-        return post;
-      })
-
-
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts: removedLikes,
-      });
+      const { accessToken, refreshToken } = response.data;
+      persistToken(accessToken, refreshToken);
+      if (accessToken) {
+        const decoded = jwt(accessToken);
+        return dispatch({ type: LOGIN_USER, user: decoded });
+      }
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
   };
 }
 
-export function commentPost(id, user, comment) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    const posts = getState().posts;
-
-    const response = await fetch(`${serverURL}/post/comment`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ id, comment }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    if (response.status === 200) {
-      const updatedComments = posts.map(post => {
-        if (post._id === id) {
-          if (!post.likes.includes(user._id)) {
-            post.comments.push({
-              user,
-              comment,
-              likes: [],
-            });
-          }
-        }
-        return post;
+export function uploadUserPost(formData) {
+  return async (dispatch) => {
+    try {
+      const response = await axios.post(`${serverURL}/post/upload`, formData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("JWT_AUTH_TOKEN")}` },
       });
-
-      return dispatch({
-        type: UPDATE_POSTS,
-        posts: updatedComments,
-      });
+      return dispatch({ type: UPDATE_POSTS, posts: undefined, prepend: response.data });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-  }
+  };
+}
+
+export function getUserProfilePage(username) {
+  return async (dispatch) => {
+    try {
+      const data = await request(`/user/profile/${username}`);
+      return dispatch({
+        type: UPDATE_PROFILE,
+        user: data.user,
+        posts: data.posts,
+        following: data.following,
+        followers: data.followers,
+        isFollowing: data.isFollowing,
+      });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function requestFollow(userId) {
+  return async (dispatch) => {
+    try {
+      await request("/follow", { method: "POST", body: { user: userId } });
+      return dispatch(getMyRelationships());
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function requestUnfollow(userId) {
+  return async (dispatch) => {
+    try {
+      await request("/unfollow", { method: "POST", body: { user: userId } });
+      return dispatch(getMyRelationships());
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function getMyRelationships() {
+  return async (dispatch) => {
+    try {
+      const data = await request("/myRelationships");
+      return dispatch({ type: UPDATE_RELATIONSHIPS, followers: data.followers, following: data.following });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function likePost(id, user) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/post/like", { method: "POST", body: { id } });
+      const posts = getState().posts;
+      const updated = posts.map((post) => {
+        if (post._id !== id) return post;
+        if (post.likes.some((l) => (l._id || l) === user._id)) return post;
+        return { ...post, likes: [...post.likes, { _id: user._id, username: user.username, profilePicture: user.profilePicture }] };
+      });
+      return dispatch({ type: UPDATE_POSTS, posts: updated });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function unlikePost(id, user) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/post/unlike", { method: "POST", body: { id } });
+      const posts = getState().posts;
+      const updated = posts.map((post) =>
+        post._id === id
+          ? { ...post, likes: post.likes.filter((l) => (l._id || l) !== user._id) }
+          : post
+      );
+      return dispatch({ type: UPDATE_POSTS, posts: updated });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function commentPost(id, user, comment, mentions = []) {
+  return async (dispatch, getState) => {
+    try {
+      const data = await request("/post/comment", {
+        method: "POST",
+        body: { id, comment, mentions },
+      });
+      const posts = getState().posts;
+      const updated = posts.map((post) => (post._id === id ? data.post : post));
+      return dispatch({ type: UPDATE_POSTS, posts: updated });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function deleteComment(postId, commentId) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/post/deleteComment", {
+        method: "POST",
+        body: { id: postId, commentId },
+      });
+      const posts = getState().posts;
+      const updated = posts.map((post) =>
+        post._id === postId
+          ? { ...post, comments: post.comments.filter((c) => c._id !== commentId) }
+          : post
+      );
+      return dispatch({ type: UPDATE_POSTS, posts: updated });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function likeComment(postId, commentId) {
+  return async (dispatch) => {
+    try {
+      await request("/post/likeComment", {
+        method: "POST",
+        body: { id: postId, commentId },
+      });
+      return { success: true };
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
 }
 
 export function deletePost(postId, imageId) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/post/delete`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ postId, imageId }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    if (response.status === 200) {
+  return async (dispatch) => {
+    try {
+      await request("/post/delete", { method: "POST", body: { postId, imageId } });
       return dispatch(getFollowingPosts());
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-  }
+  };
+}
+
+export function getExplorePosts(params = {}, options = {}) {
+  return async (dispatch) => {
+    try {
+      const search = new URLSearchParams(params).toString();
+      const data = await request(`/explore${search ? `?${search}` : ""}`);
+      if (options.append) {
+        return dispatch({
+          type: SET_EXPLORE,
+          posts: undefined,
+          append: data.posts || [],
+          nextCursor: data.nextCursor || null,
+          hasMore: Boolean(data.hasMore),
+        });
+      }
+      return dispatch({
+        type: SET_EXPLORE,
+        posts: data.posts || [],
+        nextCursor: data.nextCursor || null,
+        hasMore: Boolean(data.hasMore),
+      });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function getTrendingTags() {
+  return async (dispatch) => {
+    try {
+      const data = await request("/explore/tags/trending?limit=12");
+      return dispatch({ type: SET_TRENDING_TAGS, tags: data.tags });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function getPostsByTag(tag) {
+  return async (dispatch) => {
+    try {
+      const data = await request(`/explore/tags/${encodeURIComponent(tag)}?limit=60`);
+      return dispatch({ type: SET_TAG_RESULTS, tag, posts: data.posts, count: data.count });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function searchUsers(query) {
+  return async (dispatch) => {
+    if (!query) {
+      return dispatch({ type: SET_USER_SEARCH, users: [] });
+    }
+    try {
+      const data = await request("/search", { method: "POST", body: { username: query } });
+      return dispatch({ type: SET_USER_SEARCH, users: data.users });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
 }
 
 export function getConversations() {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/conversation/getConversations`, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
-      });
+  return async (dispatch) => {
+    try {
+      const data = await request("/conversation/getConversations");
+      return dispatch({ type: UPDATE_CONVERSATIONS, conversations: data });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-
-    return dispatch({
-      type: UPDATE_CONVERSATIONS,
-      conversations: data
-    });
-  }
+  };
 }
 
-export function sendMessage(conversationId, message) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/conversation/message/send`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ conversationId, message }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
+export function createConversation({ userIds = [], name = null, isGroup = false }) {
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/create", {
+        method: "POST",
+        body: { userIds, name, isGroup },
       });
+      return dispatch({ type: ADD_CONVERSATION, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-    
-    return dispatch({
-      type: UPDATE_CONVERSATION_MESSAGES,
-      conversation: { ...data }
-    });
-  }
+  };
+}
+
+export function sendMessage(conversationId, message, mentions = []) {
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/message/send", {
+        method: "POST",
+        body: { conversationId, message, mentions },
+      });
+      return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
 }
 
 export function socketMessage(conversation) {
   return async (dispatch) => {
-    return dispatch({
-      type: UPDATE_CONVERSATION_MESSAGES,
-      conversation
-    })
-  }
+    return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+  };
 }
 
 export function deleteMessage(conversationId, messageId) {
-  return async (dispatch, getState) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/conversation/message/delete`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ conversationId, messageId }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/message/delete", {
+        method: "POST",
+        body: { conversationId, messageId },
       });
+      return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-    
-    return dispatch({
-      type: UPDATE_CONVERSATION_MESSAGES,
-      conversation: { ...data }
-    });
-  }
+  };
+}
+
+export function addConversationMembers(conversationId, userIds) {
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/addMembers", {
+        method: "POST",
+        body: { conversationId, userIds },
+      });
+      return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function removeConversationMember(conversationId, userId) {
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/removeMember", {
+        method: "POST",
+        body: { conversationId, userId },
+      });
+      return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function leaveConversation(conversationId) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/conversation/leave", { method: "POST", body: { conversationId } });
+      const conversations = getState().conversations.filter((c) => c._id !== conversationId);
+      return dispatch({ type: UPDATE_CONVERSATIONS, conversations });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function renameGroup(conversationId, name) {
+  return async (dispatch) => {
+    try {
+      const conversation = await request("/conversation/rename", {
+        method: "POST",
+        body: { conversationId, name },
+      });
+      return dispatch({ type: UPDATE_CONVERSATION_MESSAGES, conversation });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
 }
 
 export function getNotifications() {
   return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/notifications`, {
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
+    try {
+      const data = await request("/notifications");
       return dispatch({
-        type: ERROR,
-        error: data.error,
+        type: UPDATE_NOTIFICATIONS,
+        notifications: data.notifications || [],
+        unreadCount: data.unreadCount || 0,
       });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-
-    return dispatch({
-      type: UPDATE_NOTIFICATIONS,
-      notifications: data.notifications || [],
-      unreadCount: data.unreadCount || 0,
-    });
   };
 }
 
 export function markNotificationsRead(ids = [], markAll = false) {
   return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-
-    const response = await fetch(`${serverURL}/notifications/read`, {
-      method: "post",
-      dataType: "json",
-      body: JSON.stringify({ ids, all: markAll }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      },
-    });
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error,
+    try {
+      const data = await request("/notifications/read", {
+        method: "POST",
+        body: { ids, all: markAll },
       });
+      return dispatch({
+        type: MARK_NOTIFICATIONS_READ,
+        updatedIds: data.updatedIds,
+        unreadCount: data.unreadCount,
+      });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-
-    return dispatch({
-      type: MARK_NOTIFICATIONS_READ,
-      updatedIds: data.updatedIds,
-      unreadCount: data.unreadCount,
-    });
   };
 }
 
 export function socketNotification(notification) {
   return async (dispatch) => {
-    return dispatch({
-      type: PUSH_NOTIFICATION,
-      notification,
-    });
+    return dispatch({ type: PUSH_NOTIFICATION, notification });
   };
 }
 
 export function updateThemeMode(mode) {
   return async (dispatch) => {
-    const bearer = `Bearer ${localStorage.getItem('JWT_AUTH_TOKEN')}`;
-    const response = await fetch(`${serverURL}/user/update`, {
-      method: 'post',
-      dataType: 'json',
-      body: JSON.stringify({ themeMode: mode }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        "Authorization": bearer,
-      }
-    })
-    const data = await response.json();
-    if (data.error) {
-      return dispatch({
-        type: ERROR,
-        error: data.error
-      });
+    try {
+      const data = await request("/user/update", { method: "POST", body: { themeMode: mode } });
+      persistToken(data.accessToken);
+      const decoded = jwt(data.accessToken);
+      return dispatch({ type: LOGIN_USER, user: decoded });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
     }
-    const accessToken = data.accessToken;
-    const decodedAccessToken = jwt(accessToken);
-
-    localStorage.setItem('JWT_AUTH_TOKEN', accessToken);
-    return dispatch({
-      type: LOGIN_USER,
-      user: decodedAccessToken,
-    });
-  }
+  };
 }

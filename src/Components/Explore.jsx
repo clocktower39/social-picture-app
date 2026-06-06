@@ -1,255 +1,576 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Avatar,
+  AvatarGroup,
+  Box,
   Button,
   CardMedia,
+  Chip,
   Container,
   Dialog,
-  DialogContent,
+  Divider,
   Grid,
   IconButton,
+  InputAdornment,
+  Skeleton,
+  Tab,
+  Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Close,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   requestFollow,
   requestUnfollow,
   getMyRelationships,
-  serverURL,
+  getExplorePosts,
+  getTrendingTags,
+  searchUsers,
+  getPostsByTag,
 } from "../Redux/actions";
+import { postImageUrl, profilePictureUrl, debounce } from "../api";
+import { getFilterCss } from "../filters";
 import SinglePost from "./SinglePost";
 
 export const UserCard = ({ account }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const relationships = useSelector((state) => state.relationships);
-  const isFollowing = relationships.following.some(
-    (r) => r.user === account._id
-  );
+  const isFollowing = relationships.following.some((r) => r._id === account._id);
+  const isSelf = user._id === account._id;
 
-  const handleRequestFollow = (user) => {
-    dispatch(requestFollow(user._id));
-  };
-
-  const handleRequestUnfollow = (user) => {
-    dispatch(requestUnfollow(user._id));
-  };
+  const handleFollow = () => dispatch(requestFollow(account._id));
+  const handleUnfollow = () => dispatch(requestUnfollow(account._id));
 
   return (
     <Grid container size={12} alignItems="center" spacing={3}>
       <Grid size={2}>
-        <Avatar
-          src={
-            account.profilePicture
-              ? `${serverURL}/user/profilePicture/${account.profilePicture}`
-              : null
-          }
-          component={Link}
-          to={`/profile/${account.username}`}
-        />
+        <Avatar src={profilePictureUrl(account.profilePicture)} />
       </Grid>
       <Grid size={6}>
-        <Typography variant="body1" color="text.primary">
+        <Typography variant="body1" color="text.primary" noWrap>
           {account.username}
         </Typography>
-        <Typography variant="body2" color="text.primary">
+        <Typography variant="body2" color="text.secondary" noWrap>
           {account.firstName} {account.lastName}
         </Typography>
       </Grid>
       <Grid container size={4} sx={{ justifyContent: "flex-end" }}>
-        {user._id === account._id ? null : isFollowing ? (
-          <Button
-            variant="contained"
-            onClick={() => handleRequestUnfollow(account)}
-            fullWidth
-          >
-            Unfollow
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            onClick={() => handleRequestFollow(account)}
-            fullWidth
-          >
-            Follow
-          </Button>
-        )}
+        {!isSelf &&
+          (isFollowing ? (
+            <Button variant="outlined" onClick={handleUnfollow} fullWidth>
+              Unfollow
+            </Button>
+          ) : (
+            <Button variant="contained" onClick={handleFollow} fullWidth>
+              Follow
+            </Button>
+          ))}
       </Grid>
     </Grid>
   );
 };
 
-export const Explore = (props) => {
+const SearchPanel = ({ onClose }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const [posts, setPosts] = useState([]);
-  const [searchInput, setSearchInput] = useState("");
-  const [users, setUsers] = useState([]);
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  const [singlePostDialogOpen, setSinglePostDialogOpen] = useState(false);
-  const searchRef = useRef(null);
-  const [singlePost, setSinglePost] = useState(null);
-  const [singlePostLikes, setSinglePostLikes] = useState(null);
-  const [isPostLiked, setIsPostLiked] = useState(null);
-
-  const handleSearchDialogOpen = () => {
-    setSearchDialogOpen(true);
-    searchRef.current.focus();
-  };
-
-  const handleSearchDialogClose = () => setSearchDialogOpen(false);
-
-  const handleSinglePostDialogOpen = (post, postLikes, isLiked) => {
-    setSinglePostDialogOpen(true);
-    setSinglePost(post);
-    setSinglePostLikes(postLikes);
-    setIsPostLiked(isLiked);
-  }
-  const handleSinglePostDialogClose = () => {
-    setSinglePostDialogOpen(false);
-  }
-
-  const fetchExplorePosts = async () => {
-    let response = await fetch(`${serverURL}/explore`, {
-      method: "get",
-      dataType: "json",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-
-    let data = await response.json();
-
-    setPosts(data);
-  };
-
-  const fetchSearch = async () => {
-    let payload = JSON.stringify({ username: searchInput });
-
-    let response = await fetch(`${serverURL}/search`, {
-      method: "post",
-      dataType: "json",
-      body: payload,
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-
-    let data = await response.json();
-
-    setUsers(data.users);
-  };
-
-  const handleInput = (e) => {
-    setSearchInput(e.target.value);
-  };
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState(0);
+  const users = useSelector((state) => state.explore.userSearch);
+  const trending = useSelector((state) => state.explore.trendingTags);
+  const [tagPosts, setTagPosts] = useState([]);
+  const [tagSearch, setTagSearch] = useState("");
 
   useEffect(() => {
-    if (searchInput.length) {
-      fetchSearch();
+    if (trending.length === 0) dispatch(getTrendingTags());
+  }, [dispatch, trending.length]);
+
+  const debouncedSearch = useRef(
+    debounce((value) => {
+      if (tab === 0) {
+        dispatch(searchUsers(value));
+      } else if (tab === 1) {
+        setTagSearch(value.startsWith("#") ? value.slice(1) : value);
+      }
+    }, 300)
+  ).current;
+
+  useEffect(() => {
+    debouncedSearch(query);
+  }, [query, tab, debouncedSearch]);
+
+  useEffect(() => {
+    if (tab === 1 && tagSearch) {
+      dispatch(getPostsByTag(tagSearch)).then((action) => {
+        if (action?.posts) setTagPosts(action.posts);
+      });
+    } else {
+      setTagPosts([]);
     }
-    // eslint-disable-next-line
-  }, [searchInput]);
+  }, [tagSearch, tab, dispatch]);
+
+  return (
+    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
+      <Box sx={{ display: "flex", alignItems: "center", padding: "8px 12px", gap: 1 }}>
+        <IconButton onClick={onClose}>
+          <ArrowBack />
+        </IconButton>
+        <TextField
+          autoFocus
+          fullWidth
+          size="small"
+          placeholder="Search users, tags, or locations"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
+        <Tab label="People" />
+        <Tab label="Tags" />
+        <Tab label="Places" />
+      </Tabs>
+      <Box sx={{ padding: 2 }}>
+        {tab === 0 && (
+          <>
+            {query.length === 0 ? (
+              <Typography color="text.secondary" variant="body2">
+                Type to find people
+              </Typography>
+            ) : users.length === 0 ? (
+              <Typography color="text.secondary" variant="body2">
+                No users found
+              </Typography>
+            ) : (
+              <Grid container spacing={2}>
+                {users.map((account) => (
+                  <UserCard key={account._id} account={account} />
+                ))}
+              </Grid>
+            )}
+          </>
+        )}
+        {tab === 1 && (
+          <>
+            {query.length === 0 ? (
+              <Box>
+                <Typography variant="overline" color="text.secondary">
+                  <TrendingUp sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }} />
+                  Trending tags
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                  {trending.map((t) => (
+                    <Chip
+                      key={t.tag}
+                      label={`#${t.tag} (${t.count})`}
+                      clickable
+                      onClick={() => setQuery(`#${t.tag}`)}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            ) : tagPosts.length === 0 ? (
+              <Typography color="text.secondary" variant="body2">
+                No posts for this tag
+              </Typography>
+            ) : (
+              <Grid container spacing={0.5}>
+                {tagPosts.map((post) => {
+                  const imageId = post.image?._id || post.image;
+                  return (
+                    <Grid size={4} key={post._id}>
+                      <CardMedia
+                        sx={{
+                          paddingTop: "100%",
+                          backgroundSize: "cover",
+                          filter: getFilterCss(post.filter),
+                        }}
+                        image={imageId ? postImageUrl(imageId) : null}
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            )}
+          </>
+        )}
+        {tab === 2 && (
+          <Typography color="text.secondary" variant="body2">
+            Place search coming soon. Try a tag like #paris for now.
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const SectionHeader = ({ icon, title, action }) => (
+  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 8px" }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+      {icon}
+      <Typography variant="subtitle1" fontWeight={600}>
+        {title}
+      </Typography>
+    </Box>
+    {action}
+  </Box>
+);
+
+const FollowingRow = ({ posts, onPostClick }) => {
+  if (!posts || posts.length === 0) return null;
+  const followingPosts = posts.filter((p) => p._source === "following");
+  if (followingPosts.length === 0) return null;
+
+  return (
+    <Box>
+      <SectionHeader
+        icon={<AvatarGroup max={4} sx={{ "& .MuiAvatar-root": { width: 24, height: 24, fontSize: 12 } }}>{followingPosts.slice(0, 4).map((p) => (
+          <Avatar key={p._id} src={profilePictureUrl(p.user?.profilePicture)} />
+        ))}</AvatarGroup>}
+        title="From people you follow"
+      />
+      <Box sx={{ display: "flex", gap: 1, overflowX: "auto", paddingBottom: 1, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
+        {followingPosts.map((post) => {
+          const imageId = post.image?._id || post.image;
+          return (
+            <Box
+              key={post._id}
+              onClick={() => onPostClick(post)}
+              sx={{
+                flex: "0 0 auto",
+                width: 140,
+                height: 180,
+                borderRadius: 2,
+                backgroundImage: imageId ? `url(${postImageUrl(imageId)})` : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: getFilterCss(post.filter),
+                position: "relative",
+                cursor: "pointer",
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.65) 100%)",
+                }}
+              />
+              <Box sx={{ position: "absolute", bottom: 8, left: 8, right: 8, color: "white" }}>
+                <Typography variant="caption" fontWeight={600} sx={{ display: "block" }} noWrap>
+                  @{post.user?.username}
+                </Typography>
+                {post.caption && (
+                  <Typography variant="caption" sx={{ display: "block", opacity: 0.85, fontSize: 10 }} noWrap>
+                    {post.caption}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+      <Divider sx={{ marginTop: 1 }} />
+    </Box>
+  );
+};
+
+const GridSkeleton = ({ count = 6 }) => (
+  <Grid container spacing={0.5} sx={{ marginTop: 0.5 }}>
+    {Array.from({ length: count }).map((_, i) => (
+      <Grid size={4} key={i}>
+        <Skeleton variant="rectangular" sx={{ paddingTop: "100%", borderRadius: 1 }} />
+      </Grid>
+    ))}
+  </Grid>
+);
+
+export const Explore = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
+  const posts = useSelector((state) => state.explore.posts);
+  const trending = useSelector((state) => state.explore.trendingTags);
+  const hasMore = useSelector((state) => state.explore.hasMore);
+  const nextCursor = useSelector((state) => state.explore.nextCursor);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [postDialog, setPostDialog] = useState(null);
+  const [sort, setSort] = useState("random");
+  const [tagFilter, setTagFilter] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+
+  const load = (params, append = false) => {
+    if (append) setLoadingMore(true);
+    setLoadError(null);
+    return dispatch(getExplorePosts(params, { append }))
+      .then((action) => {
+        setInitialLoading(false);
+        setLoadingMore(false);
+        if (action?.type === "ERROR") {
+          setLoadError(action.error || "Couldn't load posts");
+        }
+      })
+      .catch(() => {
+        setInitialLoading(false);
+        setLoadingMore(false);
+        setLoadError("Couldn't load posts");
+      });
+  };
 
   useEffect(() => {
     dispatch(getMyRelationships());
-    // eslint-disable-next-line
-  }, []);
+    if (trending.length === 0) dispatch(getTrendingTags());
+  }, [dispatch, trending.length]);
 
   useEffect(() => {
-    fetchExplorePosts();
-    // eslint-disable-next-line
-  }, []);
+    setInitialLoading(true);
+    const params = { sort, limit: 30 };
+    if (tagFilter) params.tag = tagFilter;
+    load(params, false);
+  }, [dispatch, sort, tagFilter]);
+
+  const handleLoadMore = () => {
+    if (!hasMore || loadingMore) return;
+    const params = { sort, limit: 30, cursor: nextCursor };
+    if (tagFilter) params.tag = tagFilter;
+    load(params, true);
+  };
+
+  const handleRefresh = () => {
+    setInitialLoading(true);
+    const params = { sort, limit: 30 };
+    if (tagFilter) params.tag = tagFilter;
+    load(params, false);
+  };
+
+  const followingPosts = posts.filter((p) => p._source === "following");
+  const discoverPosts = posts.filter((p) => p._source !== "following");
 
   return (
-    <Container maxWidth="sm">
-      <Grid container spacing={0} alignItems="center">
-        {searchDialogOpen && (
-          <Grid size={1} sx={{ zIndex: 2000 }}>
-            <IconButton onClick={handleSearchDialogClose}>
-              <ArrowBack />
-            </IconButton>
-          </Grid>
-        )}
-        <Grid size={searchDialogOpen ? 11 : 12}>
-          <TextField
-            fullWidth
-            label="Search"
-            onChange={handleInput}
-            value={searchInput}
-            variant="filled"
-            onFocus={handleSearchDialogOpen}
-            sx={{ zIndex: searchDialogOpen ? 2000 : 0 }}
-            inputRef={searchRef}
-          />
-        </Grid>
-        <Dialog
-          fullScreen
-          open={searchDialogOpen}
-          onClose={handleSearchDialogClose}
-          disableEnforceFocus
-        >
-          <DialogContent>
-            <Container maxWidth="sm">
-              <Grid
-                container
-                spacing={3}
-                alignItems="center"
-                sx={{ marginTop: searchRef?.current?.height + 5 }}
-              >
-                {/* pull X random users then a random post from them */}
-                {users.map((account, index) => (
-                  <UserCard key={index} account={account} />
-                ))}
-              </Grid>
-            </Container>
-          </DialogContent>
-        </Dialog>
-        <Dialog
-          fullScreen
-          open={singlePostDialogOpen}
-          onClose={handleSinglePostDialogClose}
-        >
-          <DialogContent>
-            <Container maxWidth="sm">
-              <Grid size={1}>
-                <IconButton onClick={handleSinglePostDialogClose}>
-                  <ArrowBack />
-                </IconButton>
-              </Grid>
-              <Grid
-                container
-                spacing={3}
-                alignItems="center"
-              >
-                {/* pull X random users then a random post from them */}
-                <SinglePost post={singlePost} likes={singlePostLikes} isLiked={isPostLiked} />
-              </Grid>
-            </Container>
-          </DialogContent>
-        </Dialog>
-        {posts.map((post, index) => {
-          const isLiked = post.likes.some((u) => u._id === user._id);
-          return (
-            <Grid
-              size={4}
-              key={post.image._id}
-              onClick={() => handleSinglePostDialogOpen(post, post.likes, isLiked)}
-            >
-              <CardMedia
-                sx={{
-                  height: 0,
-                  paddingTop: "100%",
-                }}
-                image={`${serverURL}/post/image/${post.image._id}`}
+    <Container maxWidth="sm" sx={{ paddingBottom: "100px" }}>
+      <Box sx={{ display: "flex", alignItems: "center", padding: "12px 0", gap: 1 }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search"
+          onFocus={() => setSearchOpen(true)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Tooltip title="Refresh">
+          <IconButton onClick={handleRefresh} disabled={initialLoading}>
+            <RefreshIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {trending.length > 0 && (
+        <Box sx={{ paddingBottom: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}>
+            <TrendingUp sx={{ fontSize: 18 }} />
+            <Typography variant="overline" color="text.secondary">
+              Trending
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+            {trending.slice(0, 8).map((t) => (
+              <Chip
+                key={t.tag}
+                size="small"
+                label={`#${t.tag}`}
+                clickable
+                onClick={() => navigate(`/tag/${t.tag}`)}
+                variant={tagFilter === t.tag ? "filled" : "outlined"}
+                color={tagFilter === t.tag ? "primary" : "default"}
               />
-            </Grid>
-          );
-        })}
-      </Grid>
+            ))}
+          </Box>
+        </Box>
+      )}
+
+      <Tabs
+        value={sort}
+        onChange={(_, v) => setSort(v)}
+        variant="fullWidth"
+        sx={{ minHeight: 36, mb: 1 }}
+      >
+        <Tab value="random" label="For you" />
+        <Tab value="recent" label="Recent" />
+        <Tab value="popular" label="Popular" />
+      </Tabs>
+
+      {tagFilter && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Chip
+            label={`#${tagFilter}`}
+            onDelete={() => setTagFilter(null)}
+            color="primary"
+          />
+        </Box>
+      )}
+
+      {loadError && (
+        <Box sx={{ padding: 2, textAlign: "center" }}>
+          <Typography color="error" variant="body2" gutterBottom>
+            {loadError}
+          </Typography>
+          <Button size="small" onClick={handleRefresh}>Try again</Button>
+        </Box>
+      )}
+
+      {initialLoading ? (
+        <>
+          <SectionHeader icon={<TrendingUp sx={{ fontSize: 18 }} />} title="Loading..." />
+          <GridSkeleton count={9} />
+        </>
+      ) : posts.length === 0 ? (
+        <Box sx={{ padding: "40px 20px", textAlign: "center" }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No posts to show
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 2 }}>
+            Try switching tabs, or follow more people to fill your explore feed.
+          </Typography>
+          <Button variant="outlined" onClick={handleRefresh}>Refresh</Button>
+        </Box>
+      ) : (
+        <>
+          {sort === "random" && followingPosts.length > 0 && (
+            <FollowingRow posts={followingPosts} onPostClick={setPostDialog} />
+          )}
+
+          {sort === "random" && discoverPosts.length > 0 && (
+            <SectionHeader
+              icon={<TrendingUp sx={{ fontSize: 18 }} />}
+              title="Discover"
+            />
+          )}
+
+          {sort !== "random" && discoverPosts.length > 0 && (
+            <SectionHeader
+              icon={<TrendingUp sx={{ fontSize: 18 }} />}
+              title={
+                sort === "recent" ? "Recent posts" : "Popular posts"
+              }
+            />
+          )}
+
+          <Grid container spacing={0.5}>
+            {(sort === "random" ? discoverPosts : posts).map((post) => {
+              const imageId = post.image?._id || post.image;
+              return (
+                <Grid size={4} key={post._id}>
+                  <Box
+                    onClick={() => setPostDialog(post)}
+                    sx={{ position: "relative", cursor: "pointer" }}
+                  >
+                    <CardMedia
+                      sx={{
+                        paddingTop: "100%",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        filter: getFilterCss(post.filter),
+                      }}
+                      image={imageId ? postImageUrl(imageId) : null}
+                    />
+                    {post.tags?.length > 0 && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: 4,
+                          left: 4,
+                          background: "rgba(0,0,0,0.6)",
+                          color: "white",
+                          borderRadius: 1,
+                          padding: "0 6px",
+                          fontSize: 10,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {post.tags.length} 🏷
+                      </Box>
+                    )}
+                    {post._source === "following" && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          background: "rgba(0,0,0,0.6)",
+                          color: "white",
+                          borderRadius: 1,
+                          padding: "0 6px",
+                          fontSize: 10,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Following
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+
+          {hasMore && (
+            <Box sx={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
+              <Button variant="outlined" onClick={handleLoadMore} disabled={loadingMore}>
+                {loadingMore ? "Loading..." : "Load more"}
+              </Button>
+            </Box>
+          )}
+
+          {!hasMore && posts.length > 12 && (
+            <Box sx={{ textAlign: "center", padding: "16px 0" }}>
+              <Typography variant="caption" color="text.secondary">
+                You've reached the end
+              </Typography>
+            </Box>
+          )}
+        </>
+      )}
+
+      <Dialog fullScreen open={searchOpen} onClose={() => setSearchOpen(false)}>
+        <SearchPanel onClose={() => setSearchOpen(false)} />
+      </Dialog>
+
+      <Dialog fullScreen open={Boolean(postDialog)} onClose={() => setPostDialog(null)}>
+        <Box sx={{ padding: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
+          <IconButton onClick={() => setPostDialog(null)}>
+            <Close />
+          </IconButton>
+          {postDialog && (
+            <SinglePost
+              post={postDialog}
+              isLiked={postDialog.likes?.some((u) => (u._id || u) === user._id)}
+              onClose={() => setPostDialog(null)}
+            />
+          )}
+        </Box>
+      </Dialog>
     </Container>
   );
 };

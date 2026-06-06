@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from 'react-router-dom';
-import { serverURL, likePost, unlikePost, commentPost, deletePost, } from "../Redux/actions";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  likePost,
+  unlikePost,
+  commentPost,
+  deletePost,
+  deleteComment,
+} from "../Redux/actions";
 import {
   Avatar,
+  Box,
   Button,
   Card,
   CardActions,
@@ -18,154 +25,356 @@ import {
   DialogTitle,
   Grid,
   IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Menu,
   MenuItem,
   Slide,
   TextField,
   Typography,
 } from "@mui/material";
-import { Close, ModeComment, ExpandMore, Favorite, Share, MoreVert } from "@mui/icons-material";
+import { Close, ModeComment, Favorite, Share, MoreVert, Person } from "@mui/icons-material";
+import { postImageUrl, profilePictureUrl } from "../api";
+import { renderTextWithLinks, formatFullDateTime, extractMentions } from "../utils/text";
+import { getFilterCss } from "../filters";
 
-const classes = {
-  media: {
-    height: 0,
-    paddingTop: "100%",
-  },
-  expand: {
-    transform: "rotate(0deg)",
-    marginLeft: "auto",
-  },
-  expandOpen: {
-    transform: "rotate(180deg)",
-  },
-  avatar: {
-    backgroundColor: '#F44336',
-  },
-  avatarComment: {
-    height: "25px",
-    width: "25px",
-  },
-};
+const CaptionText = ({ text }) => {
+  const navigate = useNavigate();
+  const parts = renderTextWithLinks(text);
 
-const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
-
-  const CommentCard = ({ comment, firstComment = false }) => (
-    <Grid container spacing={1}>
-      <Grid size={1}>
-        <Avatar
-          aria-label="recipe"
-          sx={classes.avatarComment}
-          alt={comment.user.username}
-          src={comment.user.profilePicture ? `${serverURL}/user/profilePicture/${comment.user.profilePicture}` : null}
-        />
-      </Grid>
-      <Grid size={10}>
-        <Typography variant="body1" >
-          <strong>{comment.user.username}</strong> {comment.comment}
-        </Typography>
-      </Grid>
-      <Grid container size={1} sx={{ justifyContent: 'center' }}>
-
-        {firstComment && (
-          <IconButton
-            sx={expanded ? { ...classes.expand, ...classes.expandOpen } : { ...classes.expand }}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMore />
-          </IconButton>
-
-        )}
-      </Grid>
-    </Grid>
-  )
-
+  const handleClick = (part) => {
+    if (part.type === "hashtag") {
+      navigate(`/tag/${part.value}`);
+    } else if (part.type === "mention") {
+      navigate(`/profile/${part.value}`);
+    }
+  };
 
   return (
-    <CardContent>
-      {post.comments.slice(0, 1).map((comment, i) => <CommentCard key={`${comment._id}-first`} comment={comment} firstComment={true} />)}
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        {post.comments.filter((c, i) => i !== 0).map((comment, i) => <CommentCard key={comment._id || i} comment={comment} />)}
-        <CommentField post={post} user={user} />
-      </Collapse>
-    </CardContent>
-  )
-}
+    <Typography variant="body2" sx={{ padding: "0 16px 8px 16px" }}>
+      {parts.map((part, i) =>
+        part.type === "text" ? (
+          <span key={i}>{part.value}</span>
+        ) : (
+          <span
+            key={i}
+            onClick={() => handleClick(part)}
+            style={{
+              color: part.type === "hashtag" ? "#1976d2" : "#2e7d32",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            {part.type === "hashtag" ? `#${part.value}` : `@${part.value}`}
+          </span>
+        )
+      )}
+    </Typography>
+  );
+};
+
+const TagMarker = ({ tag }) => (
+  <Box
+    sx={{
+      position: "absolute",
+      left: `${tag.x * 100}%`,
+      top: `${tag.y * 100}%`,
+      transform: "translate(-50%, -50%)",
+      zIndex: 2,
+      pointerEvents: "none",
+    }}
+  >
+    <Avatar
+      src={profilePictureUrl(tag.user?.profilePicture || tag.profilePicture)}
+      sx={{
+        width: 32,
+        height: 32,
+        border: "2px solid white",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+      }}
+    />
+    <Box
+      sx={{
+        position: "absolute",
+        left: "50%",
+        top: "100%",
+        transform: "translateX(-50%)",
+        background: "rgba(0,0,0,0.7)",
+        color: "white",
+        padding: "2px 8px",
+        borderRadius: 1,
+        fontSize: 12,
+        whiteSpace: "nowrap",
+        marginTop: "4px",
+      }}
+    >
+      @{tag.user?.username || tag.username}
+    </Box>
+  </Box>
+);
+
+const CommentText = ({ comment }) => {
+  const navigate = useNavigate();
+  const parts = renderTextWithLinks(comment.comment);
+  return (
+    <Typography variant="body2" component="span">
+      <strong
+        style={{ cursor: "pointer" }}
+        onClick={() => navigate(`/profile/${comment.user.username}`)}
+      >
+        {comment.user.username}
+      </strong>{" "}
+      {parts.map((part, i) =>
+        part.type === "text" ? (
+          <span key={i}>{part.value}</span>
+        ) : (
+          <span
+            key={i}
+            onClick={() =>
+              part.type === "hashtag"
+                ? navigate(`/tag/${part.value}`)
+                : navigate(`/profile/${part.value}`)
+            }
+            style={{
+              color: part.type === "hashtag" ? "#1976d2" : "#2e7d32",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            {part.type === "hashtag" ? `#${part.value}` : `@${part.value}`}
+          </span>
+        )
+      )}
+    </Typography>
+  );
+};
+
+const CommentCard = ({ comment, postId, postOwnerId, currentUser, dispatch }) => {
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const isCommentOwner = currentUser._id === comment.user._id;
+  const isPostOwner = currentUser._id === postOwnerId;
+  const canDelete = isCommentOwner || isPostOwner;
+
+  return (
+    <Grid container spacing={1} alignItems="center">
+      <Grid size={1}>
+        <Avatar
+          sx={{ height: 28, width: 28 }}
+          alt={comment.user.username}
+          src={profilePictureUrl(comment.user.profilePicture)}
+        />
+      </Grid>
+      <Grid size={canDelete ? 10 : 12}>
+        <CommentText comment={comment} />
+        <Typography variant="caption" color="text.secondary" display="block">
+          {formatFullDateTime(comment.createdAt || comment.timestamp)}
+          {comment.likes && comment.likes.length > 0 && ` · ${comment.likes.length} likes`}
+        </Typography>
+      </Grid>
+      {canDelete && (
+        <Grid size={1}>
+          <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
+            <MoreVert fontSize="small" />
+          </IconButton>
+          <Menu open={Boolean(menuAnchor)} anchorEl={menuAnchor} onClose={() => setMenuAnchor(null)}>
+            <MenuItem
+              onClick={() => {
+                dispatch(deleteComment(postId, comment._id));
+                setMenuAnchor(null);
+              }}
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+        </Grid>
+      )}
+    </Grid>
+  );
+};
 
 const CommentField = ({ post, user }) => {
   const dispatch = useDispatch();
   const [comment, setComment] = useState("");
 
   const handlePostComment = () => {
-    if (comment !== '') {
-      dispatch(commentPost(post._id, user, comment));
-      setComment('');
-    }
-  }
-
+    if (comment.trim() === "") return;
+    const mentions = extractMentions(comment);
+    dispatch(commentPost(post._id, user, comment, mentions));
+    setComment("");
+  };
 
   return (
-    <Grid container alignItems="center" spacing={2} sx={{ marginTop: '5px', }}>
+    <Grid container alignItems="center" spacing={2} sx={{ marginTop: "5px" }}>
       <Grid size={1}>
         <Avatar
-          sx={classes.avatarComment}
+          sx={{ height: 28, width: 28 }}
           alt={user.username}
-          src={user.profilePicture ? `${serverURL}/user/profilePicture/${user.profilePicture}` : null}
+          src={profilePictureUrl(user.profilePicture)}
         />
       </Grid>
       <Grid size={11}>
         <TextField
           label="Add a comment..."
+          placeholder="Use @username to mention someone"
           fullWidth
           value={comment}
           onChange={(e) => setComment(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handlePostComment();
+            }
+          }}
           InputProps={{
             endAdornment: (
-              <Button
-                variant="contained"
-                onClick={handlePostComment}
-              >
-                Submit
+              <Button variant="contained" size="small" onClick={handlePostComment}>
+                Post
               </Button>
             ),
           }}
         />
       </Grid>
     </Grid>
-  )
+  );
 };
 
+const CommentSection = ({ post, user, expanded, handleExpandClick }) => {
+  const dispatch = useDispatch();
+  if (!post.comments) return null;
+  const first = post.comments[0];
+  const rest = post.comments.slice(1);
+
+  return (
+    <CardContent sx={{ paddingBottom: "8px !important" }}>
+      {post.caption && <CaptionText text={post.caption} />}
+      {first && (
+        <CommentCard
+          comment={first}
+          postId={post._id}
+          postOwnerId={post.user._id}
+          currentUser={user}
+          dispatch={dispatch}
+        />
+      )}
+      {post.comments.length > 1 && (
+        <Box sx={{ display: "flex", alignItems: "center", mt: 0.5, ml: 6 }}>
+          <Button size="small" onClick={handleExpandClick}>
+            {expanded
+              ? "Hide comments"
+              : `View all ${post.comments.length} comments`}
+          </Button>
+        </Box>
+      )}
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Box sx={{ mt: 1 }}>
+          {rest.map((c, i) => (
+            <Box key={c._id || i} sx={{ mt: 1 }}>
+              <CommentCard
+                comment={c}
+                postId={post._id}
+                postOwnerId={post.user._id}
+                currentUser={user}
+                dispatch={dispatch}
+              />
+            </Box>
+          ))}
+          <CommentField post={post} user={user} />
+        </Box>
+      </Collapse>
+      {!expanded && post.comments.length === 1 && (
+        <Box sx={{ mt: 1 }}>
+          <CommentField post={post} user={user} />
+        </Box>
+      )}
+    </CardContent>
+  );
+};
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export default function SinglePost(props) {
-  const { post, likes, isLiked } = props;
+const LikesDialog = ({ open, onClose, likes }) => {
+  return (
+    <Dialog open={open} onClose={onClose} fullScreen TransitionComponent={Transition}>
+      <Grid container sx={{ padding: "12px" }}>
+        <Grid size={3}>
+          <IconButton onClick={onClose}>
+            <Close />
+          </IconButton>
+        </Grid>
+        <Grid size={6}>
+          <Typography variant="h6" textAlign="center">Likes</Typography>
+        </Grid>
+        <Grid size={3} />
+      </Grid>
+      <DialogContent>
+        {(!likes || likes.length === 0) ? (
+          <Typography color="text.secondary" textAlign="center" sx={{ padding: "32px 0" }}>
+            No likes yet
+          </Typography>
+        ) : (
+          <List>
+            {likes.map((u) => (
+              <ListItem
+                key={u._id}
+                component={Link}
+                to={`/profile/${u.username}`}
+                onClick={onClose}
+                sx={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListItemAvatar>
+                  <Avatar src={profilePictureUrl(u.profilePicture)} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={u.username}
+                  secondary={u.firstName ? `${u.firstName} ${u.lastName || ""}` : null}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default function SinglePost({ post, isLiked, onClose }) {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(false);
-  const [likesDrawer, setLikesDrawer] = useState(false);
-
-  const handleLikesDrawer = () => setLikesDrawer(prev => !prev);
-
+  const [likesOpen, setLikesOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const handleExpandClick = () => setExpanded((prev) => !prev);
 
-  const handleDeleteDialog = () => setDeleteDialog((prev) => !prev);
-  const handleMenu = (event) => setOpenMenu(prev => {
-    !prev ? setAnchorEl(event.currentTarget) : setAnchorEl(null);
-    return !prev;
-  });
+  if (!post) return null;
+
+  const handleLikesOpen = () => setLikesOpen(true);
+  const handleLikesClose = () => setLikesOpen(false);
+  const handleDeleteDialog = () => setDeleteDialog((p) => !p);
+  const handleExpandClick = () => setExpanded((p) => !p);
+  const handleMenu = (event) =>
+    setOpenMenu((prev) => {
+      if (!prev) setAnchorEl(event.currentTarget);
+      else setAnchorEl(null);
+      return !prev;
+    });
 
   const handleLikePost = () => dispatch(likePost(post._id, user));
   const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
   const handleConfirmDelete = () => {
-    dispatch(deletePost(post._id, post.image)).then(() => setDeleteDialog(false));
-  }
+    dispatch(deletePost(post._id, post.image?._id || post.image)).then(() => {
+      setDeleteDialog(false);
+      onClose?.();
+    });
+  };
+
+  const imageId = post.image?._id || post.image;
+  const tags = post.tags || [];
+  const likesCount = post.likes ? post.likes.length : 0;
 
   return (
     <Grid size={12}>
@@ -173,117 +382,123 @@ export default function SinglePost(props) {
         <CardHeader
           avatar={
             <Avatar
-              sx={classes.avatar}
-              alt="Profile Picture"
-              src={post.user.profilePicture ? `${serverURL}/user/profilePicture/${post.user.profilePicture}` : null}
+              alt={post.user.username}
+              src={profilePictureUrl(post.user.profilePicture)}
               component={Link}
               to={`/profile/${post.user.username}`}
             />
           }
-          action=
-          {<>
-            <IconButton aria-label="settings" onClick={handleMenu} >
-              <MoreVert />
-            </IconButton>
-            <Menu
-              open={openMenu}
-              onClose={handleMenu}
-              anchorEl={anchorEl}
-              PaperProps={{
-                style: {
-                  width: '20ch',
-                },
-              }}
-            >
-              <MenuItem onClick={null} disabled >
-                Share
-              </MenuItem>
-              <MenuItem onClick={null} disabled >
-                Report
-              </MenuItem>
-              {
-                post.user._id === user._id &&
-                <MenuItem onClick={handleDeleteDialog}>
-                  Delete
+          action={
+            <>
+              <IconButton aria-label="settings" onClick={handleMenu}>
+                <MoreVert />
+              </IconButton>
+              <Menu
+                open={openMenu}
+                onClose={handleMenu}
+                anchorEl={anchorEl}
+                PaperProps={{ style: { width: "20ch" } }}
+              >
+                <MenuItem onClick={handleMenu} disabled>
+                  Share
                 </MenuItem>
-              }
-            </Menu>
-          </>
+                <MenuItem onClick={handleMenu} disabled>
+                  Report
+                </MenuItem>
+                {post.user._id === user._id && (
+                  <MenuItem
+                    onClick={() => {
+                      setOpenMenu(false);
+                      setDeleteDialog(true);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                )}
+              </Menu>
+            </>
           }
-          title={post.user.username}
-          subheader={post.location}
+          title={
+            <Box component={Link} to={`/profile/${post.user.username}`} sx={{ color: "inherit", textDecoration: "none" }}>
+              {post.user.username}
+            </Box>
+          }
+          subheader={post.location || formatFullDateTime(post.timestamp)}
         />
-        <CardMedia sx={classes.media} image={post.image._id ?  `${serverURL}/post/image/${post.image._id}`: post.image ? `${serverURL}/post/image/${post.image}` : null} />
+        <Box sx={{ position: "relative" }}>
+          <CardMedia
+            sx={{
+              height: 0,
+              paddingTop: "100%",
+              backgroundSize: "cover",
+              filter: getFilterCss(post.filter),
+            }}
+            image={imageId ? postImageUrl(imageId) : null}
+          />
+          {tags.map((tag, i) => (
+            <TagMarker key={i} tag={tag} />
+          ))}
+        </Box>
+        {tags.length > 0 && (
+          <Box sx={{ padding: "8px 16px 0" }}>
+            <Typography variant="body2" color="text.secondary">
+              <Person sx={{ fontSize: 14, verticalAlign: "middle", marginRight: 0.5 }} />
+              Tagged:{" "}
+              {tags.map((t, i) => (
+                <Box
+                  key={i}
+                  component={Link}
+                  to={`/profile/${t.user?.username || t.username}`}
+                  sx={{ color: "primary.main", textDecoration: "none", marginRight: 1 }}
+                >
+                  @{t.user?.username || t.username}
+                </Box>
+              ))}
+            </Typography>
+          </Box>
+        )}
         <CardActions disableSpacing>
-          {
-            isLiked
-              ?
-              <IconButton aria-label="unlike" onClick={handleUnlikePost} >
-                <Favorite
-                  sx={{ color: 'red', }}
-                />
-              </IconButton>
-              :
-              <IconButton aria-label="like" onClick={handleLikePost} >
-                <Favorite />
-              </IconButton>
-          }
-          <IconButton aria-label="comments" onClick={handleExpandClick} >
+          {isLiked ? (
+            <IconButton aria-label="unlike" onClick={handleUnlikePost}>
+              <Favorite sx={{ color: "red" }} />
+            </IconButton>
+          ) : (
+            <IconButton aria-label="like" onClick={handleLikePost}>
+              <Favorite />
+            </IconButton>
+          )}
+          <IconButton aria-label="comments" onClick={handleExpandClick}>
             <ModeComment />
           </IconButton>
-          <IconButton aria-label="share">
+          <IconButton aria-label="share" disabled>
             <Share />
           </IconButton>
         </CardActions>
-        <Typography variant="body2" color="textSecondary" sx={{ padding: '0 16px' }} onClick={handleLikesDrawer} >
-          Likes: {likes ? likes.length : 0}
+        <Typography
+          variant="body2"
+          sx={{ padding: "0 16px 4px", fontWeight: 600, cursor: "pointer" }}
+          onClick={handleLikesOpen}
+        >
+          {likesCount} {likesCount === 1 ? "like" : "likes"}
         </Typography>
-        <CommentSection post={post} user={user} expanded={expanded} handleExpandClick={handleExpandClick} />
+        <CommentSection
+          post={post}
+          user={user}
+          expanded={expanded}
+          handleExpandClick={handleExpandClick}
+        />
       </Card>
-      <Dialog
-        open={deleteDialog}
-        onClose={handleDeleteDialog}
-      >
-        <DialogTitle >
-          {"Are you sure you want to delete this post?"}
-        </DialogTitle>
+      <Dialog open={deleteDialog} onClose={handleDeleteDialog}>
+        <DialogTitle>Delete post?</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            This post will be deleted immediately.
-          </DialogContentText>
+          <DialogContentText>This post will be deleted immediately.</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleDeleteDialog}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} autoFocus>
-            Delete
-          </Button>
+          <Button onClick={handleDeleteDialog}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
-      <Dialog
-        open={likesDrawer}
-        onClose={handleLikesDrawer}
-        fullScreen
-        TransitionComponent={Transition}
-      >
-        <Grid container>
-          <Grid container spacing={2} sx={{ padding: "15px" }}>
-            <Grid container size={3}>
-              <IconButton title="Close" variant="contained" onClick={handleLikesDrawer}>
-                <Close />
-              </IconButton>
-            </Grid>
-            <Grid size={6}>
-              <Typography variant="h4" textAlign="center">
-                Likes
-              </Typography>
-            </Grid>
-            <Grid container size={3} >
-            </Grid>
-          </Grid>
-        </Grid>
-      </Dialog>
+      <LikesDialog open={likesOpen} onClose={handleLikesClose} likes={post.likes || []} />
     </Grid>
   );
 }
