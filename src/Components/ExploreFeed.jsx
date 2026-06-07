@@ -67,14 +67,16 @@ const ExploreFeed = () => {
   return (
     <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
       <AppBar position="sticky" color="default" elevation={1}>
-        <Toolbar sx={{ gap: 1, minHeight: "56px !important" }}>
-          <IconButton edge="start" onClick={handleBack} aria-label="Back to explore">
-            <ArrowBack />
-          </IconButton>
-          <Typography variant="h6" sx={{ flex: 1, fontSize: "1rem", fontWeight: 600 }}>
-            Explore
-          </Typography>
-        </Toolbar>
+        <Container maxWidth="sm" disableGutters>
+          <Toolbar sx={{ gap: 1, minHeight: "56px !important", paddingLeft: "8px !important", paddingRight: "12px !important" }}>
+            <IconButton edge="start" onClick={handleBack} aria-label="Back to explore">
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="h6" sx={{ flex: 1, fontSize: "1rem", fontWeight: 600 }}>
+              Explore
+            </Typography>
+          </Toolbar>
+        </Container>
       </AppBar>
 
       <Container maxWidth="sm" disableGutters sx={{ paddingBottom: "100px" }}>
