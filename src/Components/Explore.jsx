@@ -38,40 +38,69 @@ import { getFilterCss } from "../filters";
 
 export const UserCard = ({ account }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const relationships = useSelector((state) => state.relationships);
   const isFollowing = relationships.following.some((r) => r._id === account._id);
   const isSelf = user._id === account._id;
 
-  const handleFollow = () => dispatch(requestFollow(account._id));
-  const handleUnfollow = () => dispatch(requestUnfollow(account._id));
+  const handleFollow = (e) => {
+    e.stopPropagation();
+    dispatch(requestFollow(account._id));
+  };
+  const handleUnfollow = (e) => {
+    e.stopPropagation();
+    dispatch(requestUnfollow(account._id));
+  };
+  const goToProfile = () => navigate(`/profile/${account.username}`);
 
   return (
-    <Grid container size={12} alignItems="center" spacing={3}>
-      <Grid size={2}>
-        <Avatar src={profilePictureUrl(account.profilePicture)} />
-      </Grid>
-      <Grid size={6}>
+    <Box
+      onClick={goToProfile}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        padding: "10px 4px",
+        cursor: "pointer",
+        borderRadius: 1,
+        "&:hover": { backgroundColor: "action.hover" },
+      }}
+    >
+      <Avatar
+        src={profilePictureUrl(account.profilePicture)}
+        sx={{ width: 44, height: 44, flexShrink: 0 }}
+      />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="body1" color="text.primary" noWrap>
           {account.username}
         </Typography>
         <Typography variant="body2" color="text.secondary" noWrap>
           {account.firstName} {account.lastName}
         </Typography>
-      </Grid>
-      <Grid container size={4} sx={{ justifyContent: "flex-end" }}>
-        {!isSelf &&
-          (isFollowing ? (
-            <Button variant="outlined" onClick={handleUnfollow} fullWidth>
-              Unfollow
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={handleFollow} fullWidth>
-              Follow
-            </Button>
-          ))}
-      </Grid>
-    </Grid>
+      </Box>
+      {!isSelf && (
+        isFollowing ? (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleUnfollow}
+            sx={{ minWidth: 100 }}
+          >
+            Following
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleFollow}
+            sx={{ minWidth: 100 }}
+          >
+            Follow
+          </Button>
+        )
+      )}
+    </Box>
   );
 };
 

@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Avatar,
+  Box,
   Button,
   CardMedia,
   Container,
   Dialog,
+  Divider,
   Grid,
   IconButton,
   Input,
@@ -52,31 +54,47 @@ const classes = {
 
 const FollowingUsers = ({ userId, following }) => {
   return (
-    <Grid container spacing={2}>
-      <Grid size={12}>
-        <Typography variant="h4" textAlign="center" color="text.primary">
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 8px", borderBottom: 1, borderColor: "divider", position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 1 }}>
+        <Typography variant="h6" color="text.primary" fontWeight={600}>
           Following
         </Typography>
-      </Grid>
-      {following.map((user) => (
-        <UserCard key={user._id} account={user} />
-      ))}
-    </Grid>
+      </Box>
+      <Box sx={{ flex: 1, overflowY: "auto", padding: "8px 16px" }}>
+        {following.length === 0 ? (
+          <Typography color="text.secondary" variant="body2" sx={{ padding: "24px 0", textAlign: "center" }}>
+            Not following anyone yet
+          </Typography>
+        ) : (
+          following.map((user) => (
+            <UserCard key={user._id} account={user} />
+          ))
+        )}
+      </Box>
+    </Box>
   );
 };
 
 const FollowerUsers = ({ userId, followers }) => {
   return (
-    <Grid container spacing={2}>
-      <Grid size={12}>
-        <Typography variant="h4" textAlign="center" color="text.primary">
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 8px", borderBottom: 1, borderColor: "divider", position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 1 }}>
+        <Typography variant="h6" color="text.primary" fontWeight={600}>
           Followers
         </Typography>
-      </Grid>
-      {followers.map((user) => (
-        <UserCard key={user._id} account={user} />
-      ))}
-    </Grid>
+      </Box>
+      <Box sx={{ flex: 1, overflowY: "auto", padding: "8px 16px" }}>
+        {followers.length === 0 ? (
+          <Typography color="text.secondary" variant="body2" sx={{ padding: "24px 0", textAlign: "center" }}>
+            No followers yet
+          </Typography>
+        ) : (
+          followers.map((user) => (
+            <UserCard key={user._id} account={user} />
+          ))
+        )}
+      </Box>
+    </Box>
   );
 };
 
@@ -514,7 +532,7 @@ export const Profile = (props) => {
         onClose={handleFollowersModal}
         maxWidth="md"
         fullWidth
-        sx={{ "& .MuiDialog-paper": { padding: "5px", minHeight: "80%" } }}
+        sx={{ "& .MuiDialog-paper": { height: { xs: "85vh", sm: "75vh" }, maxHeight: 720 } }}
       >
         <FollowerUsers userId={profile.user._id} followers={profile.followers} />
       </Dialog>
@@ -523,7 +541,7 @@ export const Profile = (props) => {
         onClose={handleFollowingModal}
         maxWidth="md"
         fullWidth
-        sx={{ "& .MuiDialog-paper": { padding: "5px", minHeight: "80%" } }}
+        sx={{ "& .MuiDialog-paper": { height: { xs: "85vh", sm: "75vh" }, maxHeight: 720 } }}
       >
         <FollowingUsers userId={profile.user._id} following={profile.following} />
       </Dialog>
