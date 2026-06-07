@@ -1,5 +1,14 @@
-const currentIP = typeof window !== "undefined" ? window.location.href.split(":")[1] : "localhost";
-export const serverURL = `http:${currentIP}:3003`;
+const FALLBACK_DEV_BACKEND = (() => {
+  if (typeof window === "undefined") return "http://localhost:3003";
+  const protocol = window.location.protocol;
+  const host = window.location.hostname || "localhost";
+  return `${protocol}//${host}:3003`;
+})();
+
+export const serverURL =
+  (typeof __BACKEND_URL__ !== "undefined" && __BACKEND_URL__) ||
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_URL) ||
+  FALLBACK_DEV_BACKEND;
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem("JWT_AUTH_TOKEN");
