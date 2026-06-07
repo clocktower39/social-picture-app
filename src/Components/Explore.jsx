@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,22 +22,19 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  ArrowBack,
   Close,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   TrendingUp,
 } from "@mui/icons-material";
 import {
-  requestFollow,
-  requestUnfollow,
   getMyRelationships,
   getExplorePosts,
   getTrendingTags,
-  searchUsers,
-  getPostsByTag,
+  requestFollow,
+  requestUnfollow,
 } from "../Redux/actions";
-import { postImageUrl, profilePictureUrl, debounce } from "../api";
+import { postImageUrl, profilePictureUrl } from "../api";
 import { getFilterCss } from "../filters";
 import SinglePost from "./SinglePost";
 
@@ -77,144 +74,6 @@ export const UserCard = ({ account }) => {
           ))}
       </Grid>
     </Grid>
-  );
-};
-
-const SearchPanel = ({ onClose }) => {
-  const dispatch = useDispatch();
-  const [query, setQuery] = useState("");
-  const [tab, setTab] = useState(0);
-  const users = useSelector((state) => state.explore.userSearch);
-  const trending = useSelector((state) => state.explore.trendingTags);
-  const [tagPosts, setTagPosts] = useState([]);
-  const [tagSearch, setTagSearch] = useState("");
-
-  useEffect(() => {
-    if (trending.length === 0) dispatch(getTrendingTags());
-  }, [dispatch, trending.length]);
-
-  const debouncedSearch = useRef(
-    debounce((value) => {
-      if (tab === 0) {
-        dispatch(searchUsers(value));
-      } else if (tab === 1) {
-        setTagSearch(value.startsWith("#") ? value.slice(1) : value);
-      }
-    }, 300)
-  ).current;
-
-  useEffect(() => {
-    debouncedSearch(query);
-  }, [query, tab, debouncedSearch]);
-
-  useEffect(() => {
-    if (tab === 1 && tagSearch) {
-      dispatch(getPostsByTag(tagSearch)).then((action) => {
-        if (action?.posts) setTagPosts(action.posts);
-      });
-    } else {
-      setTagPosts([]);
-    }
-  }, [tagSearch, tab, dispatch]);
-
-  return (
-    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
-      <Box sx={{ display: "flex", alignItems: "center", padding: "8px 12px", gap: 1 }}>
-        <IconButton onClick={onClose}>
-          <ArrowBack />
-        </IconButton>
-        <TextField
-          autoFocus
-          fullWidth
-          size="small"
-          placeholder="Search users, tags, or locations"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
-        <Tab label="People" />
-        <Tab label="Tags" />
-        <Tab label="Places" />
-      </Tabs>
-      <Box sx={{ padding: 2 }}>
-        {tab === 0 && (
-          <>
-            {query.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                Type to find people
-              </Typography>
-            ) : users.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                No users found
-              </Typography>
-            ) : (
-              <Grid container spacing={2}>
-                {users.map((account) => (
-                  <UserCard key={account._id} account={account} />
-                ))}
-              </Grid>
-            )}
-          </>
-        )}
-        {tab === 1 && (
-          <>
-            {query.length === 0 ? (
-              <Box>
-                <Typography variant="overline" color="text.secondary">
-                  <TrendingUp sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }} />
-                  Trending tags
-                </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                  {trending.map((t) => (
-                    <Chip
-                      key={t.tag}
-                      label={`#${t.tag} (${t.count})`}
-                      clickable
-                      onClick={() => setQuery(`#${t.tag}`)}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            ) : tagPosts.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                No posts for this tag
-              </Typography>
-            ) : (
-              <Grid container spacing={0.5}>
-                {tagPosts.map((post) => {
-                  const imageId = post.image?._id || post.image;
-                  return (
-                    <Grid size={4} key={post._id}>
-                      <CardMedia
-                        sx={{
-                          paddingTop: "100%",
-                          backgroundSize: "cover",
-                          filter: getFilterCss(post.filter),
-                        }}
-                        image={imageId ? postImageUrl(imageId) : null}
-                      />
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            )}
-          </>
-        )}
-        {tab === 2 && (
-          <Typography color="text.secondary" variant="body2">
-            Place search coming soon. Try a tag like #paris for now.
-          </Typography>
-        )}
-      </Box>
-    </Box>
   );
 };
 
@@ -308,7 +167,6 @@ export const Explore = () => {
   const trending = useSelector((state) => state.explore.trendingTags);
   const hasMore = useSelector((state) => state.explore.hasMore);
   const nextCursor = useSelector((state) => state.explore.nextCursor);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [postDialog, setPostDialog] = useState(null);
   const [sort, setSort] = useState("random");
   const [tagFilter, setTagFilter] = useState(null);
@@ -370,13 +228,16 @@ export const Explore = () => {
           fullWidth
           size="small"
           placeholder="Search"
-          onFocus={() => setSearchOpen(true)}
+          onClick={() => navigate("/explore/search")}
+          onFocus={() => navigate("/explore/search")}
+          readOnly
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
                 <SearchIcon fontSize="small" />
               </InputAdornment>
             ),
+            sx: { cursor: "pointer" },
           }}
         />
         <Tooltip title="Refresh">
@@ -552,10 +413,6 @@ export const Explore = () => {
           )}
         </>
       )}
-
-      <Dialog fullScreen open={searchOpen} onClose={() => setSearchOpen(false)}>
-        <SearchPanel onClose={() => setSearchOpen(false)} />
-      </Dialog>
 
       <Dialog fullScreen open={Boolean(postDialog)} onClose={() => setPostDialog(null)}>
         <Box sx={{ padding: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
