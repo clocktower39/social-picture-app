@@ -38,9 +38,6 @@ import ChangePassword from "./ChangePassword";
 import ThemeSettings from "./ThemeSettings";
 
 const classes = {
-  root: {
-    maxWidth: "700px",
-  },
   imgList: {
     paddingBottom: "56px",
   },
@@ -289,7 +286,12 @@ const EditProfile = ({ user, handleEditProfileModal }) => {
       {themeModal && openMenu && (
         <ThemeSettings open={openMenu} handleThemeClose={handleThemeClose} />
       )}
-      <Dialog open={profilePictureDialog} onClose={handleProfilePictureDialog}>
+      <Dialog
+        open={profilePictureDialog}
+        onClose={handleProfilePictureDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <ProfilePictureUpload />
       </Dialog>
     </Grid>
@@ -370,7 +372,7 @@ export const Profile = (props) => {
   return loading ? (
     <Loading />
   ) : (
-    <Container disableGutters maxWidth="sm" sx={classes.root}>
+    <Container disableGutters maxWidth="sm">
       <Grid container sx={{ justifyContent: "center" }} spacing={1}>
         <Grid container size={11} spacing={1}>
           <Grid size={12}>
@@ -510,21 +512,24 @@ export const Profile = (props) => {
       <Dialog
         open={openFollowersModal}
         onClose={handleFollowersModal}
-        sx={{ "& .MuiDialog-paper": { padding: "5px", width: "100%", minHeight: "80%" } }}
+        maxWidth="md"
+        fullWidth
+        sx={{ "& .MuiDialog-paper": { padding: "5px", minHeight: "80%" } }}
       >
         <FollowerUsers userId={profile.user._id} followers={profile.followers} />
       </Dialog>
       <Dialog
         open={openFollowingModal}
         onClose={handleFollowingModal}
-        sx={{ "& .MuiDialog-paper": { padding: "5px", width: "100%", minHeight: "80%" } }}
+        maxWidth="md"
+        fullWidth
+        sx={{ "& .MuiDialog-paper": { padding: "5px", minHeight: "80%" } }}
       >
         <FollowingUsers userId={profile.user._id} following={profile.following} />
       </Dialog>
       <Dialog
         open={openEditProfileModal}
         onClose={handleEditProfileModal}
-        fullScreen
         TransitionComponent={Transition}
       >
         <EditProfile user={user} handleEditProfileModal={handleEditProfileModal} />

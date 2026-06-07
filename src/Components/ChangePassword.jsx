@@ -23,6 +23,8 @@ export default function ChangePassword({ open, handlePasswordClose }) {
       onClose={handlePasswordClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      maxWidth="md"
+      fullWidth
     >
       <DialogTitle id="alert-dialog-title">
         {"Change password"}

@@ -9,7 +9,6 @@ import {
   CardMedia,
   Chip,
   Container,
-  Dialog,
   Divider,
   Grid,
   IconButton,
@@ -22,7 +21,6 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  Close,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   TrendingUp,
@@ -36,7 +34,7 @@ import {
 } from "../Redux/actions";
 import { postImageUrl, profilePictureUrl } from "../api";
 import { getFilterCss } from "../filters";
-import SinglePost from "./SinglePost";
+
 
 export const UserCard = ({ account }) => {
   const dispatch = useDispatch();
@@ -167,7 +165,6 @@ export const Explore = () => {
   const trending = useSelector((state) => state.explore.trendingTags);
   const hasMore = useSelector((state) => state.explore.hasMore);
   const nextCursor = useSelector((state) => state.explore.nextCursor);
-  const [postDialog, setPostDialog] = useState(null);
   const [sort, setSort] = useState("random");
   const [tagFilter, setTagFilter] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -240,10 +237,12 @@ export const Explore = () => {
             sx: { cursor: "pointer" },
           }}
         />
-        <Tooltip title="Refresh">
-          <IconButton onClick={handleRefresh} disabled={initialLoading}>
-            <RefreshIcon />
-          </IconButton>
+        <Tooltip title="Refresh" placement="bottom-end">
+          <span>
+            <IconButton onClick={handleRefresh} disabled={initialLoading}>
+              <RefreshIcon />
+            </IconButton>
+          </span>
         </Tooltip>
       </Box>
 
@@ -319,7 +318,10 @@ export const Explore = () => {
       ) : (
         <>
           {sort === "random" && followingPosts.length > 0 && (
-            <FollowingRow posts={followingPosts} onPostClick={setPostDialog} />
+            <FollowingRow
+              posts={followingPosts}
+              onPostClick={(post) => navigate("/explore/feed", { state: { startFromId: post._id } })}
+            />
           )}
 
           {sort === "random" && discoverPosts.length > 0 && (
@@ -344,7 +346,7 @@ export const Explore = () => {
               return (
                 <Grid size={4} key={post._id}>
                   <Box
-                    onClick={() => setPostDialog(post)}
+                    onClick={() => navigate("/explore/feed", { state: { startFromId: post._id } })}
                     sx={{ position: "relative", cursor: "pointer" }}
                   >
                     <CardMedia
@@ -413,21 +415,6 @@ export const Explore = () => {
           )}
         </>
       )}
-
-      <Dialog fullScreen open={Boolean(postDialog)} onClose={() => setPostDialog(null)}>
-        <Box sx={{ padding: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
-          <IconButton onClick={() => setPostDialog(null)}>
-            <Close />
-          </IconButton>
-          {postDialog && (
-            <SinglePost
-              post={postDialog}
-              isLiked={postDialog.likes?.some((u) => (u._id || u) === user._id)}
-              onClose={() => setPostDialog(null)}
-            />
-          )}
-        </Box>
-      </Dialog>
     </Container>
   );
 };

@@ -4,6 +4,7 @@ import Login from "./Components/Login";
 import Signup from "./Components/Signup";
 import Home from "./Components/Home";
 import Explore from "./Components/Explore";
+import ExploreFeed from "./Components/ExploreFeed";
 import SearchPage from "./Components/SearchPage";
 import Post from "./Components/Post";
 import Messages from "./Components/Messages";
@@ -61,6 +62,7 @@ function App({ socket }) {
               <Route exact path="/" element={<Home />} />
               <Route exact path="/explore" element={<Explore />} />
               <Route exact path="/explore/search" element={<SearchPage />} />
+              <Route exact path="/explore/feed" element={<ExploreFeed />} />
               <Route exact path="/post" element={<Post />} />
               <Route exact path="/messages" element={<Messages socket={socket} />} />
               <Route exact path="/notifications" element={<Notifications />} />

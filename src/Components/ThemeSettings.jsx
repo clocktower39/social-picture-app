@@ -30,8 +30,7 @@ export default function ThemeSettings({ open, handleThemeClose }) {
             onClose={handleThemeClose}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
-            maxWidth="sm"
-            fullWidth
+            maxWidth="md"
         >
             <DialogTitle id="alert-dialog-title">
                 {"Theme"}

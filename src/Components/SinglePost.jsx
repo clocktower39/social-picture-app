@@ -298,7 +298,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 const LikesDialog = ({ open, onClose, likes }) => {
   return (
-    <Dialog open={open} onClose={onClose} fullScreen TransitionComponent={Transition}>
+    <Dialog open={open} onClose={onClose} TransitionComponent={Transition}>
       <Grid container sx={{ padding: "12px" }}>
         <Grid size={3}>
           <IconButton onClick={onClose}>
@@ -488,7 +488,12 @@ export default function SinglePost({ post, isLiked, onClose }) {
           handleExpandClick={handleExpandClick}
         />
       </Card>
-      <Dialog open={deleteDialog} onClose={handleDeleteDialog}>
+      <Dialog
+        open={deleteDialog}
+        onClose={handleDeleteDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Delete post?</DialogTitle>
         <DialogContent>
           <DialogContentText>This post will be deleted immediately.</DialogContentText>

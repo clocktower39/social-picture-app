@@ -6,6 +6,7 @@ import {
   AppBar,
   CardMedia,
   Chip,
+  Container,
   Grid,
   IconButton,
   InputAdornment,
@@ -64,110 +65,114 @@ const SearchPage = () => {
   return (
     <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
       <AppBar position="sticky" color="default" elevation={1}>
-        <Toolbar sx={{ gap: 1, minHeight: "56px !important", paddingLeft: "8px !important", paddingRight: "12px !important" }}>
-          <IconButton
-            edge="start"
-            onClick={handleBack}
-            aria-label="Back to explore"
-            data-testid="search-back-button"
-          >
-            <ArrowBack />
-          </IconButton>
-          <TextField
-            autoFocus
-            fullWidth
-            size="small"
-            placeholder="Search users, tags, or locations"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            variant="standard"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              disableUnderline: true,
-            }}
-            sx={{ marginLeft: 1 }}
-          />
-        </Toolbar>
+        <Container maxWidth="sm" disableGutters>
+          <Toolbar sx={{ gap: 1, minHeight: "56px !important", paddingLeft: "8px !important", paddingRight: "12px !important" }}>
+            <IconButton
+              edge="start"
+              onClick={handleBack}
+              aria-label="Back to explore"
+              data-testid="search-back-button"
+            >
+              <ArrowBack />
+            </IconButton>
+            <TextField
+              autoFocus
+              fullWidth
+              size="small"
+              placeholder="Search users, tags, or locations"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              variant="standard"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                disableUnderline: true,
+              }}
+              sx={{ marginLeft: 1 }}
+            />
+          </Toolbar>
+        </Container>
       </AppBar>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
-        <Tab label="People" />
-        <Tab label="Tags" />
-        <Tab label="Places" />
-      </Tabs>
-      <Box sx={{ padding: 2 }}>
-        {tab === 0 && (
-          <>
-            {query.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                Type to find people
-              </Typography>
-            ) : users.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                No users found
-              </Typography>
-            ) : (
-              <Grid container spacing={2}>
-                {users.map((account) => (
-                  <SearchUserCard key={account._id} account={account} />
-                ))}
-              </Grid>
-            )}
-          </>
-        )}
-        {tab === 1 && (
-          <>
-            {query.length === 0 ? (
-              <Box>
-                <Typography variant="overline" color="text.secondary">
-                  <TrendingUp sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }} />
-                  Trending tags
+      <Container maxWidth="sm" disableGutters>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
+          <Tab label="People" />
+          <Tab label="Tags" />
+          <Tab label="Places" />
+        </Tabs>
+        <Box sx={{ padding: 2 }}>
+          {tab === 0 && (
+            <>
+              {query.length === 0 ? (
+                <Typography color="text.secondary" variant="body2">
+                  Type to find people
                 </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                  {trending.map((t) => (
-                    <Chip
-                      key={t.tag}
-                      label={`#${t.tag} (${t.count})`}
-                      clickable
-                      onClick={() => setQuery(`#${t.tag}`)}
-                    />
+              ) : users.length === 0 ? (
+                <Typography color="text.secondary" variant="body2">
+                  No users found
+                </Typography>
+              ) : (
+                <Grid container spacing={2}>
+                  {users.map((account) => (
+                    <SearchUserCard key={account._id} account={account} />
                   ))}
-                </Box>
-              </Box>
-            ) : tagPosts.length === 0 ? (
-              <Typography color="text.secondary" variant="body2">
-                No posts for this tag
-              </Typography>
-            ) : (
-              <Grid container spacing={0.5}>
-                {tagPosts.map((post) => {
-                  const imageId = post.image?._id || post.image;
-                  return (
-                    <Grid size={4} key={post._id}>
-                      <CardMedia
-                        sx={{
-                          paddingTop: "100%",
-                          backgroundSize: "cover",
-                          filter: getFilterCss(post.filter),
-                        }}
-                        image={imageId ? postImageUrl(imageId) : null}
+                </Grid>
+              )}
+            </>
+          )}
+          {tab === 1 && (
+            <>
+              {query.length === 0 ? (
+                <Box>
+                  <Typography variant="overline" color="text.secondary">
+                    <TrendingUp sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }} />
+                    Trending tags
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                    {trending.map((t) => (
+                      <Chip
+                        key={t.tag}
+                        label={`#${t.tag} (${t.count})`}
+                        clickable
+                        onClick={() => setQuery(`#${t.tag}`)}
                       />
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            )}
-          </>
-        )}
-        {tab === 2 && (
-          <Typography color="text.secondary" variant="body2">
-            Place search coming soon. Try a tag like #paris for now.
-          </Typography>
-        )}
-      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              ) : tagPosts.length === 0 ? (
+                <Typography color="text.secondary" variant="body2">
+                  No posts for this tag
+                </Typography>
+              ) : (
+                <Grid container spacing={0.5}>
+                  {tagPosts.map((post) => {
+                    const imageId = post.image?._id || post.image;
+                    return (
+                      <Grid size={4} key={post._id}>
+                        <CardMedia
+                          sx={{
+                            paddingTop: "100%",
+                            backgroundSize: "cover",
+                            filter: getFilterCss(post.filter),
+                          }}
+                          image={imageId ? postImageUrl(imageId) : null}
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              )}
+            </>
+          )}
+          {tab === 2 && (
+            <Typography color="text.secondary" variant="body2">
+              Place search coming soon. Try a tag like #paris for now.
+            </Typography>
+          )}
+        </Box>
+      </Container>
     </Box>
   );
 };
