@@ -178,7 +178,13 @@ const CommentCard = ({ comment, postId, postOwnerId, currentUser, dispatch }) =>
           <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}>
             <MoreVert fontSize="small" />
           </IconButton>
-          <Menu open={Boolean(menuAnchor)} anchorEl={menuAnchor} onClose={() => setMenuAnchor(null)}>
+          <Menu
+            open={Boolean(menuAnchor)}
+            anchorEl={menuAnchor}
+            onClose={() => setMenuAnchor(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
             <MenuItem
               onClick={() => {
                 dispatch(deleteComment(postId, comment._id));
@@ -356,12 +362,14 @@ export default function SinglePost({ post, isLiked, onClose }) {
   const handleLikesClose = () => setLikesOpen(false);
   const handleDeleteDialog = () => setDeleteDialog((p) => !p);
   const handleExpandClick = () => setExpanded((p) => !p);
-  const handleMenu = (event) =>
-    setOpenMenu((prev) => {
-      if (!prev) setAnchorEl(event.currentTarget);
-      else setAnchorEl(null);
-      return !prev;
-    });
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+    setOpenMenu(true);
+  };
+  const handleCloseMenu = () => {
+    setOpenMenu(false);
+    setAnchorEl(null);
+  };
 
   const handleLikePost = () => dispatch(likePost(post._id, user));
   const handleUnlikePost = () => dispatch(unlikePost(post._id, user));
@@ -390,25 +398,28 @@ export default function SinglePost({ post, isLiked, onClose }) {
           }
           action={
             <>
-              <IconButton aria-label="settings" onClick={handleMenu}>
+              <IconButton aria-label="settings" onClick={handleOpenMenu}>
                 <MoreVert />
               </IconButton>
               <Menu
                 open={openMenu}
-                onClose={handleMenu}
+                onClose={handleCloseMenu}
                 anchorEl={anchorEl}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
                 PaperProps={{ style: { width: "20ch" } }}
               >
-                <MenuItem onClick={handleMenu} disabled>
+                <MenuItem onClick={handleCloseMenu} disabled>
                   Share
                 </MenuItem>
-                <MenuItem onClick={handleMenu} disabled>
+                <MenuItem onClick={handleCloseMenu} disabled>
                   Report
                 </MenuItem>
                 {post.user._id === user._id && (
                   <MenuItem
                     onClick={() => {
                       setOpenMenu(false);
+                      setAnchorEl(null);
                       setDeleteDialog(true);
                     }}
                   >
