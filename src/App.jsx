@@ -58,16 +58,16 @@ function App({ socket }) {
           <Routes>
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/signup" element={<Signup />} />
+            <Route exact path="/explore" element={<Explore />} />
+            <Route exact path="/explore/feed" element={<ExploreFeed />} />
+            <Route exact path="/tag/:tag" element={<TagResults />} />
             <Route element={<AuthRoute />}>
               <Route exact path="/" element={<Home />} />
-              <Route exact path="/explore" element={<Explore />} />
               <Route exact path="/explore/search" element={<SearchPage />} />
-              <Route exact path="/explore/feed" element={<ExploreFeed />} />
               <Route exact path="/post" element={<Post />} />
               <Route exact path="/messages" element={<Messages socket={socket} />} />
               <Route exact path="/notifications" element={<Notifications />} />
               <Route exact path="/profile/:username" element={<Profile />} />
-              <Route exact path="/tag/:tag" element={<TagResults />} />
             </Route>
           </Routes>
         </Box>

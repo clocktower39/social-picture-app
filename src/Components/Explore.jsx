@@ -41,15 +41,21 @@ export const UserCard = ({ account }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const relationships = useSelector((state) => state.relationships);
+  const isLoggedIn = Boolean(user && user._id);
   const isFollowing = relationships.following.some((r) => r._id === account._id);
-  const isSelf = user._id === account._id;
+  const isSelf = isLoggedIn && user._id === account._id;
 
   const handleFollow = (e) => {
     e.stopPropagation();
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
     dispatch(requestFollow(account._id));
   };
   const handleUnfollow = (e) => {
     e.stopPropagation();
+    if (!isLoggedIn) return;
     dispatch(requestUnfollow(account._id));
   };
   const goToProfile = () => navigate(`/profile/${account.username}`);
@@ -79,7 +85,7 @@ export const UserCard = ({ account }) => {
           {account.firstName} {account.lastName}
         </Typography>
       </Box>
-      {!isSelf && (
+      {isLoggedIn && !isSelf && (
         isFollowing ? (
           <Button
             variant="outlined"
