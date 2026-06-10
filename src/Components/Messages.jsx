@@ -15,13 +15,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Drawer,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
+  ListItemSecondaryAction,
   ListItemText,
+  Menu,
+  MenuItem,
   TextField,
   Toolbar,
   Typography,
@@ -33,14 +38,22 @@ import {
   Delete,
   Edit,
   Group as GroupIcon,
+  MoreVert,
+  NotificationsOff,
   Send,
+  VolumeOff,
+  VolumeUp,
 } from "@mui/icons-material";
 import {
   addConversationMembers,
+  archiveConversation,
   createConversation,
+  deleteConversation,
   deleteMessage,
   getConversations,
   leaveConversation,
+  markConversationUnread,
+  muteConversation,
   removeConversationMember,
   renameGroup,
   searchUsers,
@@ -54,57 +67,86 @@ import Loading from "./Loading";
 const getConversationTitle = (conversation, currentUserId) => {
   if (conversation.isGroup && conversation.name) return conversation.name;
   const others = conversation.users.filter((u) => u._id !== currentUserId);
-  if (!currentUserId) return others.map((u) => u.username).join(", ");
   if (others.length === 0) return "You";
   if (others.length === 1) return others[0].username;
   return others.map((u) => u.username).join(", ");
 };
 
-const ConversationListItem = ({ conversation, onOpen }) => {
+const ConversationListItem = ({ conversation, onOpen, onMenu, muted, archived }) => {
   const user = useSelector((state) => state.user);
   const others = conversation.users.filter((u) => u._id !== user._id);
   const lastMessage = conversation.messages?.[conversation.messages.length - 1];
 
   return (
-    <ListItem disablePadding>
-      <ListItemButton onClick={() => onOpen(conversation)}>
+    <ListItem
+      disablePadding
+      secondaryAction={
+        <IconButton
+          edge="end"
+          onClick={(e) => onMenu(e, conversation)}
+          aria-label="Conversation options"
+        >
+          <MoreVert />
+        </IconButton>
+      }
+    >
+      <ListItemButton onClick={() => onOpen(conversation)} sx={{ paddingRight: 7 }}>
         <ListItemAvatar>
           {conversation.isGroup ? (
             <Box
               sx={{
-                width: 40,
-                height: 40,
+                width: 48,
+                height: 48,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "primary.main",
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                 color: "primary.contrastText",
               }}
             >
               <GroupIcon />
             </Box>
           ) : (
-            <AvatarGroup max={3} spacing="small">
-              {others.slice(0, 3).map((u) => (
-                <Avatar key={u._id} src={profilePictureUrl(u.profilePicture)} />
-              ))}
-            </AvatarGroup>
+            <Avatar
+              src={profilePictureUrl(others[0]?.profilePicture)}
+              sx={{ width: 48, height: 48 }}
+            />
           )}
         </ListItemAvatar>
         <ListItemText
-          primary={getConversationTitle(conversation, user._id)}
-          secondary={
-            lastMessage
-              ? `${lastMessage.user?.username || "?"}: ${lastMessage.message?.slice(0, 40) || ""}`
-              : "No messages yet"
+          primary={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Typography
+                variant="body1"
+                color="text.primary"
+                noWrap
+                sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}
+              >
+                {getConversationTitle(conversation, user._id)}
+              </Typography>
+              {(muted || archived) && (
+                <VolumeOff sx={{ fontSize: 14, color: "text.secondary" }} />
+              )}
+            </Box>
           }
-          primaryTypographyProps={{ color: "text.primary" }}
+          secondary={
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {lastMessage
+                ? lastMessage.user?._id === user._id
+                  ? `You: ${lastMessage.message?.slice(0, 40) || ""}`
+                  : `${lastMessage.user?.username || "?"}: ${lastMessage.message?.slice(0, 40) || ""}`
+                : "No messages yet"}
+            </Typography>
+          }
         />
         {lastMessage && (
-          <Typography variant="caption" color="text.secondary">
-            {formatTime(lastMessage.timestamp)}
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginLeft: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {formatTime(lastMessage.timestamp)}
+            </Typography>
+          </Box>
         )}
       </ListItemButton>
     </ListItem>
@@ -121,50 +163,98 @@ const MessageList = ({ conversation, currentUser, onDelete }) => {
 
   if (messages.length === 0) {
     return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Typography color="text.secondary" variant="body2">
-          Say hi 👋
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1,
+          padding: 4,
+        }}
+      >
+        <Box
+          sx={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            backgroundColor: "action.hover",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <GroupIcon sx={{ fontSize: 32, color: "text.secondary" }} />
+        </Box>
+        <Typography color="text.secondary" variant="body2" textAlign="center">
+          No messages yet
+        </Typography>
+        <Typography variant="caption" color="text.secondary" textAlign="center">
+          Send a message to start the conversation
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ flex: 1, overflow: "auto", padding: "12px" }}>
+    <Box sx={{ flex: 1, overflow: "auto", padding: "12px 16px" }}>
       {messages.map((message, i) => {
         const isMine = message.user?._id === currentUser._id;
-        const showAuthor = !isMine && (i === 0 || messages[i - 1].user?._id !== message.user._id);
+        const showAuthor =
+          !isMine && (i === 0 || messages[i - 1].user?._id !== message.user._id);
+        const prevMine = i > 0 && messages[i - 1].user?._id === currentUser._id;
+        const nextMine = i < messages.length - 1 && messages[i + 1].user?._id === currentUser._id;
+        const stackToPrev = prevMine && isMine;
+        const stackToNext = nextMine && isMine;
         return (
           <Box
             key={message._id || i}
             sx={{
               display: "flex",
-              justifyContent: isMine ? "flex-end" : "flex-start",
-              marginBottom: 0.5,
+              flexDirection: "column",
+              alignItems: isMine ? "flex-end" : "flex-start",
+              marginTop: showAuthor ? 1.5 : 0.25,
             }}
           >
+            {showAuthor && conversation.isGroup && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ marginLeft: 1.5, marginBottom: 0.25, fontWeight: 600 }}
+              >
+                {message.user?.username}
+              </Typography>
+            )}
             <Box
               sx={{
                 maxWidth: "75%",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: isMine ? "flex-end" : "flex-start",
+                alignItems: "center",
+                gap: 0.5,
+                flexDirection: isMine ? "row-reverse" : "row",
               }}
             >
-              {showAuthor && conversation.isGroup && (
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 1, mb: 0.25 }}>
-                  {message.user?.username}
-                </Typography>
-              )}
               <Box
                 sx={{
-                  padding: "8px 12px",
-                  borderRadius: 2,
+                  padding: "8px 14px",
+                  borderRadius: stackToPrev
+                    ? isMine
+                      ? "18px 18px 4px 18px"
+                      : "18px 18px 18px 4px"
+                    : stackToNext
+                    ? isMine
+                      ? "18px 4px 18px 18px"
+                      : "4px 18px 18px 18px"
+                    : isMine
+                    ? "18px 18px 4px 18px"
+                    : "18px 18px 18px 4px",
                   backgroundColor: isMine ? "primary.main" : "background.paper",
                   color: isMine ? "primary.contrastText" : "text.primary",
                   border: isMine ? "none" : "1px solid",
                   borderColor: "divider",
                   position: "relative",
+                  minWidth: 48,
                 }}
               >
                 <Typography variant="body2" sx={{ wordBreak: "break-word", whiteSpace: "pre-wrap" }}>
@@ -174,31 +264,25 @@ const MessageList = ({ conversation, currentUser, onDelete }) => {
                   variant="caption"
                   sx={{
                     display: "block",
-                    opacity: 0.6,
+                    opacity: 0.65,
                     fontSize: 10,
-                    marginTop: 0.5,
+                    marginTop: 0.25,
                     textAlign: "right",
                   }}
                 >
                   {formatTime(message.timestamp)}
                 </Typography>
-                {isMine && (
-                  <IconButton
-                    size="small"
-                    onClick={() => onDelete(message._id)}
-                    sx={{
-                      position: "absolute",
-                      top: -8,
-                      right: -8,
-                      backgroundColor: "background.paper",
-                      padding: 0.25,
-                      "&:hover": { backgroundColor: "background.default" },
-                    }}
-                  >
-                    <Delete sx={{ fontSize: 12 }} />
-                  </IconButton>
-                )}
               </Box>
+              {isMine && (
+                <IconButton
+                  size="small"
+                  onClick={() => onDelete(message._id)}
+                  aria-label="Delete message"
+                  sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
+                >
+                  <Delete sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
             </Box>
           </Box>
         );
@@ -224,7 +308,7 @@ const MessageInput = ({ conversationId }) => {
       sx={{
         borderTop: 1,
         borderColor: "divider",
-        padding: "8px 12px",
+        padding: "10px 12px",
         backgroundColor: "background.paper",
         display: "flex",
         gap: 1,
@@ -253,14 +337,21 @@ const MessageInput = ({ conversationId }) => {
   );
 };
 
-const GroupSettings = ({ conversation, onClose }) => {
+const GroupSettings = ({ conversation, onClose, onDeleted, onLeft }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const [name, setName] = useState(conversation.name || "");
   const [editing, setEditing] = useState(false);
   const [addingMembers, setAddingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+
+  const isCreator = conversation.createdBy && conversation.createdBy === user._id;
 
   const handleSaveName = () => {
     dispatch(renameGroup(conversation._id, name));
@@ -275,7 +366,7 @@ const GroupSettings = ({ conversation, onClose }) => {
     }
     const action = await dispatch(searchUsers(value));
     if (action?.users) {
-      const memberIds = new Set(conversation.users.map((u) => u._id || u));
+      const memberIds = new Set(conversation.users.map((u) => u._id));
       setSearchResults(action.users.filter((u) => !memberIds.has(u._id)));
     }
   };
@@ -289,15 +380,36 @@ const GroupSettings = ({ conversation, onClose }) => {
     dispatch(removeConversationMember(conversation._id, userId));
   };
 
-  const handleLeave = () => {
-    if (window.confirm("Leave this group?")) {
-      dispatch(leaveConversation(conversation._id));
+  const handleLeave = async () => {
+    setLeaving(true);
+    try {
+      await dispatch(leaveConversation(conversation._id));
+      onLeft?.();
       onClose();
+    } finally {
+      setLeaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await dispatch(deleteConversation(conversation._id));
+      onDeleted?.();
+      onClose();
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{ sx: { backgroundColor: "background.default" } }}
+    >
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <GroupIcon /> Group settings
         <IconButton onClick={onClose} sx={{ marginLeft: "auto" }}>
@@ -314,13 +426,16 @@ const GroupSettings = ({ conversation, onClose }) => {
                 onChange={(e) => setName(e.target.value)}
                 fullWidth
                 autoFocus
+                placeholder="Group name"
               />
               <Button onClick={handleSaveName}>Save</Button>
               <Button onClick={() => setEditing(false)}>Cancel</Button>
             </>
           ) : (
             <>
-              <Typography variant="h6">{conversation.name || "Unnamed group"}</Typography>
+              <Typography variant="h6" sx={{ flex: 1 }}>
+                {conversation.name || "Unnamed group"}
+              </Typography>
               <IconButton size="small" onClick={() => setEditing(true)}>
                 <Edit fontSize="small" />
               </IconButton>
@@ -333,11 +448,12 @@ const GroupSettings = ({ conversation, onClose }) => {
         <List dense>
           {conversation.users.map((u) => {
             const userObj = u._id ? u : { _id: u, username: "?" };
+            const isYou = userObj._id === user._id;
             return (
               <ListItem
                 key={userObj._id}
                 secondaryAction={
-                  userObj._id !== user._id && (
+                  !isYou && (
                     <IconButton
                       edge="end"
                       size="small"
@@ -353,7 +469,7 @@ const GroupSettings = ({ conversation, onClose }) => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={userObj.username}
-                  secondary={userObj._id === user._id ? "You" : null}
+                  secondary={isYou ? "You" : null}
                 />
               </ListItem>
             );
@@ -394,16 +510,59 @@ const GroupSettings = ({ conversation, onClose }) => {
           </Button>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button color="error" onClick={handleLeave}>
+      <DialogActions sx={{ padding: 2, gap: 1, justifyContent: "space-between" }}>
+        <Button
+          color="error"
+          onClick={() => setConfirmLeave(true)}
+          disabled={leaving}
+        >
           Leave group
         </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<Delete />}
+          onClick={() => setConfirmDelete(true)}
+          disabled={deleting}
+        >
+          Delete group
+        </Button>
       </DialogActions>
+
+      <Dialog open={confirmLeave} onClose={() => setConfirmLeave(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Leave this group?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            You won't receive new messages. You can be re-added by another member.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmLeave(false)}>Cancel</Button>
+          <Button color="error" onClick={handleLeave} disabled={leaving}>
+            {leaving ? "Leaving..." : "Leave"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete this group?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This permanently removes the group for all members. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDelete(false)}>Cancel</Button>
+          <Button color="error" onClick={handleDelete} disabled={deleting}>
+            {deleting ? "Deleting..." : "Delete for everyone"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };
 
-const ConversationView = ({ conversation, onClose, socket }) => {
+const ConversationView = ({ conversation, onClose, socket, onDeleted }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -425,47 +584,71 @@ const ConversationView = ({ conversation, onClose, socket }) => {
 
   const title = getConversationTitle(conversation, user._id);
   const others = conversation.users.filter((u) => u._id !== user._id);
+  const subtitle = conversation.isGroup ? `${others.length} members` : "Direct message";
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        backgroundColor: "background.default",
+      }}
+    >
       <AppBar position="sticky" color="default" elevation={1}>
-        <Toolbar sx={{ gap: 1 }}>
-          <IconButton edge="start" onClick={onClose}>
-            <ArrowBack />
-          </IconButton>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography
-              variant="subtitle1"
-              noWrap
+        <Container maxWidth="md" disableGutters>
+          <Toolbar
+            sx={{
+              gap: 1,
+              minHeight: "56px !important",
+              paddingLeft: "8px !important",
+              paddingRight: "8px !important",
+            }}
+          >
+            <IconButton edge="start" onClick={onClose} aria-label="Back to messages">
+              <ArrowBack />
+            </IconButton>
+            <Box
+              sx={{ flex: 1, minWidth: 0, cursor: "pointer" }}
               onClick={() => conversation.isGroup && setSettingsOpen(true)}
-              sx={{ cursor: conversation.isGroup ? "pointer" : "default" }}
             >
-              {title}
-            </Typography>
-            {conversation.isGroup && (
-              <Typography variant="caption" color="text.secondary">
-                {others.length} members
+              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                {title}
               </Typography>
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {conversation.isGroup ? subtitle : "Active now"}
+              </Typography>
+            </Box>
+            {others.length === 1 && !conversation.isGroup && (
+              <IconButton onClick={() => navigate(`/profile/${others[0].username}`)}>
+                <Avatar
+                  src={profilePictureUrl(others[0].profilePicture)}
+                  sx={{ width: 32, height: 32 }}
+                />
+              </IconButton>
             )}
-          </Box>
-          {others.length === 1 && !conversation.isGroup && (
-            <IconButton onClick={() => navigate(`/profile/${others[0].username}`)}>
-              <Avatar src={profilePictureUrl(others[0].profilePicture)} sx={{ width: 32, height: 32 }} />
-            </IconButton>
-          )}
-          {conversation.isGroup && (
-            <IconButton onClick={() => setSettingsOpen(true)}>
-              <GroupIcon />
-            </IconButton>
-          )}
-        </Toolbar>
+            {conversation.isGroup && (
+              <IconButton onClick={() => setSettingsOpen(true)} aria-label="Group settings">
+                <GroupIcon />
+              </IconButton>
+            )}
+          </Toolbar>
+        </Container>
       </AppBar>
-      <MessageList conversation={conversation} currentUser={user} onDelete={handleDeleteMessage} />
-      <MessageInput conversationId={conversation._id} />
+      <Container maxWidth="md" disableGutters sx={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+        <MessageList
+          conversation={conversation}
+          currentUser={user}
+          onDelete={handleDeleteMessage}
+        />
+        <MessageInput conversationId={conversation._id} />
+      </Container>
       {settingsOpen && (
         <GroupSettings
           conversation={conversation}
           onClose={() => setSettingsOpen(false)}
+          onDeleted={onDeleted}
+          onLeft={onDeleted}
         />
       )}
     </Box>
@@ -545,73 +728,86 @@ const CreateConversation = ({ open, onClose }) => {
         reset();
         onClose();
       }}
-      sx={{ "& .MuiPaper-root": { width: "100%" } }}
+      PaperProps={{ sx: { maxWidth: 600, width: "100%", margin: "0 auto" } }}
     >
-      <Box sx={{ padding: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
-          <IconButton onClick={() => { reset(); onClose(); }}>
-            <ArrowBack />
-          </IconButton>
-          <Typography variant="h6">{isGroup ? "New group" : "New message"}</Typography>
-        </Box>
-        <Button
-          fullWidth
-          variant={isGroup ? "contained" : "outlined"}
-          startIcon={<GroupIcon />}
-          onClick={() => setIsGroup((p) => !p)}
-          sx={{ marginBottom: 2 }}
-        >
-          {isGroup ? "Group chat" : "Direct message"}
-        </Button>
-        {isGroup && (
-          <TextField
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <AppBar position="sticky" color="default" elevation={1}>
+          <Toolbar
+            sx={{
+              gap: 1,
+              minHeight: "56px !important",
+              paddingLeft: "8px !important",
+              paddingRight: "8px !important",
+            }}
+          >
+            <IconButton onClick={() => { reset(); onClose(); }}>
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="h6" sx={{ flex: 1, fontSize: "1rem", fontWeight: 600 }}>
+              {isGroup ? "New group" : "New message"}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ padding: 2, overflowY: "auto" }}>
+          <Button
             fullWidth
-            label="Group name (optional)"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
+            variant={isGroup ? "contained" : "outlined"}
+            startIcon={<GroupIcon />}
+            onClick={() => setIsGroup((p) => !p)}
             sx={{ marginBottom: 2 }}
-          />
-        )}
-        <Autocomplete
-          multiple
-          freeSolo={false}
-          options={searchResults}
-          getOptionLabel={(opt) => opt.username || ""}
-          value={selectedUsers}
-          onChange={(_, value) => setSelectedUsers(value)}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                key={option._id || index}
-                variant="outlined"
-                label={option.username}
-                {...getTagProps({ index })}
-              />
-            ))
-          }
-          renderInput={(params) => (
+          >
+            {isGroup ? "Group chat" : "Direct message"}
+          </Button>
+          {isGroup && (
             <TextField
-              {...params}
-              label="Add people"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search users"
+              fullWidth
+              label="Group name (optional)"
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              sx={{ marginBottom: 2 }}
             />
           )}
-        />
-        {error && (
-          <Alert severity="error" sx={{ marginTop: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={handleCreate}
-          disabled={submitting}
-          sx={{ marginTop: 2 }}
-        >
-          {submitting ? "Creating..." : isGroup ? "Create group" : "Send message"}
-        </Button>
+          <Autocomplete
+            multiple
+            freeSolo={false}
+            options={searchResults}
+            getOptionLabel={(opt) => opt.username || ""}
+            value={selectedUsers}
+            onChange={(_, value) => setSelectedUsers(value)}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  key={option._id || index}
+                  variant="outlined"
+                  label={option.username}
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Add people"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search users"
+              />
+            )}
+          />
+          {error && (
+            <Alert severity="error" sx={{ marginTop: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleCreate}
+            disabled={submitting}
+            sx={{ marginTop: 2 }}
+          >
+            {submitting ? "Creating..." : isGroup ? "Create group" : "Send message"}
+          </Button>
+        </Box>
       </Box>
     </Drawer>
   );
@@ -623,10 +819,23 @@ export default function Messages({ socket }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [openConvo, setOpenConvo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuConvo, setMenuConvo] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => {
     dispatch(getConversations()).then(() => setLoading(false));
   }, [dispatch]);
+
+  const handleOpenMenu = (e, convo) => {
+    e.stopPropagation();
+    setMenuAnchor(e.currentTarget);
+    setMenuConvo(convo);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuAnchor(null);
+  };
 
   const handleOpenConvo = (convo) => setOpenConvo(convo);
   const handleCloseConvo = () => setOpenConvo(null);
@@ -635,36 +844,83 @@ export default function Messages({ socket }) {
     if (created) setOpenConvo(created);
   };
 
+  const handleConfirm = async () => {
+    if (!confirmAction) return;
+    const targetId = confirmAction.conversationId || menuConvo?._id;
+    if (!targetId) return;
+    const { type } = confirmAction;
+    try {
+      if (type === "delete") {
+        await dispatch(deleteConversation(targetId));
+        if (openConvo?._id === targetId) handleCloseConvo();
+      } else if (type === "archive") {
+        await dispatch(archiveConversation(targetId, true));
+      } else if (type === "unarchive") {
+        await dispatch(archiveConversation(targetId, false));
+      } else if (type === "mute") {
+        await dispatch(muteConversation(targetId, true));
+      } else if (type === "unmute") {
+        await dispatch(muteConversation(targetId, false));
+      } else if (type === "markUnread") {
+        await dispatch(markConversationUnread(targetId));
+      }
+    } catch (err) {
+      console.error("Conversation action failed:", err);
+    } finally {
+      setConfirmAction(null);
+      setMenuConvo(null);
+      handleCloseMenu();
+    }
+  };
+
   if (loading) return <Loading />;
 
   return (
-    <Container maxWidth="sm" sx={{ paddingBottom: "100px" }} disableGutters>
+    <Container maxWidth="md" sx={{ paddingBottom: "100px" }}>
       <Box sx={{ display: "flex", alignItems: "center", padding: "16px 0" }}>
-        <Typography variant="h5" sx={{ flex: 1 }}>
+        <Typography variant="h5" sx={{ flex: 1, fontWeight: 600 }}>
           Messages
         </Typography>
-        <IconButton onClick={() => setCreateOpen(true)}>
-          <AddIcon />
-        </IconButton>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setCreateOpen(true)}
+        >
+          New
+        </Button>
       </Box>
       {conversations.length === 0 ? (
-        <Box sx={{ textAlign: "center", padding: "40px 0" }}>
-          <Typography color="text.secondary" gutterBottom>
+        <Box sx={{ textAlign: "center", padding: "40px 20px" }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
             No conversations yet
           </Typography>
-          <Button variant="contained" onClick={() => setCreateOpen(true)}>
+          <Typography color="text.secondary" sx={{ marginBottom: 3 }}>
+            Start a new conversation to connect with friends.
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateOpen(true)}
+          >
             Start a conversation
           </Button>
         </Box>
       ) : (
-        <List>
-          {conversations.map((convo) => (
-            <ConversationListItem
-              key={convo._id}
-              conversation={convo}
-              onOpen={handleOpenConvo}
-            />
-          ))}
+        <List sx={{ backgroundColor: "background.paper", borderRadius: 2, overflow: "hidden" }}>
+          {conversations.map((convo) => {
+            const muted = (convo.mutedBy || []).some((id) => id === convo.mutedBy?.[0] || id);
+            const archived = false;
+            return (
+              <ConversationListItem
+                key={convo._id}
+                conversation={convo}
+                onOpen={handleOpenConvo}
+                onMenu={handleOpenMenu}
+                muted={convo.mutedBy?.length > 0}
+                archived={convo.archivedBy?.length > 0}
+              />
+            );
+          })}
         </List>
       )}
 
@@ -674,16 +930,119 @@ export default function Messages({ socket }) {
         anchor="right"
         open={Boolean(openConvo)}
         onClose={handleCloseConvo}
-        sx={{ "& .MuiPaper-root": { width: "100%" } }}
+        PaperProps={{ sx: { maxWidth: 720, width: "100%", margin: "0 auto" } }}
       >
         {openConvo && (
           <ConversationView
             conversation={openConvo}
             onClose={handleCloseConvo}
             socket={socket}
+            onDeleted={handleCloseConvo}
           />
         )}
       </Drawer>
+
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        {menuConvo && menuConvo.archivedBy?.length > 0 ? (
+          <MenuItem
+            onClick={() => {
+              setConfirmAction({ type: "unarchive", conversationId: menuConvo._id });
+              handleCloseMenu();
+            }}
+          >
+            Unarchive
+          </MenuItem>
+        ) : (
+          <MenuItem
+            onClick={() => {
+              setConfirmAction({ type: "archive", conversationId: menuConvo._id });
+              handleCloseMenu();
+            }}
+          >
+            Archive
+          </MenuItem>
+        )}
+        {menuConvo && menuConvo.mutedBy?.length > 0 ? (
+          <MenuItem
+            onClick={() => {
+              setConfirmAction({ type: "unmute", conversationId: menuConvo._id });
+              handleCloseMenu();
+            }}
+          >
+            <ListItemText inset>Unmute</ListItemText>
+          </MenuItem>
+        ) : (
+          <MenuItem
+            onClick={() => {
+              setConfirmAction({ type: "mute", conversationId: menuConvo._id });
+              handleCloseMenu();
+            }}
+          >
+            Mute
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setConfirmAction({ type: "markUnread", conversationId: menuConvo._id });
+            handleCloseMenu();
+          }}
+        >
+          Mark as unread
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            setConfirmAction({ type: "delete", conversationId: menuConvo._id });
+            handleCloseMenu();
+          }}
+          sx={{ color: "error.main" }}
+        >
+          Delete chat
+        </MenuItem>
+      </Menu>
+
+      <Dialog
+        open={Boolean(confirmAction)}
+        onClose={() => setConfirmAction(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {confirmAction?.type === "delete" && "Delete this chat?"}
+          {confirmAction?.type === "archive" && "Archive this chat?"}
+          {confirmAction?.type === "unarchive" && "Unarchive this chat?"}
+          {confirmAction?.type === "mute" && "Mute this chat?"}
+          {confirmAction?.type === "unmute" && "Unmute this chat?"}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            {confirmAction?.type === "delete" &&
+              "This removes the chat from your list. Other members can still see it."}
+            {confirmAction?.type === "archive" &&
+              "Archived chats are hidden from your inbox. You can find them under Archived."}
+            {confirmAction?.type === "unarchive" &&
+              "This chat will show up in your inbox again."}
+            {confirmAction?.type === "mute" &&
+              "You won't get notifications for new messages in this chat."}
+            {confirmAction?.type === "unmute" && "Notifications for this chat are turned back on."}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmAction(null)}>Cancel</Button>
+          <Button
+            color={confirmAction?.type === "delete" ? "error" : "primary"}
+            onClick={handleConfirm}
+          >
+            {confirmAction?.type === "delete" ? "Delete" : "OK"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

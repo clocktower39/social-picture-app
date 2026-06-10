@@ -4,8 +4,16 @@ import { Link } from "react-router-dom";
 import { getFollowingPosts } from "../Redux/actions";
 import Loading from "./Loading";
 import SinglePost from "./SinglePost";
-import { Box, Button, Container, Grid, IconButton, Typography } from "@mui/material";
-import { Message as MessageIcon } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Container,
+  Fab,
+  Grid,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 
 export const Home = () => {
   const dispatch = useDispatch();
@@ -20,14 +28,23 @@ export const Home = () => {
   if (loading) return <Loading />;
 
   return (
-    <Container maxWidth="sm" disableGutters>
+    <Container maxWidth="sm" disableGutters sx={{ position: "relative" }}>
       <Box sx={{ display: "flex", alignItems: "center", padding: "16px 0" }}>
-        <Typography variant="h5" sx={{ flex: 1 }} color="text.primary">
+        <Typography variant="h5" sx={{ flex: 1, fontWeight: 600 }} color="text.primary">
           Social Photo App
         </Typography>
-        <IconButton component={Link} to="/messages">
-          <MessageIcon />
-        </IconButton>
+        <Tooltip title="New post">
+          <Fab
+            component={Link}
+            to="/post"
+            color="primary"
+            aria-label="Create post"
+            size="small"
+            sx={{ boxShadow: 2 }}
+          >
+            <AddIcon />
+          </Fab>
+        </Tooltip>
       </Box>
       {posts.length === 0 ? (
         <Box sx={{ textAlign: "center", padding: "40px 20px" }}>

@@ -4,11 +4,12 @@ import { Badge, BottomNavigation, BottomNavigationAction } from '@mui/material';
 import {
   Home,
   Search,
-  AddCircle,
+  AddBox,
   AccountCircle,
   Login as LoginIcon,
   PersonAdd,
   Notifications as NotificationsIcon,
+  Mail as MailIcon,
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -76,7 +77,14 @@ export default function Navbar() {
     <BottomNavigation value={value} onChange={handleChange} sx={classes.root}>
       <BottomNavigationAction disabled={disableNav} label="Home" value="/" to='/' icon={<Home />} component={Link} />
       <BottomNavigationAction disabled={disableNav} label="Explore" value="/explore" to='/explore' icon={<Search />} component={Link} />
-      <BottomNavigationAction disabled={disableNav} label="Post" value="/post" to='/post' icon={<AddCircle />} component={Link} />
+      <BottomNavigationAction
+        disabled={disableNav}
+        label="Messages"
+        value="/messages"
+        to='/messages'
+        icon={<MailIcon />}
+        component={Link}
+      />
       <BottomNavigationAction
         disabled={disableNav}
         label="Notifications"

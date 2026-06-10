@@ -473,6 +473,66 @@ export function renameGroup(conversationId, name) {
   };
 }
 
+export function deleteConversation(conversationId) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/conversation/delete", {
+        method: "POST",
+        body: { conversationId },
+      });
+      const conversations = getState().conversations.filter((c) => c._id !== conversationId);
+      return dispatch({ type: UPDATE_CONVERSATIONS, conversations });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function archiveConversation(conversationId, archived = true) {
+  return async (dispatch, getState) => {
+    try {
+      await request("/conversation/archive", {
+        method: "POST",
+        body: { conversationId, archived },
+      });
+      const conversations = archived
+        ? getState().conversations.filter((c) => c._id !== conversationId)
+        : getState().conversations;
+      return dispatch({ type: UPDATE_CONVERSATIONS, conversations });
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function muteConversation(conversationId, muted = true) {
+  return async (dispatch) => {
+    try {
+      await request("/conversation/mute", {
+        method: "POST",
+        body: { conversationId, muted },
+      });
+      return { success: true, conversationId, muted };
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
+export function markConversationUnread(conversationId) {
+  return async (dispatch) => {
+    try {
+      await request("/conversation/markUnread", {
+        method: "POST",
+        body: { conversationId },
+      });
+      return { success: true, conversationId };
+    } catch (err) {
+      return errorDispatch(dispatch, err);
+    }
+  };
+}
+
 export function getNotifications() {
   return async (dispatch) => {
     try {
